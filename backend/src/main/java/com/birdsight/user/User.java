@@ -4,6 +4,8 @@ import com.birdsight.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @Builder
@@ -27,5 +29,21 @@ public class User extends BaseEntity {
 
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    @Builder.Default
+    private Role role = Role.USER;
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private boolean deleted = false;
+
+    @Column(name = "is_suspended", nullable = false)
+    @Builder.Default
+    private boolean suspended = false;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
 }
 
