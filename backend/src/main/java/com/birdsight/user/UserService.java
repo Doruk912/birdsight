@@ -9,6 +9,7 @@ import com.birdsight.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Pageable pageable) {
@@ -51,7 +53,7 @@ public class UserService {
         }
 
         User user = userMapper.toEntity(request);
-        // TODO: hash password
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         User savedUser = userRepository.saveAndFlush(user);
         return userMapper.toResponse(savedUser);
     }

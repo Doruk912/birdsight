@@ -14,7 +14,7 @@ public class UpdateUserRequest {
     @Email(message = "Email must be valid")
     private String email;
 
-    @Size(max = 100, message = "Display name must be at most 100 characters")
+    @Size(max = 50, message = "Display name must be at most 50 characters")
     private String displayName;
 
     private String bio;
