@@ -2,7 +2,6 @@ package com.birdsight.auth;
 
 import com.birdsight.auth.dto.AuthResponse;
 import com.birdsight.auth.dto.LoginRequest;
-import com.birdsight.auth.dto.RefreshTokenRequest;
 import com.birdsight.auth.dto.RegisterRequest;
 import com.birdsight.common.exception.InvalidTokenException;
 import com.birdsight.common.exception.ResourceAlreadyExistsException;
@@ -53,11 +52,9 @@ public class AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
         String accessToken = jwtService.generateAccessToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .user(userResponse)
                 .build();
     }
@@ -68,7 +65,6 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword())
         );
 
-        // identifier resolved to email by UserDetailsService; look up by email or username
         User user = userRepository.findByEmailOrUsernameAndDeletedFalse(request.getIdentifier())
                 .orElseThrow(() -> new IllegalStateException("User not found after successful authentication"));
 
@@ -76,33 +72,39 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
 
         String accessToken = jwtService.generateAccessToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .user(userResponse)
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse refresh(RefreshTokenRequest request) {
-        final String refreshToken = request.getRefreshToken();
+    public String generateRefreshToken(String email) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        return jwtService.generateRefreshToken(userDetails);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponse refresh(String rawRefreshToken) {
+        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
+            throw new InvalidTokenException("Refresh token cookie is missing");
+        }
 
         String userEmail;
         try {
-            userEmail = jwtService.extractUsername(refreshToken);
+            userEmail = jwtService.extractUsername(rawRefreshToken);
         } catch (Exception e) {
             throw new InvalidTokenException("Invalid or malformed refresh token", e);
         }
 
-        if (!jwtService.isRefreshToken(refreshToken)) {
+        if (!jwtService.isRefreshToken(rawRefreshToken)) {
             throw new InvalidTokenException("Provided token is not a refresh token");
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-        if (!jwtService.isTokenValid(refreshToken, userDetails)) {
+        if (!jwtService.isTokenValid(rawRefreshToken, userDetails)) {
             throw new InvalidTokenException("Refresh token is expired or invalid");
         }
 
@@ -111,13 +113,10 @@ public class AuthService {
 
         UserResponse userResponse = userMapper.toResponse(user);
         String newAccessToken = jwtService.generateAccessToken(userDetails);
-        String newRefreshToken = jwtService.generateRefreshToken(userDetails);
 
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
                 .user(userResponse)
                 .build();
     }
 }
-
