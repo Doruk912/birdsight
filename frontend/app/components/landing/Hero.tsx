@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, Map, Search } from "lucide-react";
 
 export default function Hero() {
@@ -37,12 +38,12 @@ export default function Hero() {
 
         {/* CTA row */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
-          <a
-            href="#"
+          <Link
+            href="/register"
             className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-7 py-3.5 rounded-full transition-colors duration-200 text-sm shadow-lg shadow-emerald-900/40"
           >
             Start exploring <ArrowRight size={16} />
-          </a>
+          </Link>
           <a
             href="#"
             className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white font-semibold px-7 py-3.5 rounded-full transition-colors duration-200 text-sm border border-white/10"

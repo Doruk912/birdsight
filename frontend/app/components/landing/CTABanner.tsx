@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export default function CTABanner() {
@@ -21,12 +22,12 @@ export default function CTABanner() {
           open, and built by the community — for the community.
         </p>
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
-          <a
-            href="#"
+          <Link
+            href="/register"
             className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-8 py-3.5 rounded-full transition-colors text-sm shadow-lg shadow-emerald-900/50"
           >
             Create free account <ArrowRight size={16} />
-          </a>
+          </Link>
           <a
             href="#"
             className="text-sm font-medium text-stone-400 hover:text-white transition-colors"

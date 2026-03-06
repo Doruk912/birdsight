@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bird, Menu, X } from "lucide-react";
+import { Bird, Menu, X, LogOut, User } from "lucide-react";
 import { NAV_LINKS } from "@/app/constants/navigation";
+import { useAuth } from "@/app/hooks/useAuth";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, logout, isLoading } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100">
@@ -21,33 +23,49 @@ export default function Navbar() {
         <ul className="hidden md:flex items-center gap-8 text-sm font-medium text-stone-600">
           {NAV_LINKS.map((link) => (
             <li key={link.label}>
-              <a
-                href={link.href}
-                className="hover:text-emerald-600 transition-colors duration-200"
-              >
+              <a href={link.href} className="hover:text-emerald-600 transition-colors duration-200">
                 {link.label}
               </a>
             </li>
           ))}
         </ul>
 
-        {/* Desktop CTA */}
+        {/* Desktop auth */}
         <div className="hidden md:flex items-center gap-3">
-          <a
-            href="#"
-            className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
-          >
-            Sign in
-          </a>
-          <a
-            href="#"
-            className="text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full transition-colors duration-200"
-          >
-            Join free
-          </a>
+          {!isLoading && (
+            user ? (
+              <>
+                <span className="flex items-center gap-1.5 text-sm text-stone-600">
+                  <User size={15} className="text-emerald-600" />
+                  {user.username || user.email}
+                </span>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors"
+                >
+                  <LogOut size={15} /> Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full transition-colors duration-200"
+                >
+                  Join free
+                </Link>
+              </>
+            )
+          )}
         </div>
 
-        {/* Mobile menu toggle */}
+        {/* Mobile toggle */}
         <button
           className="md:hidden text-stone-700"
           onClick={() => setMobileOpen((o) => !o)}
@@ -71,19 +89,31 @@ export default function Navbar() {
             </a>
           ))}
           <hr className="border-stone-100" />
-          <a href="#" className="text-sm font-medium text-stone-700">Sign in</a>
-          <a
-            href="#"
-            className="text-sm font-medium bg-emerald-600 text-white text-center px-4 py-2 rounded-full"
-          >
-            Join free
-          </a>
+          {!isLoading && (
+            user ? (
+              <button
+                onClick={() => { setMobileOpen(false); logout(); }}
+                className="text-sm font-medium text-stone-700 text-left"
+              >
+                Sign out
+              </button>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-medium text-stone-700" onClick={() => setMobileOpen(false)}>
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-sm font-medium bg-emerald-600 text-white text-center px-4 py-2 rounded-full"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Join free
+                </Link>
+              </>
+            )
+          )}
         </div>
       )}
     </nav>
   );
 }
-
-
-
-
