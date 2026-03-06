@@ -21,9 +21,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmailAndDeletedFalse(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public UserDetails loadUserByUsername(@NonNull String identifier) throws UsernameNotFoundException {
+        User user = userRepository.findByEmailOrUsernameAndDeletedFalse(identifier)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

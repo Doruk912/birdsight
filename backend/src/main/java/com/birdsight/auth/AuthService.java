@@ -45,7 +45,6 @@ public class AuthService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .displayName(request.getDisplayName())
                 .role(Role.USER)
                 .build();
 
@@ -66,10 +65,11 @@ public class AuthService {
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword())
         );
 
-        User user = userRepository.findByEmailAndDeletedFalse(request.getEmail())
+        // identifier resolved to email by UserDetailsService; look up by email or username
+        User user = userRepository.findByEmailOrUsernameAndDeletedFalse(request.getIdentifier())
                 .orElseThrow(() -> new IllegalStateException("User not found after successful authentication"));
 
         UserResponse userResponse = userMapper.toResponse(user);
