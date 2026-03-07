@@ -137,7 +137,6 @@ print("\n" + "=" * 70)
 print("CONFIGURATION")
 print("=" * 70)
 print(f"  Model:              {Config.CURRENT_MODEL.upper()}")
-print(f"  Label Smoothing:    {Config.LABEL_SMOOTHING}")
 print(f"  Batch size:         {Config.BATCH_SIZE}")
 print(f"  Phase 1 (frozen):   {Config.FREEZE_EPOCHS} epochs, head LR={Config.HEAD_LR}")
 print(f"  Phase 2 (finetune): {Config.FINETUNE_EPOCHS} epochs, backbone LR={Config.BACKBONE_LR}, head LR={Config.FINETUNE_HEAD_LR}")
@@ -670,7 +669,6 @@ def main():
         'best_acc': best_acc,
         'history': history,
         'training_time': total_time,
-        'label_smoothing': Config.LABEL_SMOOTHING,
         'augmentation': 'enhanced'
     }, final_path)
 
@@ -698,7 +696,6 @@ def main():
     results = {
         'experiment': 'exp02_augmentation',
         'model': model_name,
-        'label_smoothing': Config.LABEL_SMOOTHING,
         'augmentation': 'enhanced',
         'total_parameters': total_params2,
         'batch_size': Config.BATCH_SIZE,
