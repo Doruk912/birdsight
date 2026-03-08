@@ -30,6 +30,9 @@ public class User extends BaseEntity {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
+    @Column(name = "avatar_url", length = 512)
+    private String avatarUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     @Builder.Default

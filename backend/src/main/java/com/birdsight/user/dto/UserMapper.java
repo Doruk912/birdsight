@@ -13,6 +13,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .displayName(user.getDisplayName())
                 .bio(user.getBio())
+                .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole())
                 .suspended(user.isSuspended())
                 .emailVerifiedAt(user.getEmailVerifiedAt())

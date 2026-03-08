@@ -18,6 +18,7 @@ public class UserResponse {
     private String email;
     private String displayName;
     private String bio;
+    private String avatarUrl;
     private Role role;
     private boolean suspended;
     private Instant emailVerifiedAt;

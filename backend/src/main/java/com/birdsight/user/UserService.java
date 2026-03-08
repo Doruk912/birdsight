@@ -37,6 +37,13 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        return userMapper.toResponse(user);
+    }
+
+    @Transactional(readOnly = true)
     public UserResponse getUserByUsername(String username) {
         User user = userRepository.findByUsernameAndDeletedFalse(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
@@ -105,6 +112,15 @@ public class UserService {
         User user = userRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         user.setSuspended(false);
+        User updatedUser = userRepository.saveAndFlush(user);
+        return userMapper.toResponse(updatedUser);
+    }
+
+    @Transactional
+    public UserResponse updateAvatarUrl(UUID id, String avatarUrl) {
+        User user = userRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        user.setAvatarUrl(avatarUrl);
         User updatedUser = userRepository.saveAndFlush(user);
         return userMapper.toResponse(updatedUser);
     }

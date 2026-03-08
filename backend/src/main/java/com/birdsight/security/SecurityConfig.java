@@ -42,6 +42,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public auth endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Current user avatar — authenticated users only
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/me/avatar").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/avatar").authenticated()
                         // User management — admin only for write operations
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
