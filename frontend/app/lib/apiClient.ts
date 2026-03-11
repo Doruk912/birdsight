@@ -26,11 +26,13 @@ async function request<T>(url: string, options: RequestOptions = {}): Promise<T>
   const { skipAuth = false, headers = {}, ...rest } = options;
   const token = tokenStore.get();
 
+  const isFormData = rest.body instanceof FormData;
+
   const response = await fetch(url, {
     ...rest,
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
+      ...(!isFormData ? { "Content-Type": "application/json" } : {}),
       ...(!skipAuth && token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
@@ -87,6 +89,16 @@ export const apiClient = {
 
   post: <T>(url: string, body: unknown, options?: RequestOptions) =>
     request<T>(url, { method: "POST", body: JSON.stringify(body), ...options }),
+
+  postForm: <T>(url: string, formData: FormData, options?: RequestOptions) => {
+    const { headers = {}, ...rest } = options ?? {};
+    return request<T>(url, {
+      method: "POST",
+      body: formData,
+      headers,
+      ...rest,
+    });
+  },
 
   put: <T>(url: string, body: unknown, options?: RequestOptions) =>
     request<T>(url, { method: "PUT", body: JSON.stringify(body), ...options }),

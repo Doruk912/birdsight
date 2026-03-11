@@ -15,14 +15,32 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
+  tokenType: string;
+  user: AuthUserResponse;
+}
+
+export interface AuthUserResponse {
+  id: string;
+  username: string;
+  email: string;
+  displayName?: string;
+  bio?: string;
+  avatarUrl?: string;
+  role: string;
+  suspended: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ── Client-side auth state ────────────────────────────────────────────────────
 
 export interface AuthUser {
+  id: string;
   email: string;
   username: string;
+  displayName?: string;
+  bio?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthState {

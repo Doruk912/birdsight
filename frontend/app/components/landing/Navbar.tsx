@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bird, Menu, X, LogOut, User } from "lucide-react";
+import { Bird, Menu, X, User, Binoculars, Settings, LogOut } from "lucide-react";
 import { NAV_LINKS } from "@/app/constants/navigation";
 import { useAuth } from "@/app/hooks/useAuth";
+import UserDropdown from "@/app/components/shared/UserDropdown";
+import UserAvatar from "@/app/components/shared/UserAvatar";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,18 +36,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {!isLoading && (
             user ? (
-              <>
-                <span className="flex items-center gap-1.5 text-sm text-stone-600">
-                  <User size={15} className="text-emerald-600" />
-                  {user.username || user.email}
-                </span>
-                <button
-                  onClick={logout}
-                  className="flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors"
-                >
-                  <LogOut size={15} /> Sign out
-                </button>
-              </>
+              <UserDropdown user={user} logout={logout} />
             ) : (
               <>
                 <Link
@@ -91,12 +82,57 @@ export default function Navbar() {
           <hr className="border-stone-100" />
           {!isLoading && (
             user ? (
-              <button
-                onClick={() => { setMobileOpen(false); logout(); }}
-                className="text-sm font-medium text-stone-700 text-left"
-              >
-                Sign out
-              </button>
+              <>
+                {/* Mobile user info */}
+                <div className="flex items-center gap-3 py-1">
+                  <UserAvatar
+                    avatarUrl={user.avatarUrl}
+                    displayName={user.displayName}
+                    username={user.username}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-stone-800 truncate">
+                      {user.displayName || user.username}
+                    </p>
+                    <p className="text-xs text-stone-500 truncate">{user.email}</p>
+                  </div>
+                </div>
+
+                <hr className="border-stone-100" />
+
+                {/* Mobile menu items */}
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-3 text-sm font-medium text-stone-700 hover:text-emerald-600 transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <User size={16} strokeWidth={1.8} /> Profile
+                </Link>
+                <Link
+                  href="/observations"
+                  className="flex items-center gap-3 text-sm font-medium text-stone-700 hover:text-emerald-600 transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Binoculars size={16} strokeWidth={1.8} /> My Observations
+                </Link>
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-3 text-sm font-medium text-stone-700 hover:text-emerald-600 transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Settings size={16} strokeWidth={1.8} /> Settings
+                </Link>
+
+                <hr className="border-stone-100" />
+
+                <button
+                  onClick={() => { setMobileOpen(false); logout(); }}
+                  className="flex items-center gap-3 text-sm font-medium text-stone-700 hover:text-red-600 transition-colors text-left"
+                >
+                  <LogOut size={16} strokeWidth={1.8} /> Sign out
+                </button>
+              </>
             ) : (
               <>
                 <Link href="/login" className="text-sm font-medium text-stone-700" onClick={() => setMobileOpen(false)}>

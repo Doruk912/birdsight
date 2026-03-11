@@ -12,29 +12,29 @@
  *
  * On mount, a silent refresh is attempted so users with a valid refresh-token
  * cookie stay logged in across page reloads.
+ *
+ * User profile data (avatarUrl, displayName, bio, etc.) is read directly from
+ * the `user` object that the backend includes in every AuthResponse — NOT from
+ * JWT claims. This guarantees the data is always fresh from the database.
  */
 
 import { createContext, useCallback, useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/app/lib/authService";
 import { tokenStore } from "@/app/lib/apiClient";
-import { AuthState, AuthUser, LoginRequest, RegisterRequest } from "@/app/types/auth";
+import { AuthResponse, AuthState, AuthUser, LoginRequest, RegisterRequest } from "@/app/types/auth";
 
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(atob(base64));
-  } catch {
-    return null;
-  }
-}
-
-function userFromToken(token: string): AuthUser | null {
-  const payload = decodeJwtPayload(token);
-  if (!payload) return null;
+/** Maps the UserResponse nested in AuthResponse to our client-side AuthUser shape. */
+function userFromResponse(response: AuthResponse): AuthUser | null {
+  const u = response.user;
+  if (!u) return null;
   return {
-    email: (payload.sub ?? payload.email ?? "") as string,
-    username: (payload.username ?? "") as string,
+    id: u.id,
+    email: u.email,
+    username: u.username,
+    displayName: u.displayName || undefined,
+    bio: u.bio || undefined,
+    avatarUrl: u.avatarUrl || undefined,
   };
 }
 
@@ -42,6 +42,7 @@ interface AuthContextValue extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => void;
+  updateUser: (partial: Partial<AuthUser>) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -63,11 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           credentials: "include",
         });
         if (res.ok) {
-          const data = await res.json();
+          const data: AuthResponse = await res.json();
           if (data?.accessToken) {
             tokenStore.set(data.accessToken);
             setState({
-              user: userFromToken(data.accessToken),
+              user: userFromResponse(data),
               accessToken: data.accessToken,
               isLoading: false,
             });
@@ -85,13 +86,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (credentials: LoginRequest) => {
     const data = await authService.login(credentials);
-    setState({ user: userFromToken(data.accessToken), accessToken: data.accessToken, isLoading: false });
+    setState({ user: userFromResponse(data), accessToken: data.accessToken, isLoading: false });
     router.push("/");
   }, [router]);
 
   const register = useCallback(async (payload: RegisterRequest) => {
     const data = await authService.register(payload);
-    setState({ user: userFromToken(data.accessToken), accessToken: data.accessToken, isLoading: false });
+    setState({ user: userFromResponse(data), accessToken: data.accessToken, isLoading: false });
     router.push("/");
   }, [router]);
 
@@ -101,8 +102,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/");
   }, [router]);
 
+  const updateUser = useCallback((partial: Partial<AuthUser>) => {
+    setState((prev) => ({
+      ...prev,
+      user: prev.user ? { ...prev.user, ...partial } : prev.user,
+    }));
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+    <AuthContext.Provider value={{ ...state, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
