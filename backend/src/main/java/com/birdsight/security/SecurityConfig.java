@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me/password").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/me/avatar").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/avatar").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").authenticated()
                         // User management — admin only for write operations
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")

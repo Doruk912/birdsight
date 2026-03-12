@@ -80,13 +80,15 @@ public class UserService {
             user.setEmailVerifiedAt(null);
         }
 
-        if (request.getDisplayName() != null) {
-            user.setDisplayName(request.getDisplayName());
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new ResourceAlreadyExistsException("User", "username", request.getUsername());
+            }
+            user.setUsername(request.getUsername());
         }
 
-        if (request.getBio() != null) {
-            user.setBio(request.getBio());
-        }
+        user.setDisplayName(request.getDisplayName());
+        user.setBio(request.getBio());
 
         User updatedUser = userRepository.saveAndFlush(user);
         return userMapper.toResponse(updatedUser);
