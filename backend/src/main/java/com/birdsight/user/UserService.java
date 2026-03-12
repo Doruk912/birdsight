@@ -1,7 +1,9 @@
 package com.birdsight.user;
 
+import com.birdsight.common.exception.BadRequestException;
 import com.birdsight.common.exception.ResourceAlreadyExistsException;
 import com.birdsight.common.exception.ResourceNotFoundException;
+import com.birdsight.user.dto.ChangePasswordRequest;
 import com.birdsight.user.dto.CreateUserRequest;
 import com.birdsight.user.dto.UpdateUserRequest;
 import com.birdsight.user.dto.UserMapper;
@@ -114,6 +116,23 @@ public class UserService {
         user.setSuspended(false);
         User updatedUser = userRepository.saveAndFlush(user);
         return userMapper.toResponse(updatedUser);
+    }
+
+    @Transactional
+    public void changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BadRequestException("Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new BadRequestException("New password must differ from the current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.saveAndFlush(user);
     }
 
     @Transactional

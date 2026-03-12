@@ -42,7 +42,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public auth endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Current user avatar — authenticated users only
+                        // Current user self-service endpoints — authenticated users only
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/me/password").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/me/avatar").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/avatar").authenticated()
                         // User management — admin only for write operations

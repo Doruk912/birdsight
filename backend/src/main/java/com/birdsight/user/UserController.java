@@ -1,5 +1,6 @@
 package com.birdsight.user;
 
+import com.birdsight.user.dto.ChangePasswordRequest;
 import com.birdsight.user.dto.CreateUserRequest;
 import com.birdsight.user.dto.UpdateUserRequest;
 import com.birdsight.user.dto.UserResponse;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -41,6 +44,13 @@ public class UserController {
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         UserResponse created = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> changePassword(@AuthenticationPrincipal UserDetails principal,
+                                                @Valid @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(principal.getUsername(), request);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
