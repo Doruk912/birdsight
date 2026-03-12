@@ -47,7 +47,12 @@ async function request<T>(url: string, options: RequestOptions = {}): Promise<T>
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new ApiError(response.status, body?.message ?? response.statusText);
+    let message: string = body?.message ?? response.statusText;
+    if (body?.validationErrors && typeof body.validationErrors === "object") {
+      const details = Object.values(body.validationErrors as Record<string, string>).join("; ");
+      if (details) message = `${message}: ${details}`;
+    }
+    throw new ApiError(response.status, message);
   }
 
   if (response.status === 204) return undefined as T;

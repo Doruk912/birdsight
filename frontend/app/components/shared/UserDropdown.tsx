@@ -11,12 +11,6 @@ interface UserDropdownProps {
   logout: () => void;
 }
 
-const menuItems = [
-  { label: "Profile", href: "/profile", icon: User },
-  { label: "My Observations", href: "/observations", icon: Binoculars },
-  { label: "Settings", href: "/settings", icon: Settings },
-];
-
 export default function UserDropdown({ user, logout }: UserDropdownProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -42,6 +36,12 @@ export default function UserDropdown({ user, logout }: UserDropdownProps) {
   }, []);
 
   const displayLabel = user.displayName || user.username;
+
+  const menuItems = [
+    { label: "Profile", href: `/profile/${user.username}`, icon: User },
+    { label: "My Observations", href: "/observations", icon: Binoculars },
+    { label: "Settings", href: "/settings", icon: Settings },
+  ];
 
   return (
     <div ref={ref} className="relative">

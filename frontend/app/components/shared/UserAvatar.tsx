@@ -1,6 +1,6 @@
 "use client";
 
-type AvatarSize = "sm" | "md" | "lg";
+type AvatarSize = "sm" | "md" | "lg" | "xl";
 
 interface UserAvatarProps {
   avatarUrl?: string;
@@ -13,12 +13,14 @@ const sizeClasses: Record<AvatarSize, string> = {
   sm: "h-8 w-8 text-xs",
   md: "h-10 w-10 text-sm",
   lg: "h-20 w-20 text-2xl",
+  xl: "h-28 w-28 text-4xl",
 };
 
 const imageSizes: Record<AvatarSize, number> = {
   sm: 32,
   md: 40,
   lg: 80,
+  xl: 112,
 };
 
 function getInitials(displayName: string | undefined, username: string): string {
@@ -60,4 +62,3 @@ export default function UserAvatar({
     </span>
   );
 }
-

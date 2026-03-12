@@ -31,8 +31,8 @@ export const userService = {
     return apiClient.get<UserResponse>(`/api/v1/users/username/${username}`);
   },
 
-  updateProfile: async (data: UpdateProfileRequest): Promise<UserResponse> => {
-    return apiClient.put<UserResponse>("/api/v1/users/me", data);
+  updateProfile: async (id: string, data: UpdateProfileRequest): Promise<UserResponse> => {
+    return apiClient.put<UserResponse>(`/api/v1/users/${id}`, data);
   },
 
   changePassword: async (data: ChangePasswordRequest): Promise<void> => {
