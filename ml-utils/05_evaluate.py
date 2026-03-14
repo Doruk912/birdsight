@@ -43,7 +43,7 @@ from sklearn.preprocessing import label_binarize
 class Config:
     BASE_PATH    = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed"
     TEST_CSV     = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\test.csv"
-    MODELS_DIR   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\modelsV2"
+    MODELS_DIR   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\models"
     OUTPUT_DIR   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\evaluation"
 
     LABEL_MAP    = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\label_mapping.csv"
@@ -221,6 +221,19 @@ def compute_metrics(labels, preds, probs, class_names):
 
     # Per-class accuracy
     cm = confusion_matrix(labels, preds, labels=classes)
+
+    # Top-3-aware confusion matrix:
+    # if true class is in top-3 predictions -> count as correct (diagonal),
+    # otherwise assign to top-1 predicted class.
+    top_k = min(3, num_classes)
+    top3_idx = np.argsort(probs, axis=1)[:, -top_k:][:, ::-1]
+    top3_effective_preds = np.where(
+        (top3_idx == labels[:, None]).any(axis=1),
+        labels,
+        top3_idx[:, 0],
+    )
+    cm_top3 = confusion_matrix(labels, top3_effective_preds, labels=classes)
+
     per_class_acc = cm.diagonal() / cm.sum(axis=1).clip(min=1)
 
     # Sample counts
@@ -261,6 +274,7 @@ def compute_metrics(labels, preds, probs, class_names):
         'roc_auc_macro':    roc_auc_macro,
         'map_score':        map_score,
         'confusion_matrix': cm,
+        'confusion_matrix_top3': cm_top3,
         'per_class':        per_class_df,
         'labels_bin':       labels_bin,
         'class_report':     classification_report(labels, preds,
@@ -321,6 +335,49 @@ def plot_confusion_matrix(cm, class_names, model_name, save_dir, normalize=True)
 
     plt.tight_layout()
     _save(fig, os.path.join(save_dir, f'{model_name}_confusion_matrix.png'))
+
+
+def plot_top3_confusion_matrix(cm_top3, class_names, model_name, save_dir, normalize=True):
+    """
+    Top-3-aware confusion matrix.
+    A sample is counted as correct (diagonal) if true class is in top-3.
+    Otherwise it is assigned to the top-1 predicted class.
+    """
+    n = len(class_names)
+    cm_norm = cm_top3.astype('float') / cm_top3.sum(axis=1, keepdims=True).clip(min=1)
+
+    cell_w = max(0.55, 12 / n)
+    fig_size = float(max(14, n * cell_w))
+    fig, ax = plt.subplots(figsize=(fig_size, fig_size * 0.88))
+
+    im = ax.imshow(cm_norm, interpolation='nearest', cmap='Purples', vmin=0, vmax=1)
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label('Row-normalised proportion', fontsize=11)
+
+    tick_marks = np.arange(n)
+    ax.set_xticks(tick_marks)
+    ax.set_yticks(tick_marks)
+    ax.set_xticklabels(class_names, rotation=90, fontsize=max(5, 9 - n // 8))
+    ax.set_yticklabels(class_names, fontsize=max(5, 9 - n // 8))
+
+    threshold = 0.5
+    for i in range(n):
+        for j in range(n):
+            count = cm_top3[i, j]
+            pct = cm_norm[i, j] * 100
+            color = 'white' if cm_norm[i, j] > threshold else 'black'
+            if count > 0:
+                ax.text(j, i, f'{count}\n({pct:.0f}%)',
+                        ha='center', va='center',
+                        fontsize=max(4, 7 - n // 8),
+                        color=color, fontweight='bold' if i == j else 'normal')
+
+    ax.set_xlabel('Effective Predicted Label (Top-3 rule)', fontsize=13, labelpad=10)
+    ax.set_ylabel('True Label', fontsize=13, labelpad=10)
+    ax.set_title(f'Top-3 Confusion Matrix — {model_name.upper()}', fontsize=14, fontweight='bold', pad=14)
+
+    plt.tight_layout()
+    _save(fig, os.path.join(save_dir, f'{model_name}_top3_confusion_matrix.png'))
 
 
 def plot_per_class_metrics(per_class_df, model_name, save_dir):
@@ -669,6 +726,12 @@ def evaluate_single_model(model_name, model_path, test_loader,
     # 1. Annotated confusion matrix (counts + %)
     plot_confusion_matrix(
         metrics['confusion_matrix'], class_names,
+        model_name, model_out_dir
+    )
+
+    # 1b. Top-3-aware confusion matrix (true label in top-3 => correct)
+    plot_top3_confusion_matrix(
+        metrics['confusion_matrix_top3'], class_names,
         model_name, model_out_dir
     )
 
