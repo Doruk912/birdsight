@@ -52,7 +52,7 @@ class Config:
     TRAIN_CSV = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\train.csv"
     VAL_CSV   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\val.csv"
     TEST_CSV  = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\test.csv"
-    SAVE_DIR  = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\models\exp04_combined"
+    SAVE_DIR  = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\final model"
 
     # CSV column names
     IMAGE_PATH_COL = 'image_path'
@@ -60,7 +60,7 @@ class Config:
     SPECIES_COL    = 'species'
 
     # Training parameters
-    NUM_CLASSES = 23
+    NUM_CLASSES = 30
 
     # ── EXP03 best: 11 freeze epochs ─────────────────────────
     FREEZE_EPOCHS    = 11

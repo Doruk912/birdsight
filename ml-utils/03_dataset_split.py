@@ -5,7 +5,6 @@
 import os
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 # Configuration
@@ -13,14 +12,16 @@ BASE_PATH = r'C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset
 OUTPUT_PATH = r'C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed'  # Save CSV in same location
 
 SPECIES_LIST = [
-    "Larus michahellis", "Corvus cornix", "Passer domesticus",
-    "Spilopelia senegalensis", "Columba livia", "Fringilla coelebs",
-    "Anas platyrhynchos", "Ardea cinerea", "Phalacrocorax carbo",
-    "Streptopelia decaocto", "Pica pica", "Chroicocephalus ridibundus",
-    "Garrulus glandarius", "Sturnus vulgaris", "Motacilla alba",
-    "Parus major", "Ciconia ciconia", "Fulica atra",
-    "Hirundo rustica", "Coloeus monedula", "Psittacula krameri",
-    "Turdus merula", "Acridotheres tristis"
+    "Larus michahellis", "Corvus cornix", "Spilopelia senegalensis",
+    "Ardea cinerea", "Phalacrocorax carbo", "Chroicocephalus ridibundus",
+    "Passer domesticus", "Psittacula krameri", "Gulosus aristotelis",
+    "Columba livia", "Acridotheres tristis", "Sturnus vulgaris",
+    "Anas platyrhynchos", "Coloeus monedula", "Parus major",
+    "Fringilla coelebs", "Microcarbo pygmaeus", "Pica pica",
+    "Erithacus rubecula", "Buteo buteo", "Tachymarptis melba",
+    "Fulica atra", "Ciconia ciconia", "Motacilla alba",
+    "Accipiter nisus", "Turdus merula", "Garrulus glandarius",
+    "Cyanistes caeruleus", "Streptopelia decaocto", "Hirundo rustica"
 ]
 
 # Split ratios
@@ -80,32 +81,46 @@ df['label'] = df['species'].map(species_to_idx)
 print(f"  Labels assigned: 0 to {len(species_to_idx) - 1}")
 
 # ============================================================
-# STEP 3: Stratified split
+# STEP 3: Deterministic per-class split (exact counts)
 # ============================================================
 
-print("\nStep 3: Performing stratified split...")
+print("\nStep 3: Performing deterministic per-class split...")
 
-# First split: separate test set
-train_val_df, test_df = train_test_split(
-    df,
-    test_size=TEST_RATIO,
-    stratify=df['species'],
-    random_state=RANDOM_SEED
-)
+rng = np.random.RandomState(RANDOM_SEED)
 
-# Second split: separate train and validation from remaining
-val_ratio_adjusted = VAL_RATIO / (TRAIN_RATIO + VAL_RATIO)
-train_df, val_df = train_test_split(
-    train_val_df,
-    test_size=val_ratio_adjusted,
-    stratify=train_val_df['species'],
-    random_state=RANDOM_SEED
-)
+train_parts = []
+val_parts = []
+test_parts = []
+
+for species in species_sorted:
+    class_df = df[df['species'] == species].copy()
+
+    # Shuffle each class reproducibly, then slice exact counts per class.
+    class_df = class_df.iloc[rng.permutation(len(class_df))].reset_index(drop=True)
+
+    n = len(class_df)
+    n_train = int(round(n * TRAIN_RATIO))
+    n_val = int(round(n * VAL_RATIO))
+    n_test = n - n_train - n_val
+
+    class_train = class_df.iloc[:n_train].copy()
+    class_val = class_df.iloc[n_train:n_train + n_val].copy()
+    class_test = class_df.iloc[n_train + n_val:].copy()
+
+    train_parts.append(class_train)
+    val_parts.append(class_val)
+    test_parts.append(class_test)
+
+train_df = pd.concat(train_parts, ignore_index=True)
+val_df = pd.concat(val_parts, ignore_index=True)
+test_df = pd.concat(test_parts, ignore_index=True)
+
+# Optional global shuffle per split (still deterministic).
+train_df = train_df.sample(frac=1, random_state=RANDOM_SEED).reset_index(drop=True)
+val_df = val_df.sample(frac=1, random_state=RANDOM_SEED).reset_index(drop=True)
+test_df = test_df.sample(frac=1, random_state=RANDOM_SEED).reset_index(drop=True)
 
 # Assign split labels
-train_df = train_df.copy()
-val_df = val_df.copy()
-test_df = test_df.copy()
 
 train_df['split'] = 'train'
 val_df['split'] = 'val'
@@ -221,11 +236,11 @@ Split Distribution:
 ┌─────────────┬─────────────┬──────────────────┐
 │ Split       │ Images      │ Per Class        │
 ├─────────────┼─────────────┼──────────────────┤
-│ Train       │ {len(train_df):>9,}   │ ~{len(train_df)//23:,}            │
-│ Validation  │ {len(val_df):>9,}   │ ~{len(val_df)//23:,}             │
-│ Test        │ {len(test_df):>9,}   │ ~{len(test_df)//23:,}             │
+│ Train       │ {len(train_df):>9,}   │ ~{len(train_df)//len(species_to_idx):,}            │
+│ Validation  │ {len(val_df):>9,}   │ ~{len(val_df)//len(species_to_idx):,}             │
+│ Test        │ {len(test_df):>9,}   │ ~{len(test_df)//len(species_to_idx):,}             │
 ├─────────────┼─────────────┼──────────────────┤
-│ Total       │ {len(df):>9,}   │ 5,000            │
+│ Total       │ {len(df):>9,}   │ ~{len(df)//len(species_to_idx):,}            │
 └─────────────┴─────────────┴──────────────────┘
 
 Files Saved:
