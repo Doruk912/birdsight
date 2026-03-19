@@ -43,15 +43,15 @@ from sklearn.preprocessing import label_binarize
 class Config:
     BASE_PATH    = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed"
     TEST_CSV     = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\test.csv"
-    MODELS_DIR   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\models"
-    OUTPUT_DIR   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\evaluation"
+    MODELS_DIR   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\model-final"
+    OUTPUT_DIR   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\evaluation-final"
 
     LABEL_MAP    = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\label_mapping.csv"
 
     IMAGE_PATH_COL = 'image_path'
     LABEL_COL      = 'label'
 
-    NUM_CLASSES  = 23
+    NUM_CLASSES  = 30
     BATCH_SIZE   = 32
     NUM_WORKERS  = 4
     PIN_MEMORY   = True
@@ -822,11 +822,11 @@ def main():
     ================================================================
     """
     models_to_evaluate = {
-        'mobilenet_v2': os.path.join(Config.MODELS_DIR, 'mobilenet_v2_best.pth'),
-        'resnet50':     os.path.join(Config.MODELS_DIR, 'resnet50_best.pth'),
-        'densenet121':  os.path.join(Config.MODELS_DIR, 'densenet121_best.pth'),
+        #'mobilenet_v2': os.path.join(Config.MODELS_DIR, 'mobilenet_v2_best.pth'),
+        #'resnet50':     os.path.join(Config.MODELS_DIR, 'resnet50_best.pth'),
+        #'densenet121':  os.path.join(Config.MODELS_DIR, 'densenet121_best.pth'),
         'inception_v3': os.path.join(Config.MODELS_DIR, 'inception_v3_best.pth'),
-        'vgg16':        os.path.join(Config.MODELS_DIR, 'vgg16_best.pth'),
+        #'vgg16':        os.path.join(Config.MODELS_DIR, 'vgg16_best.pth'),
     }
 
     # ---- Validate paths ----

@@ -52,7 +52,7 @@ class Config:
     TRAIN_CSV = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\train.csv"
     VAL_CSV   = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\val.csv"
     TEST_CSV  = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\test.csv"
-    SAVE_DIR  = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\final model"
+    SAVE_DIR  = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\model-final"
 
     # CSV column names
     IMAGE_PATH_COL = 'image_path'
