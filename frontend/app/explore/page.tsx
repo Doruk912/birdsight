@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { MapObservation } from "@/app/types/explore";
-import { MAP_OBSERVATIONS } from "@/app/constants/mapObservations";
+import { fetchMapObservations } from "@/app/lib/observationService";
 import MapSidebar from "@/app/components/explore/MapSidebar";
 import "./explore.css";
 
@@ -14,7 +14,19 @@ const ObservationMap = dynamic(
 );
 
 export default function ExplorePage() {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [observations, setObservations] = useState<MapObservation[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMapObservations()
+      .then((data) => {
+        setObservations(data);
+      })
+      .catch(() => {
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleSelectObservation = useCallback(
     (obs: MapObservation | null) => {
@@ -38,16 +50,29 @@ export default function ExplorePage() {
 
   return (
     <div className="fixed inset-0 top-16 bg-stone-50">
+      {/* Loading overlay */}
+      {loading && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+          <div className="flex items-center gap-3 text-stone-500">
+            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span className="text-sm font-medium">Loading observations…</span>
+          </div>
+        </div>
+      )}
+
       {/* Map — fills entire viewport below navbar */}
       <ObservationMap
-        observations={MAP_OBSERVATIONS}
+        observations={observations}
         selectedId={selectedId}
         onSelectObservation={handleSelectObservation}
       />
 
       {/* Sidebar overlays on top of the map */}
       <MapSidebar
-        observations={MAP_OBSERVATIONS}
+        observations={observations}
         selectedId={selectedId}
         onSelectObservation={handleSidebarSelect}
       />

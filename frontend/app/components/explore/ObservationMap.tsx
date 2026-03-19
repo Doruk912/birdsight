@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import MapGL, {
   Marker,
   Popup,
@@ -14,14 +15,14 @@ import { MapObservation } from "@/app/types/explore";
 
 interface ObservationMapProps {
   observations: MapObservation[];
-  selectedId: number | null;
+  selectedId: string | null;
   onSelectObservation: (obs: MapObservation | null) => void;
 }
 
 const INITIAL_VIEW = {
-  longitude: 10,
-  latitude: 30,
-  zoom: 2.2,
+  longitude: 29.0,
+  latitude: 41.0,
+  zoom: 10,
 };
 
 const MAP_STYLE =
@@ -41,7 +42,7 @@ export default function ObservationMap({
       setPopupObs(obs);
       mapRef.current?.flyTo({
         center: [obs.longitude, obs.latitude],
-        zoom: Math.max(mapRef.current.getZoom(), 6),
+        zoom: Math.max(mapRef.current.getZoom(), 12),
         duration: 1200,
       });
     },
@@ -58,13 +59,23 @@ export default function ObservationMap({
       const { longitude, latitude } = (e as CustomEvent).detail;
       mapRef.current?.flyTo({
         center: [longitude, latitude],
-        zoom: Math.max(mapRef.current.getZoom(), 6),
+        zoom: Math.max(mapRef.current.getZoom(), 12),
         duration: 1200,
       });
     };
     window.addEventListener("birdsight:flyto", handler);
     return () => window.removeEventListener("birdsight:flyto", handler);
   }, []);
+
+  const getGradeStyle = (grade: string) => {
+    if (grade === "RESEARCH_GRADE") return "bg-emerald-100 text-emerald-700";
+    return "bg-amber-100 text-amber-700";
+  };
+
+  const getGradeLabel = (grade: string) => {
+    if (grade === "RESEARCH_GRADE") return "Research Grade";
+    return "Needs ID";
+  };
 
   return (
     <div className="relative w-full h-full">
@@ -84,7 +95,7 @@ export default function ObservationMap({
         {/* Markers */}
         {observations.map((obs) => {
           const isSelected = selectedId === obs.id;
-          const isRare = obs.badge === "Rare";
+          const isResearchGrade = obs.qualityGrade === "RESEARCH_GRADE";
 
           return (
             <Marker
@@ -104,9 +115,9 @@ export default function ObservationMap({
                   ${isSelected ? "scale-125 z-10" : "hover:scale-110"}
                 `}
               >
-                {/* Pulse ring for rare species */}
-                {isRare && (
-                  <span className="absolute w-10 h-10 rounded-full bg-rose-400/30 animate-ping" />
+                {/* Pulse ring for research grade */}
+                {isResearchGrade && (
+                  <span className="absolute w-10 h-10 rounded-full bg-emerald-400/30 animate-ping" />
                 )}
 
                 {/* Marker dot */}
@@ -119,11 +130,13 @@ export default function ObservationMap({
                     ${
                       isSelected
                         ? "bg-emerald-500 border-white shadow-emerald-500/40"
-                        : "bg-white border-emerald-500/70 hover:border-emerald-500"
+                        : isResearchGrade
+                          ? "bg-white border-emerald-500 hover:border-emerald-600"
+                          : "bg-white border-amber-400 hover:border-amber-500"
                     }
                   `}
                 >
-                  <span className="select-none leading-none">{obs.emoji}</span>
+                  <span className="select-none leading-none">🐦</span>
                 </span>
               </div>
             </Marker>
@@ -155,27 +168,34 @@ export default function ObservationMap({
                     </p>
                   )}
                 </div>
-                {popupObs.badge && (
-                  <span
-                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${popupObs.badgeColor}`}
-                  >
-                    {popupObs.badge}
-                  </span>
-                )}
+                <span
+                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${getGradeStyle(popupObs.qualityGrade)}`}
+                >
+                  {getGradeLabel(popupObs.qualityGrade)}
+                </span>
               </div>
 
               {/* Details */}
               <div className="flex flex-col gap-1 text-xs text-stone-500">
-                <span className="flex items-center gap-1">
-                  📍 {popupObs.location}
-                </span>
-                <div className="flex items-center justify-between">
+                {popupObs.location && (
+                  <span className="flex items-center gap-1">
+                    📍 {popupObs.location}
+                  </span>
+                )}
+                {popupObs.user && (
                   <span className="font-medium text-stone-600">
                     @{popupObs.user}
                   </span>
-                  <span className="text-stone-400">{popupObs.timeAgo}</span>
-                </div>
+                )}
               </div>
+
+              {/* View observation link */}
+              <Link
+                href={`/observations/${popupObs.id}`}
+                className="mt-2 flex items-center justify-center gap-1 w-full text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg py-1.5 transition-colors duration-200"
+              >
+                View observation →
+              </Link>
             </div>
           </Popup>
         )}

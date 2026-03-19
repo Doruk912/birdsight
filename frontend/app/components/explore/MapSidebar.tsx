@@ -1,23 +1,26 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   Search,
   X,
   PanelLeftClose,
   PanelLeftOpen,
   MapPin,
-  Clock,
+  CheckCircle2,
+  HelpCircle,
+  ExternalLink,
 } from "lucide-react";
 import { MapObservation } from "@/app/types/explore";
 
 interface MapSidebarProps {
   observations: MapObservation[];
-  selectedId: number | null;
+  selectedId: string | null;
   onSelectObservation: (obs: MapObservation) => void;
 }
 
-type BadgeFilter = "all" | "rare" | "featured" | "lifer";
+type GradeFilter = "all" | "research_grade" | "needs_id";
 
 export default function MapSidebar({
   observations,
@@ -26,31 +29,30 @@ export default function MapSidebar({
 }: MapSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [search, setSearch] = useState("");
-  const [badgeFilter, setBadgeFilter] = useState<BadgeFilter>("all");
+  const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
 
   const filtered = useMemo(() => {
     return observations.filter((obs) => {
       const matchesSearch =
         !search ||
         obs.species.toLowerCase().includes(search.toLowerCase()) ||
+        (obs.speciesScientific?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
         obs.location.toLowerCase().includes(search.toLowerCase()) ||
         obs.user.toLowerCase().includes(search.toLowerCase());
 
-      const matchesBadge =
-        badgeFilter === "all" ||
-        (badgeFilter === "rare" && obs.badge === "Rare") ||
-        (badgeFilter === "featured" && obs.badge === "Featured") ||
-        (badgeFilter === "lifer" && obs.badge === "Lifer");
+      const matchesGrade =
+        gradeFilter === "all" ||
+        (gradeFilter === "research_grade" && obs.qualityGrade === "RESEARCH_GRADE") ||
+        (gradeFilter === "needs_id" && obs.qualityGrade === "NEEDS_ID");
 
-      return matchesSearch && matchesBadge;
+      return matchesSearch && matchesGrade;
     });
-  }, [observations, search, badgeFilter]);
+  }, [observations, search, gradeFilter]);
 
-  const badges: { key: BadgeFilter; label: string }[] = [
+  const grades: { key: GradeFilter; label: string }[] = [
     { key: "all", label: "All" },
-    { key: "rare", label: "Rare" },
-    { key: "featured", label: "Featured" },
-    { key: "lifer", label: "Lifer" },
+    { key: "research_grade", label: "Research Grade" },
+    { key: "needs_id", label: "Needs ID" },
   ];
 
   return (
@@ -118,23 +120,23 @@ export default function MapSidebar({
               )}
             </div>
 
-            {/* Badge filter pills */}
+            {/* Quality grade filter pills */}
             <div className="flex gap-1.5 mt-3">
-              {badges.map((b) => (
+              {grades.map((g) => (
                 <button
-                  key={b.key}
-                  onClick={() => setBadgeFilter(b.key)}
+                  key={g.key}
+                  onClick={() => setGradeFilter(g.key)}
                   className={`
                     text-[11px] font-medium px-2.5 py-1 rounded-full
                     transition-colors duration-200 cursor-pointer
                     ${
-                      badgeFilter === b.key
+                      gradeFilter === g.key
                         ? "bg-emerald-500 text-white shadow-sm"
                         : "bg-stone-100 text-stone-500 hover:bg-stone-200"
                     }
                   `}
                 >
-                  {b.label}
+                  {g.label}
                 </button>
               ))}
             </div>
@@ -150,6 +152,7 @@ export default function MapSidebar({
             ) : (
               filtered.map((obs) => {
                 const isSelected = selectedId === obs.id;
+                const isResearchGrade = obs.qualityGrade === "RESEARCH_GRADE";
                 return (
                   <button
                     key={obs.id}
@@ -165,13 +168,17 @@ export default function MapSidebar({
                     `}
                   >
                     <div className="flex items-start gap-3">
-                      {/* Emoji */}
-                      <span className="text-2xl leading-none mt-0.5 select-none">
-                        {obs.emoji}
+                      {/* Quality grade icon */}
+                      <span className="mt-0.5 shrink-0">
+                        {isResearchGrade ? (
+                          <CheckCircle2 size={20} className="text-emerald-500" />
+                        ) : (
+                          <HelpCircle size={20} className="text-amber-400" />
+                        )}
                       </span>
 
                       <div className="min-w-0 flex-1">
-                        {/* Species + badge */}
+                        {/* Species + grade badge */}
                         <div className="flex items-center gap-2">
                           <h3
                             className={`text-sm font-semibold truncate ${
@@ -182,13 +189,15 @@ export default function MapSidebar({
                           >
                             {obs.species}
                           </h3>
-                          {obs.badge && (
-                            <span
-                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${obs.badgeColor}`}
-                            >
-                              {obs.badge}
-                            </span>
-                          )}
+                          <span
+                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${
+                              isResearchGrade
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {isResearchGrade ? "RG" : "ID"}
+                          </span>
                         </div>
 
                         {/* Scientific name */}
@@ -198,17 +207,30 @@ export default function MapSidebar({
                           </p>
                         )}
 
-                        {/* Location & time */}
+                        {/* Location & user */}
                         <div className="flex items-center justify-between mt-1 text-[11px] text-stone-400">
-                          <span className="flex items-center gap-0.5 truncate">
-                            <MapPin size={10} className="shrink-0" />
-                            {obs.location}
-                          </span>
-                          <span className="flex items-center gap-0.5 shrink-0 ml-2">
-                            <Clock size={10} />
-                            {obs.timeAgo}
-                          </span>
+                          {obs.location && (
+                            <span className="flex items-center gap-0.5 truncate">
+                              <MapPin size={10} className="shrink-0" />
+                              {obs.location}
+                            </span>
+                          )}
+                          {obs.user && (
+                            <span className="shrink-0 ml-2 font-medium text-stone-500">
+                              @{obs.user}
+                            </span>
+                          )}
                         </div>
+
+                        {/* View observation link */}
+                        <Link
+                          href={`/observations/${obs.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                        >
+                          View details
+                          <ExternalLink size={10} strokeWidth={2} />
+                        </Link>
                       </div>
                     </div>
                   </button>
