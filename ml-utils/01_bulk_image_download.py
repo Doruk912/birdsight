@@ -25,7 +25,10 @@ SPECIES_LIST = [
     "Garrulus glandarius", "Sturnus vulgaris", "Motacilla alba",
     "Parus major", "Ciconia ciconia", "Fulica atra",
     "Hirundo rustica", "Coloeus monedula", "Psittacula krameri",
-    "Turdus merula", "Acridotheres tristis"
+    "Turdus merula", "Acridotheres tristis",
+    "Gulosus aristotelis", "Microcarbo pygmaeus", "Erithacus rubecula",
+    "Buteo buteo", "Tachymarptis melba", "Accipiter nisus",
+    "Cyanistes caeruleus"
 ]
 
 def download_images_for_species(species_name):
