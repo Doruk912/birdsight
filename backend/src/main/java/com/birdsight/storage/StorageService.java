@@ -16,20 +16,32 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StorageService {
 
-    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
             "image/jpeg", "image/png", "image/webp"
     );
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    private static final long AVATAR_MAX_SIZE = 5 * 1024 * 1024;       // 5 MB
+    private static final long OBSERVATION_MAX_SIZE = 10 * 1024 * 1024;  // 10 MB
 
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
 
     public String uploadAvatar(UUID userId, MultipartFile file) {
-        validateFile(file);
+        validateImage(file, AVATAR_MAX_SIZE, "Avatar");
+        String objectKey = "avatars/" + userId + "/" + UUID.randomUUID() + "." + getExtension(file.getOriginalFilename());
+        return upload(objectKey, file);
+    }
 
-        String extension = getExtension(file.getOriginalFilename());
-        String objectKey = "avatars/" + userId + "/" + UUID.randomUUID() + "." + extension;
+    public void deleteAvatar(String avatarUrl) {
+        deleteByUrl(avatarUrl);
+    }
 
+    public String uploadObservationImage(UUID observationId, MultipartFile file) {
+        validateImage(file, OBSERVATION_MAX_SIZE, "Observation image");
+        String objectKey = "observations/" + observationId + "/" + UUID.randomUUID() + "." + getExtension(file.getOriginalFilename());
+        return upload(objectKey, file);
+    }
+
+    private String upload(String objectKey, MultipartFile file) {
         try {
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -40,20 +52,20 @@ public class StorageService {
                             .build()
             );
         } catch (Exception e) {
-            log.error("Failed to upload avatar for user {}: {}", userId, e.getMessage(), e);
-            throw new RuntimeException("Failed to upload avatar. Please try again.", e);
+            log.error("Failed to upload '{}': {}", objectKey, e.getMessage(), e);
+            throw new RuntimeException("Failed to upload file. Please try again.", e);
         }
 
         return minioProperties.getEndpoint() + "/" + minioProperties.getBucketName() + "/" + objectKey;
     }
 
-    public void deleteAvatar(String avatarUrl) {
-        if (avatarUrl == null || avatarUrl.isBlank()) return;
+    private void deleteByUrl(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) return;
 
         String prefix = minioProperties.getEndpoint() + "/" + minioProperties.getBucketName() + "/";
-        if (!avatarUrl.startsWith(prefix)) return;
+        if (!fileUrl.startsWith(prefix)) return;
 
-        String objectKey = avatarUrl.substring(prefix.length());
+        String objectKey = fileUrl.substring(prefix.length());
 
         try {
             minioClient.removeObject(
@@ -63,20 +75,20 @@ public class StorageService {
                             .build()
             );
         } catch (Exception e) {
-            log.warn("Failed to delete avatar object '{}': {}", objectKey, e.getMessage());
+            log.warn("Failed to delete object '{}': {}", objectKey, e.getMessage());
         }
     }
 
-    private void validateFile(MultipartFile file) {
+    private void validateImage(MultipartFile file, long maxSize, String label) {
         if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Avatar file must not be empty.");
+            throw new BadRequestException(label + " file must not be empty.");
         }
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new BadRequestException("Avatar file size must not exceed 5 MB.");
+        if (file.getSize() > maxSize) {
+            throw new BadRequestException(label + " file size must not exceed " + (maxSize / (1024 * 1024)) + " MB.");
         }
         String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
-            throw new BadRequestException("Avatar must be a JPEG, PNG, or, WebP image.");
+        if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType)) {
+            throw new BadRequestException(label + " must be a JPEG, PNG, or WebP image.");
         }
     }
 
@@ -85,4 +97,3 @@ public class StorageService {
         return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
     }
 }
-

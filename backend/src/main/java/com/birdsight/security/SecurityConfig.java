@@ -42,13 +42,25 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public auth endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Taxonomy — public (for species search/autocomplete)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/taxa/**").permitAll()
+                        // Observations — public read, authenticated write
+                        .requestMatchers(HttpMethod.GET, "/api/v1/observations/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/observations").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/observations/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/observations/**").authenticated()
+                        // Identifications — public read (via GET observations), authenticated write
+                        .requestMatchers(HttpMethod.POST, "/api/v1/observations/*/identifications").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/observations/*/identifications/*").authenticated()
+                        // Comments — public read, authenticated write
+                        .requestMatchers(HttpMethod.POST, "/api/v1/observations/*/comments").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/observations/*/comments/*").authenticated()
                         // Current user self-service endpoints — authenticated users only
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me/password").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/me/avatar").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/avatar").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").authenticated()
                         // User management — admin only for write operations
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
