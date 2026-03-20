@@ -11,6 +11,14 @@ export interface MapObservation {
   thumbnailUrl?: string;
 }
 
+export interface PageResponse<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+}
+
 export interface ObservationMapApiResponse {
   id: string;
   latitude: number;

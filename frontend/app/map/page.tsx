@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { MapObservation } from "@/app/types/explore";
 import { fetchMapObservations } from "@/app/lib/observationService";
 import MapSidebar from "@/app/components/explore/MapSidebar";
-import "./explore.css";
+import "./map.css";
 
 // Dynamic import to avoid SSR issues with MapLibre
 const ObservationMap = dynamic(

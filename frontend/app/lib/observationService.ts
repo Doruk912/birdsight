@@ -63,6 +63,27 @@ export async function fetchObservationDetail(
   return response.json();
 }
 
+export async function fetchAllObservations(
+  page: number = 0,
+  search?: string,
+  grade?: string
+): Promise<import("@/app/types/explore").PageResponse<ObservationDetailResponse>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    size: "12",
+  });
+  if (search) params.append("search", search);
+  if (grade) params.append("grade", grade);
+
+  const response = await fetch(`${API_BASE}/api/v1/observations?${params.toString()}`, {
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch all observations: ${response.statusText}`);
+  }
+  return response.json();
+}
+
 export async function fetchIdentifications(
   observationId: string
 ): Promise<IdentificationResponse[]> {

@@ -39,13 +39,13 @@ export default function Hero() {
         {/* CTA row */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
           <Link
-            href="/register"
+            href="/observations"
             className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-7 py-3.5 rounded-full transition-colors duration-200 text-sm shadow-lg shadow-emerald-900/40"
           >
             Start exploring <ArrowRight size={16} />
           </Link>
           <a
-            href="#"
+            href="/map"
             className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white font-semibold px-7 py-3.5 rounded-full transition-colors duration-200 text-sm border border-white/10"
           >
             <Map size={16} /> View live map
