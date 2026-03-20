@@ -78,8 +78,13 @@ public class ObservationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ObservationResponse> getAllObservations(Pageable pageable) {
-        return observationRepository.findAllActive(pageable)
+    public Page<ObservationResponse> getAllObservations(String search, QualityGrade grade, Pageable pageable) {
+        if ((search == null || search.trim().isEmpty()) && grade == null) {
+            return observationRepository.findAllActive(pageable)
+                    .map(obs -> observationMapper.toResponse(obs, 0, 0));
+        }
+        String searchQuery = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+        return observationRepository.findAllWithFilters(searchQuery, grade, pageable)
                 .map(obs -> observationMapper.toResponse(obs, 0, 0));
     }
 

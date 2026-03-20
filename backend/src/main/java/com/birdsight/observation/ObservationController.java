@@ -39,8 +39,10 @@ public class ObservationController {
 
     @GetMapping
     public ResponseEntity<Page<ObservationResponse>> getAllObservations(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) QualityGrade grade,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(observationService.getAllObservations(pageable));
+        return ResponseEntity.ok(observationService.getAllObservations(search, grade, pageable));
     }
 
     @GetMapping("/user/{userId}")

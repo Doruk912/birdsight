@@ -19,8 +19,13 @@ public interface ObservationRepository extends JpaRepository<Observation, UUID> 
     @Query("SELECT o FROM Observation o WHERE o.deleted = false AND o.user.id = :userId ORDER BY o.createdAt DESC")
     Page<Observation> findByUserId(@Param("userId") UUID userId, Pageable pageable);
 
-    @Query("SELECT o FROM Observation o WHERE o.deleted = false AND o.qualityGrade = :grade ORDER BY o.createdAt DESC")
-    Page<Observation> findByQualityGrade(@Param("grade") QualityGrade grade, Pageable pageable);
+    @Query("SELECT o FROM Observation o " +
+           "LEFT JOIN o.communityTaxon t " +
+           "WHERE o.deleted = false " +
+           "AND (:search IS NULL OR LOWER(t.commonName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.scientificName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(o.locationName) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:grade IS NULL OR o.qualityGrade = :grade) " +
+           "ORDER BY o.createdAt DESC")
+    Page<Observation> findAllWithFilters(@Param("search") String search, @Param("grade") QualityGrade grade, Pageable pageable);
 
     Optional<Observation> findByIdAndDeletedFalse(UUID id);
 
