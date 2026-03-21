@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.birdsight.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -60,7 +60,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<AuthResponse> me(@AuthenticationPrincipal UserDetails principal,
+    public ResponseEntity<AuthResponse> me(@AuthenticationPrincipal CustomUserDetails principal,
                                             HttpServletRequest request) {
         String refreshToken = extractRefreshTokenCookie(request);
         AuthResponse authResponse = authService.refresh(refreshToken);

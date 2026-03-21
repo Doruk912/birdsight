@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.birdsight.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +28,7 @@ public class ObservationController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ObservationResponse> createObservation(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal CustomUserDetails principal,
             @Valid @RequestPart("observation") CreateObservationRequest request,
             @RequestPart("images") List<MultipartFile> images) {
 
@@ -64,7 +64,7 @@ public class ObservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteObservation(@PathVariable UUID id,
-                                                    @AuthenticationPrincipal UserDetails principal) {
+                                                    @AuthenticationPrincipal CustomUserDetails principal) {
         observationService.deleteObservation(id, principal.getUsername());
         return ResponseEntity.noContent().build();
     }

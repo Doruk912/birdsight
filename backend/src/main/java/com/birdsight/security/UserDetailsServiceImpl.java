@@ -25,13 +25,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmailOrUsernameAndDeletedFalse(identifier)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
-                .accountLocked(user.isSuspended())
-                .disabled(user.isDeleted())
-                .build();
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        return new CustomUserDetails(user, authorities);
     }
 }
 

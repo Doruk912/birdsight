@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.birdsight.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class IdentificationController {
     @PostMapping
     public ResponseEntity<IdentificationResponse> addIdentification(
             @PathVariable UUID obsId,
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal CustomUserDetails principal,
             @Valid @RequestBody CreateIdentificationRequest request) {
 
         IdentificationResponse response = identificationService
@@ -40,7 +40,7 @@ public class IdentificationController {
     public ResponseEntity<Void> withdrawIdentification(
             @PathVariable UUID obsId,
             @PathVariable UUID id,
-            @AuthenticationPrincipal UserDetails principal) {
+            @AuthenticationPrincipal CustomUserDetails principal) {
 
         identificationService.withdrawIdentification(obsId, id, principal.getUsername());
         return ResponseEntity.noContent().build();

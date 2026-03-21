@@ -27,5 +27,6 @@ public class CreateUserRequest {
     @Size(max = 50, message = "Display name must be at most 50 characters")
     private String displayName;
 
+    @Size(max = 500, message = "Bio must be at most 500 characters")
     private String bio;
 }

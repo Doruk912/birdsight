@@ -12,7 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.birdsight.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -47,16 +47,16 @@ public class UserController {
     }
 
     @PutMapping("/me/password")
-    public ResponseEntity<Void> changePassword(@AuthenticationPrincipal UserDetails principal,
+    public ResponseEntity<Void> changePassword(@AuthenticationPrincipal CustomUserDetails principal,
                                                 @Valid @RequestBody ChangePasswordRequest request) {
         userService.changePassword(principal.getUsername(), request);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable UUID id,
-                                                    @Valid @RequestBody UpdateUserRequest request) {
-        return ResponseEntity.ok(userService.updateUser(id, request));
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateUser(@AuthenticationPrincipal CustomUserDetails principal,
+                                                        @Valid @RequestBody UpdateUserRequest request) {
+        return ResponseEntity.ok(userService.updateUser(principal.getActualUsername(), request));
     }
 
     @DeleteMapping("/{id}")

@@ -68,9 +68,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateUser(UUID id, UpdateUserRequest request) {
-        User user = userRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+    public UserResponse updateUser(String username, UpdateUserRequest request) {
+        User user = userRepository.findByUsernameAndDeletedFalse(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {

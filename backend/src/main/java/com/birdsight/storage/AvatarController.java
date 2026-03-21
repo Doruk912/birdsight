@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.birdsight.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +20,7 @@ public class AvatarController {
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> uploadAvatar(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam("file") MultipartFile file) {
 
         // Look up the user by email (which is the UserDetails username)
@@ -39,7 +39,7 @@ public class AvatarController {
 
     @DeleteMapping("/avatar")
     public ResponseEntity<UserResponse> deleteAvatar(
-            @AuthenticationPrincipal UserDetails principal) {
+            @AuthenticationPrincipal CustomUserDetails principal) {
 
         UserResponse currentUser = userService.getUserByEmail(principal.getUsername());
 
