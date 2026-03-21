@@ -103,7 +103,7 @@ export default function ObservationsPage() {
             </div>
             <h3 className="text-lg font-semibold text-stone-900 mb-1">No observations found</h3>
             <p className="text-stone-500 max-w-sm">
-              We couldn't find any observations matching your filters. Try adjusting your search term or quality grade.
+              We couldn&apos;t find any observations matching your filters. Try adjusting your search term or quality grade.
             </p>
             {(search || grade) && (
               <button 

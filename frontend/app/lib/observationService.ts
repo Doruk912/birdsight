@@ -137,3 +137,10 @@ export async function addIdentification(
     { taxonId, comment }
   );
 }
+
+export async function createObservation(formData: FormData): Promise<ObservationDetailResponse> {
+  return apiClient.postForm<ObservationDetailResponse>(
+    `${API_BASE}/api/v1/observations`,
+    formData
+  );
+}

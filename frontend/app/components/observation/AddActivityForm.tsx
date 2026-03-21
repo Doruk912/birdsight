@@ -93,8 +93,9 @@ export default function AddActivityForm({
       onCommentAdded(newComment);
       setCommentBody("");
       // activeTab remains "comment"
-    } catch (err: any) {
-      setError(err.message || "Failed to post comment.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || "Failed to post comment.");
     } finally {
       setIsSubmitting(false);
     }
@@ -117,8 +118,9 @@ export default function AddActivityForm({
       setSelectedTaxon(null);
       setTaxonQuery("");
       setIdComment("");
-    } catch (err: any) {
-      setError(err.message || "Failed to suggest identification.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || "Failed to suggest identification.");
     } finally {
       setIsSubmitting(false);
     }

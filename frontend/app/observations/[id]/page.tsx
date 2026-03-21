@@ -51,6 +51,7 @@ export default function ObservationPage() {
   useEffect(() => {
     if (!id) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 
@@ -95,11 +96,11 @@ export default function ObservationPage() {
             {error || "The observation you're looking for doesn't exist or has been removed."}
           </p>
           <Link
-            href="/explore"
+            href="/observations"
             className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
           >
             <ArrowLeft size={16} />
-            Back to explore
+            Back to observations
           </Link>
         </div>
       </div>

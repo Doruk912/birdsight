@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bird, Menu, X, User, Binoculars, Settings, LogOut } from "lucide-react";
+import { Bird, Menu, X, User, Binoculars, Settings, LogOut, Plus } from "lucide-react";
 import { NAV_LINKS } from "@/app/constants/navigation";
 import { useAuth } from "@/app/hooks/useAuth";
 import UserDropdown from "@/app/components/shared/UserDropdown";
@@ -36,7 +36,15 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {!isLoading && (
             user ? (
-              <UserDropdown user={user} logout={logout} />
+              <>
+                <Link
+                  href="/observations/new"
+                  className="flex items-center gap-2 text-sm font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full transition-colors duration-200"
+                >
+                  <Plus size={18} strokeWidth={2} /> Add Observation
+                </Link>
+                <UserDropdown user={user} logout={logout} />
+              </>
             ) : (
               <>
                 <Link
@@ -108,6 +116,13 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                 >
                   <User size={16} strokeWidth={1.8} /> Profile
+                </Link>
+                <Link
+                  href="/observations/new"
+                  className="flex items-center gap-3 text-sm font-medium text-stone-700 hover:text-emerald-600 transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Plus size={16} strokeWidth={1.8} /> Add Observation
                 </Link>
                 <Link
                   href="/observations"
