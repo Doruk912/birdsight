@@ -241,11 +241,11 @@ export default function SettingsPage() {
     setIsSavingProfile(true);
     const emailChanged = email.trim() !== user.email;
     try {
-      const updated = await userService.updateProfile(user.id, {
+      const updated = await userService.updateProfile({
         displayName: displayName.trim() || undefined,
-        bio: bio.trim() || undefined,
-        email: email.trim(),
         username: username.trim(),
+        email: email.trim(),
+        bio: bio.trim() || undefined,
       });
 
       setDisplayName(updated.displayName ?? "");
