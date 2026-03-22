@@ -71,7 +71,7 @@ export default function TaxonSearch({ onSelect }: TaxonSearchProps) {
           }}
           onFocus={() => { if (results.length > 0) setIsOpen(true); }}
           placeholder="Search for a species (e.g. Mallard) ..."
-          className="w-full rounded-xl border border-stone-200 bg-white pl-11 pr-4 py-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-stone-400"
+          className="w-full rounded-xl border border-stone-200 bg-white pl-11 pr-4 py-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-stone-400 text-stone-900"
         />
         {loading && <Loader2 className="absolute right-4 text-stone-400 animate-spin" size={18} />}
       </div>

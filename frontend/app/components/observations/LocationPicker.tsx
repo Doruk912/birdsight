@@ -7,7 +7,7 @@ import { MapPin, Crosshair } from "lucide-react";
 const MAP_STYLE = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
 
 interface LocationPickerProps {
-  onLocationChange: (lat: number, lng: number, name: string) => void;
+  onLocationChange: (lat: number, lng: number) => void;
 }
 
 export default function LocationPicker({ onLocationChange }: LocationPickerProps) {
@@ -18,20 +18,12 @@ export default function LocationPicker({ onLocationChange }: LocationPickerProps
     zoom: 8
   });
   const [marker, setMarker] = useState<{lat: number; lng: number} | null>(null);
-  const [locationName, setLocationName] = useState("");
 
   const handleMapClick = (e: { lngLat: { lat: number; lng: number } }) => {
     const lat = e.lngLat.lat;
     const lng = e.lngLat.lng;
     setMarker({ lat, lng });
-    onLocationChange(lat, lng, locationName);
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocationName(e.target.value);
-    if (marker) {
-      onLocationChange(marker.lat, marker.lng, e.target.value);
-    }
+    onLocationChange(lat, lng);
   };
 
   const useCurrentLocation = () => {
@@ -40,7 +32,7 @@ export default function LocationPicker({ onLocationChange }: LocationPickerProps
         const { latitude, longitude } = position.coords;
         setViewState((prev) => ({ ...prev, latitude, longitude, zoom: 14 }));
         setMarker({ lat: latitude, lng: longitude });
-        onLocationChange(latitude, longitude, locationName);
+        onLocationChange(latitude, longitude);
       });
     }
   };
@@ -81,16 +73,6 @@ export default function LocationPicker({ onLocationChange }: LocationPickerProps
             Click on the map to set location
           </div>
         )}
-      </div>
-
-      <div>
-        <input
-          type="text"
-          value={locationName}
-          onChange={handleNameChange}
-          placeholder="Location name (optional, e.g. Central Park)"
-          className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-stone-400"
-        />
       </div>
     </div>
   );

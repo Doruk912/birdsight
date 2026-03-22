@@ -29,7 +29,7 @@ export default function CTABanner() {
             Create free account <ArrowRight size={16} />
           </Link>
           <a
-            href="#"
+            href="/observations"
             className="text-sm font-medium text-stone-400 hover:text-white transition-colors"
           >
             Browse without signing up →

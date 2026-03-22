@@ -1,39 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, Loader2, ImagePlus, X } from "lucide-react";
 import LocationPicker from "./LocationPicker";
 import TaxonSearch from "./TaxonSearch";
+import DateTimePicker from "./DateTimePicker";
 import { createObservation, addIdentification } from "@/app/lib/observationService";
 
 export default function AddObservationForm() {
   const router = useRouter();
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [observedAt, setObservedAt] = useState<string>("");
-  const [location, setLocation] = useState<{lat: number; lng: number; name: string} | null>(null);
+  const [observedAtDate, setObservedAtDate] = useState<Date | null>(null);
+  const [location, setLocation] = useState<{lat: number; lng: number} | null>(null);
   const [description, setDescription] = useState("");
   const [taxonId, setTaxonId] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewUrls]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
+      // Revoke existing URLs before replacing them
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+
       const selected = Array.from(e.target.files);
       const newImages = [...images, ...selected].slice(0, 5); // Max 5
       setImages(newImages);
-      
-      const urls = newImages.map(file => URL.createObjectURL(file));
+
+      const urls = newImages.map((file) => URL.createObjectURL(file));
       setPreviewUrls(urls);
     }
   };
 
   const removeImage = (index: number) => {
+    // Revoke the URL we're removing
+    const urlToRemove = previewUrls[index];
+    if (urlToRemove) URL.revokeObjectURL(urlToRemove);
+
     const newImages = [...images];
     newImages.splice(index, 1);
     setImages(newImages);
-    
+
     const newUrls = [...previewUrls];
     newUrls.splice(index, 1);
     setPreviewUrls(newUrls);
@@ -47,7 +61,7 @@ export default function AddObservationForm() {
       setError("At least 1 photo is required.");
       return;
     }
-    if (!observedAt) {
+    if (!observedAtDate) {
       setError("Observation date & time is required.");
       return;
     }
@@ -63,10 +77,9 @@ export default function AddObservationForm() {
       
       const reqObj = {
         description,
-        observedAt: new Date(observedAt).toISOString(),
+        observedAt: observedAtDate.toISOString(),
         latitude: location.lat,
-        longitude: location.lng,
-        locationName: location.name
+        longitude: location.lng
       };
       
       formData.append("observation", new Blob([JSON.stringify(reqObj)], { type: "application/json" }));
@@ -122,6 +135,7 @@ export default function AddObservationForm() {
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             {previewUrls.map((url, i) => (
               <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-stone-200 shadow-sm group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 <button
                   type="button"
@@ -157,13 +171,10 @@ export default function AddObservationForm() {
           <section className="space-y-8">
             <div>
               <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2.5">When did you see it? <span className="text-red-500">*</span></label>
-              <input
-                type="datetime-local"
-                value={observedAt}
-                onChange={(e) => setObservedAt(e.target.value)}
-                max={new Date().toISOString().slice(0, 16)}
-                required
-                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all text-stone-800 font-medium"
+              <DateTimePicker
+                value={observedAtDate}
+                onChange={setObservedAtDate}
+                maxDate={new Date()}
               />
             </div>
             
@@ -174,7 +185,7 @@ export default function AddObservationForm() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What was it doing? How was the weather? etc."
                 rows={4}
-                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none placeholder:text-stone-400 font-medium"
+                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none placeholder:text-stone-400 font-medium text-stone-900"
               />
             </div>
 
@@ -184,7 +195,7 @@ export default function AddObservationForm() {
           </section>
 
           <section>
-            <LocationPicker onLocationChange={(lat, lng, name) => setLocation({lat, lng, name})} />
+            <LocationPicker onLocationChange={(lat, lng) => setLocation({lat, lng})} />
           </section>
         </div>
 
