@@ -1,0 +1,7 @@
+# BirdSight ML Service — Python dependencies
+torch
+torchvision
+fastapi
+uvicorn[standard]
+Pillow
+python-multipart
