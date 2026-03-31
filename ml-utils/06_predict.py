@@ -14,18 +14,18 @@ import os
 # ============================================================
 
 # Path to the image you want to classify
-IMAGE_PATH = r"C:\Users\Doruk\Downloads\large.jpg"
+IMAGE_PATH = r"C:\Users\Doruk\Downloads\test.jpg"
 
 # Which model to use for prediction
-MODEL_NAME = 'mobilenet_v2'  # Match the model you trained
+MODEL_NAME = 'inception_v3'  # Match the model you trained
 
 # Path to the saved model
-MODEL_PATH = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\modelsV1\mobilenet_v2_best.pth"
+MODEL_PATH = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\model-final\inception_v3_best.pth"
 
 # Path to label mapping
 LABEL_MAP_PATH = r"C:\Users\Doruk\OneDrive\Masaüstü\Graduation Project\Bird Dataset Processed\label_mapping.csv"
 
-NUM_CLASSES = 23
+NUM_CLASSES = 30
 
 # ============================================================
 # LOAD LABEL MAPPING
