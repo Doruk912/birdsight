@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Leaf, MessageCircle, Send, Loader2, Search, X } from "lucide-react";
+import { Leaf, MessageCircle, Send, Loader2, Search, X} from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
 import {
   searchTaxa,
@@ -13,16 +13,21 @@ import {
   TaxonResponse,
   CommentResponse,
   IdentificationResponse,
+  ObservationImageResponse,
 } from "@/app/types/explore";
+import MLSuggestions from "@/app/components/observations/MLSuggestions";
 
 interface AddActivityFormProps {
   observationId: string;
+  /** Observation images for ML prediction. */
+  observationImages: ObservationImageResponse[];
   onCommentAdded: (comment: CommentResponse) => void;
   onIdentificationAdded: (identification: IdentificationResponse) => void;
 }
 
 export default function AddActivityForm({
   observationId,
+  observationImages,
   onCommentAdded,
   onIdentificationAdded,
 }: AddActivityFormProps) {
@@ -41,6 +46,10 @@ export default function AddActivityForm({
   const [isSearchingTaxa, setIsSearchingTaxa] = useState(false);
   const [idComment, setIdComment] = useState("");
   const taxonInputRef = useRef<HTMLInputElement>(null);
+
+  // ML suggestion state
+  const firstImageUrl = observationImages.length > 0 ? observationImages[0].imageUrl : undefined;
+  const [showMlSuggestions, setShowMlSuggestions] = useState(true);
 
   // Debounced Taxon Search
   useEffect(() => {
@@ -64,6 +73,23 @@ export default function AddActivityForm({
 
     return () => clearTimeout(delayDebounceFn);
   }, [taxonQuery, selectedTaxon]);
+
+  const handleMLSelect = useCallback(
+    async (taxonId: string, commonName: string | null, scientificName: string) => {
+      // Create a TaxonResponse-like object from ML prediction
+      const taxon: TaxonResponse = {
+        id: taxonId,
+        scientificName,
+        commonName,
+        rank: "SPECIES",
+        parentId: null,
+      };
+      setSelectedTaxon(taxon);
+      setTaxonResults([]);
+      setShowMlSuggestions(false);
+    },
+    []
+  );
 
   if (!user) {
     return (
@@ -118,6 +144,7 @@ export default function AddActivityForm({
       setSelectedTaxon(null);
       setTaxonQuery("");
       setIdComment("");
+      setShowMlSuggestions(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message || "Failed to suggest identification.");
@@ -193,6 +220,15 @@ export default function AddActivityForm({
           </form>
         ) : (
           <form onSubmit={handleIdSubmit} className="space-y-4">
+            {/* ML Suggestions */}
+            {showMlSuggestions && firstImageUrl && !selectedTaxon && (
+              <MLSuggestions
+                imageUrl={firstImageUrl}
+                onSelect={handleMLSelect}
+                className="mb-2"
+              />
+            )}
+
             <div className="relative">
               {selectedTaxon ? (
                 // Selected Taxon Card
@@ -217,6 +253,7 @@ export default function AddActivityForm({
                     onClick={() => {
                       setSelectedTaxon(null);
                       setTaxonQuery("");
+                      setShowMlSuggestions(true);
                       setTimeout(() => taxonInputRef.current?.focus(), 0);
                     }}
                     className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-full transition-colors"

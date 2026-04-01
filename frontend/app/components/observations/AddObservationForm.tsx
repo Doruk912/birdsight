@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, Loader2, ImagePlus, X } from "lucide-react";
 import LocationPicker from "./LocationPicker";
 import TaxonSearch from "./TaxonSearch";
 import DateTimePicker from "./DateTimePicker";
+import MLSuggestions from "./MLSuggestions";
 import { createObservation, addIdentification } from "@/app/lib/observationService";
 
 export default function AddObservationForm() {
@@ -18,6 +19,10 @@ export default function AddObservationForm() {
   const [taxonId, setTaxonId] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ML suggestion state
+  const [mlImageFile, setMlImageFile] = useState<File | undefined>();
+  const [taxonSearchKey, setTaxonSearchKey] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -36,6 +41,11 @@ export default function AddObservationForm() {
 
       const urls = newImages.map((file) => URL.createObjectURL(file));
       setPreviewUrls(urls);
+
+      // Trigger ML prediction on the first image
+      if (newImages.length > 0) {
+        setMlImageFile(newImages[0]);
+      }
     }
   };
 
@@ -51,7 +61,21 @@ export default function AddObservationForm() {
     const newUrls = [...previewUrls];
     newUrls.splice(index, 1);
     setPreviewUrls(newUrls);
+
+    // Update ML image if the first image was removed
+    if (index === 0) {
+      setMlImageFile(newImages.length > 0 ? newImages[0] : undefined);
+    }
   };
+
+  const handleMLSelect = useCallback(
+    (selectedTaxonId: string, commonName: string | null, scientificName: string) => {
+      setTaxonId(selectedTaxonId);
+      // Force TaxonSearch to re-render with the selected suggestion
+      setTaxonSearchKey((k) => k + 1);
+    },
+    []
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,6 +189,16 @@ export default function AddObservationForm() {
           </div>
         </section>
 
+        {/* ML Suggestions — shown after photos are uploaded */}
+        {mlImageFile && (
+          <section>
+            <MLSuggestions
+              imageFile={mlImageFile}
+              onSelect={handleMLSelect}
+            />
+          </section>
+        )}
+
         <hr className="border-stone-100" />
 
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14">
@@ -190,7 +224,7 @@ export default function AddObservationForm() {
             </div>
 
             <div className="pt-2">
-              <TaxonSearch onSelect={setTaxonId} />
+              <TaxonSearch key={taxonSearchKey} onSelect={setTaxonId} initialTaxonId={taxonId} />
             </div>
           </section>
 

@@ -88,3 +88,14 @@ export interface CommentResponse {
   body: string;
   createdAt: string;
 }
+
+export interface MLPrediction {
+  species: string;
+  commonName: string | null;
+  confidence: number;
+  taxonId: string | null;
+}
+
+export interface MLPredictionResponse {
+  predictions: MLPrediction[];
+}

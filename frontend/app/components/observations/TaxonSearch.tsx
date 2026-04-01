@@ -5,17 +5,51 @@ import { Search, Loader2 } from "lucide-react";
 import { searchTaxa } from "@/app/lib/observationService";
 import { TaxonResponse } from "@/app/types/explore";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+
 interface TaxonSearchProps {
   onSelect: (taxonId: string | undefined) => void;
+  /** Optional initial taxon ID to pre-populate (e.g. from ML suggestion). */
+  initialTaxonId?: string;
 }
 
-export default function TaxonSearch({ onSelect }: TaxonSearchProps) {
+export default function TaxonSearch({ onSelect, initialTaxonId }: TaxonSearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TaxonResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<TaxonResponse | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Load initial taxon from ID (e.g. ML suggestion pre-fill)
+  useEffect(() => {
+    if (!initialTaxonId || selected) return;
+
+    let cancelled = false;
+    setInitialLoading(true);
+
+    (async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/taxa/${initialTaxonId}`, {
+          cache: "no-store",
+        });
+        if (response.ok && !cancelled) {
+          const taxon: TaxonResponse = await response.json();
+          setSelected(taxon);
+          setQuery(taxon.commonName || taxon.scientificName);
+          onSelect(taxon.id);
+        }
+      } catch (err) {
+        console.error("Failed to load initial taxon:", err);
+      } finally {
+        if (!cancelled) setInitialLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTaxonId]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -72,8 +106,9 @@ export default function TaxonSearch({ onSelect }: TaxonSearchProps) {
           onFocus={() => { if (results.length > 0) setIsOpen(true); }}
           placeholder="Search for a species (e.g. Mallard) ..."
           className="w-full rounded-xl border border-stone-200 bg-white pl-11 pr-4 py-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-stone-400 text-stone-900"
+          disabled={initialLoading}
         />
-        {loading && <Loader2 className="absolute right-4 text-stone-400 animate-spin" size={18} />}
+        {(loading || initialLoading) && <Loader2 className="absolute right-4 text-stone-400 animate-spin" size={18} />}
       </div>
       
       {isOpen && results.length > 0 && (

@@ -287,6 +287,7 @@ export default function ObservationPage() {
               <div className="flex-none mt-auto">
                 <AddActivityForm 
                   observationId={observation.id}
+                  observationImages={observation.images}
                   onCommentAdded={handleCommentAdded}
                   onIdentificationAdded={handleIdentificationAdded}
                 />
