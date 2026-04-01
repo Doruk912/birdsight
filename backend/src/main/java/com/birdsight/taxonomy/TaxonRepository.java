@@ -18,7 +18,7 @@ public interface TaxonRepository extends JpaRepository<Taxon, UUID> {
            "LOWER(t.commonName) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<Taxon> searchByName(@Param("query") String query, Pageable pageable);
 
-    List<Taxon> findByRank(TaxonRank rank);
-
     List<Taxon> findByParentId(UUID parentId);
+
+    List<Taxon> findByScientificNameIn(List<String> scientificNames);
 }

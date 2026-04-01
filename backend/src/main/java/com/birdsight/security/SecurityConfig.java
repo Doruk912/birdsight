@@ -68,6 +68,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
+                        // ML Prediction — authenticated users only
+                        .requestMatchers(HttpMethod.POST, "/api/v1/ml/predict").authenticated()
                         // All other requests require authentication
                         .anyRequest().authenticated()
                 )
