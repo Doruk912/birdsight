@@ -31,4 +31,17 @@ public interface ObservationRepository extends JpaRepository<Observation, UUID> 
 
     @Query("SELECT o FROM Observation o LEFT JOIN FETCH o.images WHERE o.id = :id AND o.deleted = false")
     Optional<Observation> findByIdWithImages(@Param("id") UUID id);
+
+    @Query(value = """
+            WITH RECURSIVE descendants AS (
+                SELECT id FROM taxa WHERE id = :taxonId
+                UNION ALL
+                SELECT t.id FROM taxa t JOIN descendants d ON t.parent_id = d.id
+            )
+            SELECT o.* FROM observations o
+            WHERE o.community_taxon_id IN (SELECT id FROM descendants)
+            AND o.is_deleted = false
+            ORDER BY o.created_at DESC
+            """, nativeQuery = true)
+    java.util.List<Observation> findByTaxonAndDescendants(@Param("taxonId") UUID taxonId);
 }

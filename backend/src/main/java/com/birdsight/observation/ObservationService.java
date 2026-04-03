@@ -102,7 +102,12 @@ public class ObservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ObservationMapResponse> getMapObservations() {
+    public List<ObservationMapResponse> getMapObservations(UUID taxonId) {
+        if (taxonId != null) {
+            return observationRepository.findByTaxonAndDescendants(taxonId).stream()
+                    .map(observationMapper::toMapResponse)
+                    .toList();
+        }
         return observationRepository.findAllActive(Pageable.unpaged())
                 .map(observationMapper::toMapResponse)
                 .getContent();

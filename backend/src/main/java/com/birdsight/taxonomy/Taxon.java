@@ -26,4 +26,7 @@ public class Taxon extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Taxon parent;
+
+    @Column(name = "cover_image_url", length = 512)
+    private String coverImageUrl;
 }

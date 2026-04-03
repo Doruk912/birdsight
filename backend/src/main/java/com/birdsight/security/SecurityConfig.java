@@ -42,8 +42,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public auth endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Taxonomy — public (for species search/autocomplete)
+                        // Taxonomy — public read, curator/admin write
                         .requestMatchers(HttpMethod.GET, "/api/v1/taxa/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/taxa/**").hasAnyRole("CURATOR", "ADMIN")
                         // Observations — public read, authenticated write
                         .requestMatchers(HttpMethod.GET, "/api/v1/observations/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/observations").authenticated()

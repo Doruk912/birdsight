@@ -58,8 +58,9 @@ public class ObservationController {
     }
 
     @GetMapping("/map")
-    public ResponseEntity<List<ObservationMapResponse>> getMapObservations() {
-        return ResponseEntity.ok(observationService.getMapObservations());
+    public ResponseEntity<List<ObservationMapResponse>> getMapObservations(
+            @RequestParam(required = false) UUID taxonId) {
+        return ResponseEntity.ok(observationService.getMapObservations(taxonId));
     }
 
     @DeleteMapping("/{id}")
