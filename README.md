@@ -32,3 +32,11 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### 5) Start the ML Service
+
+```powershell
+cd ml-service
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
