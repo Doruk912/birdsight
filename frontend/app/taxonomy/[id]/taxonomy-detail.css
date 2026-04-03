@@ -1,0 +1,607 @@
+/* ─── Taxon Detail Page — Tabbed Design ─── */
+
+/* Page container */
+.taxon-page-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Breadcrumb ── */
+.taxon-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  color: #a8a29e;
+  margin-bottom: 1rem;
+}
+
+.taxon-breadcrumb-link {
+  color: #78716c;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.taxon-breadcrumb-link:hover {
+  color: #059669;
+}
+
+/* ── Header ── */
+.taxon-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.taxon-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #1c1917;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.taxon-scientific-name {
+  font-size: 1.125rem;
+  color: #78716c;
+  margin-top: 0.375rem;
+}
+
+.taxon-obs-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.taxon-obs-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1c1917;
+  line-height: 1;
+}
+
+.taxon-obs-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a8a29e;
+}
+
+/* ── Cover Image ── */
+.taxon-cover-wrapper {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  border-radius: 1rem;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  background: #f5f5f4;
+}
+
+.taxon-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Nav Tabs ── */
+.taxon-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e7e5e4;
+  margin-bottom: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.taxon-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.taxon-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #78716c;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.taxon-tab:hover {
+  color: #1c1917;
+  background: #fafaf9;
+}
+
+.taxon-tab-active {
+  color: #1c1917;
+  border-bottom-color: #1c1917;
+}
+
+/* ── Tab Content ── */
+.taxon-tab-content {
+  min-height: 400px;
+  padding-top: 1.5rem;
+}
+
+/* ── About Panel (Wikipedia) ── */
+.taxon-about-panel {
+  /* No extra styles needed */
+}
+
+.taxon-wiki-embed {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: white;
+}
+
+.taxon-wiki-iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  display: block;
+}
+
+/* ── Taxonomy Panel ── */
+.taxon-taxonomy-panel {
+  max-width: 640px;
+}
+
+/* ── Map Panel ── */
+.taxon-map-panel {
+  position: relative;
+}
+
+.taxon-map-container {
+  width: 100%;
+  height: 500px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e7e5e4;
+}
+
+.taxon-map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 0.75rem;
+  z-index: 10;
+  font-size: 0.875rem;
+  color: #78716c;
+}
+
+/* ── Observations Panel ── */
+.taxon-observations-panel {
+  /* No extra styles needed */
+}
+
+/* ── Sections ── */
+.taxon-section-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1c1917;
+  margin-bottom: 0.75rem;
+}
+
+.taxon-section-count {
+  font-weight: 400;
+  color: #a8a29e;
+  font-size: 0.875rem;
+}
+
+/* ── Children list ── */
+.taxon-children-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.taxon-child-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s;
+  border-bottom: 1px solid #f5f5f4;
+}
+
+.taxon-child-row:last-child {
+  border-bottom: none;
+}
+
+.taxon-child-row:hover {
+  background: #fafaf9;
+}
+
+.taxon-child-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.taxon-child-row:hover .taxon-child-name {
+  color: #059669;
+}
+
+.taxon-child-scientific {
+  display: block;
+  font-size: 0.75rem;
+  color: #a8a29e;
+  font-style: italic;
+  margin-top: 0.125rem;
+}
+
+.taxon-child-chevron {
+  color: #d6d3d1;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.taxon-child-row:hover .taxon-child-chevron {
+  color: #059669;
+  transform: translateX(2px);
+}
+
+/* ── Recent observations grid ── */
+.taxon-obs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.625rem;
+}
+
+.taxon-obs-thumb {
+  aspect-ratio: 1;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  background: #f5f5f4;
+  display: block;
+}
+
+.taxon-obs-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.taxon-obs-thumb:hover img {
+  transform: scale(1.05);
+}
+
+/* ── Sidebar card (classification tree) ── */
+.taxon-sidebar-card {
+  padding: 0.5rem 0;
+}
+
+.taxon-sidebar-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #78716c;
+  margin-bottom: 0.875rem;
+}
+
+/* ── Classification tree ── */
+.taxon-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.taxon-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3125rem 0;
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.12s;
+}
+
+a.taxon-tree-node:hover .taxon-tree-name {
+  color: #059669;
+}
+
+.taxon-tree-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d6d3d1;
+  flex-shrink: 0;
+}
+
+.taxon-tree-dot-active {
+  width: 7px;
+  height: 7px;
+  background: #1c1917;
+}
+
+.taxon-tree-rank {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #a8a29e;
+  flex-shrink: 0;
+}
+
+.taxon-tree-name {
+  font-size: 0.9375rem;
+  color: #57534e;
+  transition: color 0.12s;
+}
+
+.taxon-tree-name-current {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1c1917;
+}
+
+/* ── View observations link ── */
+.taxon-observations-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background: #1c1917;
+  color: white;
+  border-radius: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.taxon-observations-link:hover {
+  background: #292524;
+}
+
+/* ── Curator controls ── */
+.taxon-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #a8a29e;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.taxon-edit-btn:hover {
+  color: #059669;
+}
+
+.taxon-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #78716c;
+  margin-bottom: 0.375rem;
+}
+
+.taxon-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background: #fafaf9;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  resize: vertical;
+}
+
+.taxon-input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.08);
+}
+
+.taxon-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: white;
+  background: #1c1917;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.taxon-save-btn:hover {
+  background: #292524;
+}
+
+.taxon-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.taxon-cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #57534e;
+  background: #f5f5f4;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.taxon-cancel-btn:hover {
+  background: #e7e5e4;
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  .taxon-title {
+    font-size: 1.5rem;
+  }
+
+  .taxon-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .taxon-obs-count {
+    align-items: flex-start;
+  }
+
+  .taxon-obs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .taxon-map-container {
+    height: 350px;
+  }
+
+  .taxon-wiki-iframe {
+    height: 450px;
+  }
+
+  .taxon-tab {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Panel Header Layout (Image + Stats) ── */
+.taxon-hero-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  align-items: stretch;
+}
+
+@media (max-width: 767px) {
+  .taxon-hero-row {
+    flex-direction: column;
+  }
+}
+
+.taxon-cover-wrapper {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #f5f5f4;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.taxon-stats-card {
+  flex: 1;
+  background: #fafaf9;
+  border: 1px solid #e7e5e4;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.taxon-stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.taxon-stats-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a8a29e;
+}
+
+.taxon-stats-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1c1917;
+  line-height: 1;
+}
+
+.taxon-top-observer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid #f0f0f0;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.taxon-top-observer:hover {
+  border-color: #059669;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.05);
+}
+
+.taxon-observer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f5f5f4;
+}
+
+.taxon-observer-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.taxon-observer-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1c1917;
+}
+
+.taxon-observer-count {
+  font-size: 0.75rem;
+  color: #78716c;
+}

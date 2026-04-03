@@ -35,6 +35,7 @@ function userFromResponse(response: AuthResponse): AuthUser | null {
     displayName: u.displayName || undefined,
     bio: u.bio || undefined,
     avatarUrl: u.avatarUrl || undefined,
+    role: u.role || undefined,
   };
 }
 

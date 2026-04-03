@@ -41,6 +41,7 @@ export interface AuthUser {
   displayName?: string;
   bio?: string;
   avatarUrl?: string;
+  role?: string;
 }
 
 export interface AuthState {

@@ -57,10 +57,46 @@ export interface ObservationImageResponse {
 
 export interface TaxonResponse {
   id: string;
-  rank: "ORDER" | "FAMILY" | "GENUS" | "SPECIES";
+  rank: "CLASS" | "ORDER" | "FAMILY" | "GENUS" | "SPECIES";
   scientificName: string;
   commonName: string | null;
   parentId: string | null;
+  observationCount?: number;
+}
+
+export interface TopObserverDto {
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  observationCount: number;
+}
+
+export interface TopIdentifierDto {
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  identificationCount: number;
+}
+
+export interface TaxonDetailResponse {
+  id: string;
+  rank: "CLASS" | "ORDER" | "FAMILY" | "GENUS" | "SPECIES";
+  scientificName: string;
+  commonName: string | null;
+  parentId: string | null;
+  observationCount: number;
+  ancestors: TaxonResponse[];
+  children: TaxonResponse[];
+  coverImageUrl: string | null;
+  recentObservations: { id: string; imageUrl: string }[];
+  topObserver?: TopObserverDto;
+  topIdentifier?: TopIdentifierDto;
+}
+
+export interface UpdateTaxonRequest {
+  coverImageUrl?: string;
 }
 
 export interface IdentificationResponse {
@@ -72,7 +108,7 @@ export interface IdentificationResponse {
   taxonId: string;
   taxonScientificName: string;
   taxonCommonName: string | null;
-  taxonRank: "ORDER" | "FAMILY" | "GENUS" | "SPECIES";
+  taxonRank: "CLASS" | "ORDER" | "FAMILY" | "GENUS" | "SPECIES";
   comment: string | null;
   current: boolean;
   withdrawn: boolean;
