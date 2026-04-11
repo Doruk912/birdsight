@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ObservationImageResponse } from "@/app/types/explore";
 
+const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f5f5f4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23a8a29e'%3ENo image available%3C/text%3E%3C/svg%3E";
+
 interface PhotoGalleryProps {
   images: ObservationImageResponse[];
 }
@@ -34,6 +36,9 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
           src={images[activeIndex].imageUrl}
           alt={`Observation photo ${activeIndex + 1}`}
           className="w-full h-full object-cover transition-opacity duration-300"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
+          }}
         />
 
         {/* Gradient overlay */}
@@ -104,6 +109,9 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
                 src={img.imageUrl}
                 alt={`Thumbnail ${i + 1}`}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
+                }}
               />
             </button>
           ))}
