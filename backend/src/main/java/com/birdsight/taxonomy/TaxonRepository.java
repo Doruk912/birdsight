@@ -114,4 +114,14 @@ public interface TaxonRepository extends JpaRepository<Taxon, UUID> {
             GROUP BY d.root_id
             """, nativeQuery = true)
     List<TaxonObservationCountProjection> countObservationsForTaxa(@Param("taxonIds") List<UUID> taxonIds);
+
+    @Query(value = """
+            WITH RECURSIVE descendants AS (
+                SELECT id FROM taxa WHERE id = :taxonId
+                UNION ALL
+                SELECT t.id FROM taxa t JOIN descendants d ON t.parent_id = d.id
+            )
+            SELECT id FROM descendants
+            """, nativeQuery = true)
+    List<UUID> findDescendantIds(@Param("taxonId") UUID taxonId);
 }

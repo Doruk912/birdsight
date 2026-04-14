@@ -1,6 +1,7 @@
 package com.birdsight.observation;
 
 import com.birdsight.observation.dto.CreateObservationRequest;
+import com.birdsight.observation.dto.ObservationFilterRequest;
 import com.birdsight.observation.dto.ObservationMapResponse;
 import com.birdsight.observation.dto.ObservationResponse;
 import jakarta.validation.Valid;
@@ -16,6 +17,7 @@ import com.birdsight.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,8 +43,30 @@ public class ObservationController {
     public ResponseEntity<Page<ObservationResponse>> getAllObservations(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) QualityGrade grade,
+            @RequestParam(required = false) UUID taxonId,
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) Instant dateFrom,
+            @RequestParam(required = false) Instant dateTo,
+            @RequestParam(required = false) Double swLat,
+            @RequestParam(required = false) Double swLng,
+            @RequestParam(required = false) Double neLat,
+            @RequestParam(required = false) Double neLng,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(observationService.getAllObservations(search, grade, pageable));
+
+        ObservationFilterRequest filter = ObservationFilterRequest.builder()
+                .search(search)
+                .grade(grade)
+                .taxonId(taxonId)
+                .userId(userId)
+                .dateFrom(dateFrom)
+                .dateTo(dateTo)
+                .swLat(swLat)
+                .swLng(swLng)
+                .neLat(neLat)
+                .neLng(neLng)
+                .build();
+
+        return ResponseEntity.ok(observationService.getAllObservations(filter, pageable));
     }
 
     @GetMapping("/user/{userId}")
@@ -59,8 +83,31 @@ public class ObservationController {
 
     @GetMapping("/map")
     public ResponseEntity<List<ObservationMapResponse>> getMapObservations(
-            @RequestParam(required = false) UUID taxonId) {
-        return ResponseEntity.ok(observationService.getMapObservations(taxonId));
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) QualityGrade grade,
+            @RequestParam(required = false) UUID taxonId,
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) Instant dateFrom,
+            @RequestParam(required = false) Instant dateTo,
+            @RequestParam(required = false) Double swLat,
+            @RequestParam(required = false) Double swLng,
+            @RequestParam(required = false) Double neLat,
+            @RequestParam(required = false) Double neLng) {
+
+        ObservationFilterRequest filter = ObservationFilterRequest.builder()
+                .search(search)
+                .grade(grade)
+                .taxonId(taxonId)
+                .userId(userId)
+                .dateFrom(dateFrom)
+                .dateTo(dateTo)
+                .swLat(swLat)
+                .swLng(swLng)
+                .neLat(neLat)
+                .neLng(neLng)
+                .build();
+
+        return ResponseEntity.ok(observationService.getMapObservations(filter));
     }
 
     @DeleteMapping("/{id}")

@@ -27,4 +27,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT u FROM User u WHERE u.deleted = false AND (u.email = :identifier OR u.username = :identifier)")
     Optional<User> findByEmailOrUsernameAndDeletedFalse(@Param("identifier") String identifier);
+
+    @Query("SELECT u FROM User u WHERE u.deleted = false AND " +
+           "(LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(u.displayName) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<User> searchByNameOrUsername(@Param("query") String query, Pageable pageable);
 }

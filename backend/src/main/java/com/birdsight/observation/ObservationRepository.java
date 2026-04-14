@@ -3,6 +3,7 @@ package com.birdsight.observation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ObservationRepository extends JpaRepository<Observation, UUID> {
+public interface ObservationRepository extends JpaRepository<Observation, UUID>, JpaSpecificationExecutor<Observation> {
 
     @Query("SELECT o FROM Observation o WHERE o.deleted = false ORDER BY o.createdAt DESC")
     Page<Observation> findAllActive(Pageable pageable);

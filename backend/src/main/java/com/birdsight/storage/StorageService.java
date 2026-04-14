@@ -37,18 +37,38 @@ public class StorageService {
 
     public String uploadObservationImage(UUID observationId, MultipartFile file) {
         validateImage(file, OBSERVATION_MAX_SIZE, "Observation image");
-        String objectKey = "observations/" + observationId + "/" + UUID.randomUUID() + "." + getExtension(file.getOriginalFilename());
-        return upload(objectKey, file);
+        return uploadObservationImage(observationId, file, file.getOriginalFilename());
+    }
+
+    public String uploadObservationImage(UUID observationId, MultipartFile file, String originalFilename) {
+        try {
+            return uploadObservationImage(observationId, file.getInputStream(), file.getSize(), file.getContentType(), originalFilename);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to read upload file.", e);
+        }
+    }
+
+    public String uploadObservationImage(UUID observationId, java.io.InputStream inputStream, long size, String contentType, String originalFilename) {
+        String objectKey = "observations/" + observationId + "/" + UUID.randomUUID() + "." + getExtension(originalFilename);
+        return upload(objectKey, inputStream, size, contentType);
     }
 
     private String upload(String objectKey, MultipartFile file) {
+        try {
+            return upload(objectKey, file.getInputStream(), file.getSize(), file.getContentType());
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to read upload file.", e);
+        }
+    }
+
+    private String upload(String objectKey, java.io.InputStream inputStream, long size, String contentType) {
         try {
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(minioProperties.getBucketName())
                             .object(objectKey)
-                            .stream(file.getInputStream(), file.getSize(), -1)
-                            .contentType(file.getContentType())
+                            .stream(inputStream, size, -1)
+                            .contentType(contentType)
                             .build()
             );
         } catch (Exception e) {

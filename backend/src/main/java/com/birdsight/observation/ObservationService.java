@@ -14,6 +14,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,13 +79,15 @@ public class ObservationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ObservationResponse> getAllObservations(String search, QualityGrade grade, Pageable pageable) {
-        if ((search == null || search.trim().isEmpty()) && grade == null) {
-            return observationRepository.findAllActive(pageable)
-                    .map(obs -> observationMapper.toResponse(obs, 0, 0));
+    public Page<ObservationResponse> getAllObservations(ObservationFilterRequest filter, Pageable pageable) {
+        // Resolve descendant taxon IDs if a taxon filter is specified
+        List<UUID> descendantIds = null;
+        if (filter.getTaxonId() != null) {
+            descendantIds = taxonRepository.findDescendantIds(filter.getTaxonId());
         }
-        String searchQuery = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
-        return observationRepository.findAllWithFilters(searchQuery, grade, pageable)
+
+        Specification<Observation> spec = ObservationSpecification.withFilters(filter, descendantIds);
+        return observationRepository.findAll(spec, pageable)
                 .map(obs -> observationMapper.toResponse(obs, 0, 0));
     }
 
@@ -102,15 +105,18 @@ public class ObservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ObservationMapResponse> getMapObservations(UUID taxonId) {
-        if (taxonId != null) {
-            return observationRepository.findByTaxonAndDescendants(taxonId).stream()
-                    .map(observationMapper::toMapResponse)
-                    .toList();
+    public List<ObservationMapResponse> getMapObservations(ObservationFilterRequest filter) {
+        // Resolve descendant taxon IDs if a taxon filter is specified
+        List<UUID> descendantIds = null;
+        if (filter.getTaxonId() != null) {
+            descendantIds = taxonRepository.findDescendantIds(filter.getTaxonId());
         }
-        return observationRepository.findAllActive(Pageable.unpaged())
+
+        Specification<Observation> spec = ObservationSpecification.withFilters(filter, descendantIds);
+        return observationRepository.findAll(spec)
+                .stream()
                 .map(observationMapper::toMapResponse)
-                .getContent();
+                .toList();
     }
 
     @Transactional
