@@ -1,59 +1,34 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
-  Search,
-  X,
   PanelLeftClose,
   PanelLeftOpen,
-  MapPin,
   CheckCircle2,
   HelpCircle,
   ExternalLink,
+  MapPin,
 } from "lucide-react";
-import { MapObservation } from "@/app/types/explore";
+import { MapObservation, ObservationFilterParams } from "@/app/types/explore";
+import ObservationFilters from "@/app/components/shared/ObservationFilters";
 
 interface MapSidebarProps {
   observations: MapObservation[];
   selectedId: string | null;
   onSelectObservation: (obs: MapObservation) => void;
+  filters: ObservationFilterParams;
+  onFiltersChange: (filters: ObservationFilterParams) => void;
 }
-
-type GradeFilter = "all" | "research_grade" | "needs_id";
 
 export default function MapSidebar({
   observations,
   selectedId,
   onSelectObservation,
+  filters,
+  onFiltersChange,
 }: MapSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [search, setSearch] = useState("");
-  const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
-
-  const filtered = useMemo(() => {
-    return observations.filter((obs) => {
-      const matchesSearch =
-        !search ||
-        obs.species.toLowerCase().includes(search.toLowerCase()) ||
-        (obs.speciesScientific?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
-        obs.location.toLowerCase().includes(search.toLowerCase()) ||
-        obs.user.toLowerCase().includes(search.toLowerCase());
-
-      const matchesGrade =
-        gradeFilter === "all" ||
-        (gradeFilter === "research_grade" && obs.qualityGrade === "RESEARCH_GRADE") ||
-        (gradeFilter === "needs_id" && obs.qualityGrade === "NEEDS_ID");
-
-      return matchesSearch && matchesGrade;
-    });
-  }, [observations, search, gradeFilter]);
-
-  const grades: { key: GradeFilter; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "research_grade", label: "Research Grade" },
-    { key: "needs_id", label: "Needs ID" },
-  ];
 
   return (
     <>
@@ -87,70 +62,33 @@ export default function MapSidebar({
         `}
       >
         <div className="w-[320px] h-full bg-white/90 backdrop-blur-xl border-r border-stone-200 flex flex-col shadow-xl">
-          {/* Header */}
+          {/* Header with filters */}
           <div className="px-4 pt-4 pb-3 border-b border-stone-100">
             <h2 className="text-base font-semibold text-stone-800 mb-3">
               Observations
               <span className="ml-2 text-xs font-normal text-stone-400">
-                {filtered.length} of {observations.length}
+                {observations.length} results
               </span>
             </h2>
 
-            {/* Search */}
-            <div className="flex items-center bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 gap-2 focus-within:border-emerald-400 transition-colors">
-              <Search
-                size={14}
-                className="text-stone-400 shrink-0"
-                strokeWidth={1.8}
-              />
-              <input
-                type="text"
-                placeholder="Search species, locations…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="bg-transparent outline-none text-sm text-stone-700 placeholder:text-stone-400 w-full"
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="text-stone-400 hover:text-stone-600 cursor-pointer"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            {/* Quality grade filter pills */}
-            <div className="flex gap-1.5 mt-3">
-              {grades.map((g) => (
-                <button
-                  key={g.key}
-                  onClick={() => setGradeFilter(g.key)}
-                  className={`
-                    text-[11px] font-medium px-2.5 py-1 rounded-full
-                    transition-colors duration-200 cursor-pointer
-                    ${
-                      gradeFilter === g.key
-                        ? "bg-emerald-500 text-white shadow-sm"
-                        : "bg-stone-100 text-stone-500 hover:bg-stone-200"
-                    }
-                  `}
-                >
-                  {g.label}
-                </button>
-              ))}
-            </div>
+            {/* Shared filter component (compact variant) */}
+            <ObservationFilters
+              filters={filters}
+              onChange={onFiltersChange}
+              variant="compact"
+              hideBoundingBox
+            />
           </div>
 
           {/* Observation list */}
           <div className="flex-1 overflow-y-auto">
-            {filtered.length === 0 ? (
+            {observations.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-40 text-stone-400 text-sm">
-                <Search size={20} className="mb-2 opacity-60" />
+                <HelpCircle size={20} className="mb-2 opacity-60" />
                 No observations found
               </div>
             ) : (
-              filtered.map((obs) => {
+              observations.map((obs) => {
                 const isSelected = selectedId === obs.id;
                 const isResearchGrade = obs.qualityGrade === "RESEARCH_GRADE";
                 return (
@@ -171,7 +109,10 @@ export default function MapSidebar({
                       {/* Quality grade icon */}
                       <span className="mt-0.5 shrink-0">
                         {isResearchGrade ? (
-                          <CheckCircle2 size={20} className="text-emerald-500" />
+                          <CheckCircle2
+                            size={20}
+                            className="text-emerald-500"
+                          />
                         ) : (
                           <HelpCircle size={20} className="text-amber-400" />
                         )}

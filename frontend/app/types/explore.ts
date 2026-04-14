@@ -135,3 +135,23 @@ export interface MLPrediction {
 export interface MLPredictionResponse {
   predictions: MLPrediction[];
 }
+
+export interface ObservationFilterParams {
+  search?: string;
+  grade?: string;
+  taxonId?: string;
+  userId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  swLat?: number;
+  swLng?: number;
+  neLat?: number;
+  neLng?: number;
+}
+
+export interface UserSearchResult {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+}

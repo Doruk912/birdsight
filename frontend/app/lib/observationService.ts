@@ -6,6 +6,8 @@ import {
   CommentResponse,
   TaxonResponse,
   MapObservation,
+  ObservationFilterParams,
+  PageResponse,
 } from "@/app/types/explore";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
@@ -23,13 +25,32 @@ export function timeAgo(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
+function buildFilterParams(filters: ObservationFilterParams): URLSearchParams {
+  const params = new URLSearchParams();
+  if (filters.search) params.append("search", filters.search);
+  if (filters.grade) params.append("grade", filters.grade);
+  if (filters.taxonId) params.append("taxonId", filters.taxonId);
+  if (filters.userId) params.append("userId", filters.userId);
+  if (filters.dateFrom) params.append("dateFrom", filters.dateFrom);
+  if (filters.dateTo) params.append("dateTo", filters.dateTo);
+  if (filters.swLat !== undefined) params.append("swLat", filters.swLat.toString());
+  if (filters.swLng !== undefined) params.append("swLng", filters.swLng.toString());
+  if (filters.neLat !== undefined) params.append("neLat", filters.neLat.toString());
+  if (filters.neLng !== undefined) params.append("neLng", filters.neLng.toString());
+  return params;
+}
+
 /**
- * Fetches map markers from the backend. Does NOT require authentication.
+ * Fetches map markers from the backend with optional filters.
  */
-export async function fetchMapObservations(): Promise<MapObservation[]> {
-  const response = await fetch(`${API_BASE}/api/v1/observations/map`, {
-    cache: "no-store",
-  });
+export async function fetchMapObservations(
+  filters: ObservationFilterParams = {}
+): Promise<MapObservation[]> {
+  const params = buildFilterParams(filters);
+  const queryString = params.toString();
+  const url = `${API_BASE}/api/v1/observations/map${queryString ? `?${queryString}` : ""}`;
+
+  const response = await fetch(url, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch observations: ${response.statusText}`);
@@ -41,8 +62,8 @@ export async function fetchMapObservations(): Promise<MapObservation[]> {
     id: obs.id,
     species: obs.speciesCommonName || "Unknown species",
     speciesScientific: obs.speciesScientificName || undefined,
-    location: "", // Map endpoint doesn't include location name; kept lean
-    user: "",     // Map endpoint doesn't include user; kept lean
+    location: "",
+    user: "",
     timeAgo: "",
     qualityGrade: obs.qualityGrade,
     latitude: obs.latitude,
@@ -65,19 +86,16 @@ export async function fetchObservationDetail(
 
 export async function fetchAllObservations(
   page: number = 0,
-  search?: string,
-  grade?: string
-): Promise<import("@/app/types/explore").PageResponse<ObservationDetailResponse>> {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    size: "12",
-  });
-  if (search) params.append("search", search);
-  if (grade) params.append("grade", grade);
+  filters: ObservationFilterParams = {}
+): Promise<PageResponse<ObservationDetailResponse>> {
+  const params = buildFilterParams(filters);
+  params.set("page", page.toString());
+  params.set("size", "12");
 
-  const response = await fetch(`${API_BASE}/api/v1/observations?${params.toString()}`, {
-    cache: "no-store",
-  });
+  const response = await fetch(
+    `${API_BASE}/api/v1/observations?${params.toString()}`,
+    { cache: "no-store" }
+  );
   if (!response.ok) {
     throw new Error(`Failed to fetch all observations: ${response.statusText}`);
   }

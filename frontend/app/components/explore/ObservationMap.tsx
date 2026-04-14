@@ -9,6 +9,7 @@ import MapGL, {
   GeolocateControl,
   ScaleControl,
   MapRef,
+  ViewStateChangeEvent,
 } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapObservation } from "@/app/types/explore";
@@ -17,6 +18,12 @@ interface ObservationMapProps {
   observations: MapObservation[];
   selectedId: string | null;
   onSelectObservation: (obs: MapObservation | null) => void;
+  onBoundsChange?: (bounds: {
+    swLat: number;
+    swLng: number;
+    neLat: number;
+    neLng: number;
+  }) => void;
 }
 
 const INITIAL_VIEW = {
@@ -32,6 +39,7 @@ export default function ObservationMap({
   observations,
   selectedId,
   onSelectObservation,
+  onBoundsChange,
 }: ObservationMapProps) {
   const mapRef = useRef<MapRef>(null);
   const [popupObs, setPopupObs] = useState<MapObservation | null>(null);
@@ -52,6 +60,39 @@ export default function ObservationMap({
   const handleClosePopup = useCallback(() => {
     setPopupObs(null);
   }, []);
+
+  // Emit viewport bounds when the map stops moving
+  const handleMoveEnd = useCallback(
+    (e: ViewStateChangeEvent) => {
+      if (!onBoundsChange || !mapRef.current) return;
+      const map = mapRef.current.getMap();
+      const b = map.getBounds();
+      if (b) {
+        onBoundsChange({
+          swLat: b.getSouthWest().lat,
+          swLng: b.getSouthWest().lng,
+          neLat: b.getNorthEast().lat,
+          neLng: b.getNorthEast().lng,
+        });
+      }
+    },
+    [onBoundsChange]
+  );
+
+  // Emit initial bounds once the map loads
+  const handleLoad = useCallback(() => {
+    if (!onBoundsChange || !mapRef.current) return;
+    const map = mapRef.current.getMap();
+    const b = map.getBounds();
+    if (b) {
+      onBoundsChange({
+        swLat: b.getSouthWest().lat,
+        swLng: b.getSouthWest().lng,
+        neLat: b.getNorthEast().lat,
+        neLng: b.getNorthEast().lng,
+      });
+    }
+  }, [onBoundsChange]);
 
   // Listen for fly-to events from the sidebar
   useEffect(() => {
@@ -86,6 +127,8 @@ export default function ObservationMap({
         mapStyle={MAP_STYLE}
         attributionControl={false}
         reuseMaps
+        onMoveEnd={handleMoveEnd}
+        onLoad={handleLoad}
       >
         {/* Controls */}
         <NavigationControl position="bottom-right" showCompass visualizePitch />
