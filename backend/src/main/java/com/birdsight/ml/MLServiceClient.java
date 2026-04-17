@@ -5,7 +5,6 @@ import com.birdsight.ml.dto.MLPredictionItem;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +14,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 
@@ -24,16 +24,21 @@ import java.util.*;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class MLServiceClient {
 
     private final MLServiceProperties properties;
     private final ObjectMapper objectMapper;
+    private final HttpClient httpClient;
 
-    /**
-     * Send an image to the ML service and return raw predictions
-     * (species name + confidence — no taxon resolution yet).
-     */
+    public MLServiceClient(MLServiceProperties properties, ObjectMapper objectMapper) {
+        this.properties = properties;
+        this.objectMapper = objectMapper;
+        this.httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofMillis(properties.getTimeout()))
+                .build();
+    }
+
     public List<MLPredictionItem> predict(MultipartFile file) {
         String boundary = UUID.randomUUID().toString();
 
@@ -47,11 +52,7 @@ public class MLServiceClient {
                     .POST(HttpRequest.BodyPublishers.ofByteArray(body))
                     .build();
 
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofMillis(properties.getTimeout()))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 log.warn("ML service returned status {}: {}", response.statusCode(), response.body());
@@ -87,15 +88,14 @@ public class MLServiceClient {
         String fileName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "image.jpg";
         String contentType = file.getContentType() != null ? file.getContentType() : "application/octet-stream";
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("--").append(boundary).append("\r\n");
-        sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(fileName).append("\"\r\n");
-        sb.append("Content-Type: ").append(contentType).append("\r\n");
-        sb.append("\r\n");
+        String sb = "--" + boundary + "\r\n" +
+                "Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"\r\n" +
+                "Content-Type: " + contentType + "\r\n" +
+                "\r\n";
 
-        byte[] header = sb.toString().getBytes();
+        byte[] header = sb.getBytes(StandardCharsets.UTF_8);
         byte[] fileBytes = file.getBytes();
-        byte[] footer = ("\r\n--" + boundary + "--\r\n").getBytes();
+        byte[] footer = ("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8);
 
         byte[] body = new byte[header.length + fileBytes.length + footer.length];
         System.arraycopy(header, 0, body, 0, header.length);
