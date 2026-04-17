@@ -58,6 +58,7 @@ public class MLController {
             if (taxon != null) {
                 item.setTaxonId(taxon.getId());
                 item.setCommonName(taxon.getCommonName());
+                item.setCoverImageUrl(taxon.getCoverImageUrl());
             }
         }
 

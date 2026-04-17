@@ -26,4 +26,6 @@ public class MLPredictionItem {
 
     /** Taxon UUID resolved from the database. Null if not found. */
     private UUID taxonId;
+    /** Cover image URL resolved from the database. Null if not found. */
+    private String coverImageUrl;
 }

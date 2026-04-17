@@ -160,35 +160,61 @@ public class ObservationService {
             return;
         }
 
-        // Count votes per taxon
+        List<Taxon> currentTaxa = taxonRepository.findAllById(currentTaxonIds);
         Map<UUID, Long> voteCounts = currentTaxonIds.stream()
                 .collect(Collectors.groupingBy(id -> id, Collectors.counting()));
 
         long totalVotes = currentTaxonIds.size();
 
-        // Find the taxon with the most votes
         Map.Entry<UUID, Long> topEntry = voteCounts.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .orElse(null);
 
-        if (topEntry == null) {
-            obs.setCommunityTaxon(null);
-            obs.setQualityGrade(QualityGrade.NEEDS_ID);
-        } else {
-            Taxon topTaxon = taxonRepository.findById(topEntry.getKey()).orElse(null);
+        boolean hasConsensus = totalVotes >= 2 && topEntry != null && topEntry.getValue() * 3 > totalVotes * 2;
+
+        if (hasConsensus) {
+            Taxon topTaxon = currentTaxa.stream()
+                    .filter(t -> t.getId().equals(topEntry.getKey()))
+                    .findFirst()
+                    .orElse(null);
             obs.setCommunityTaxon(topTaxon);
 
-            // Research Grade if ≥ 2 IDs and ≥ 2/3 agree on the same species-level taxon
-            boolean hasConsensus = totalVotes >= 2 && topEntry.getValue() * 3 >= totalVotes * 2;
             boolean isSpeciesLevel = topTaxon != null && topTaxon.getRank().name().equals("SPECIES");
-
-            if (hasConsensus && isSpeciesLevel) {
+            if (isSpeciesLevel) {
                 obs.setQualityGrade(QualityGrade.RESEARCH_GRADE);
             } else {
                 obs.setQualityGrade(QualityGrade.NEEDS_ID);
             }
+        } else {
+            // Find Lowest Common Ancestor
+            Taxon lca = currentTaxa.getFirst();
+            for (int i = 1; i < currentTaxa.size(); i++) {
+                lca = findLca(lca, currentTaxa.get(i));
+            }
+            obs.setCommunityTaxon(lca);
+            obs.setQualityGrade(QualityGrade.NEEDS_ID);
         }
 
         observationRepository.saveAndFlush(obs);
+    }
+
+    private Taxon findLca(Taxon t1, Taxon t2) {
+        if (t1 == null || t2 == null) return null;
+        
+        java.util.Set<UUID> ancestors1 = new java.util.HashSet<>();
+        Taxon curr = t1;
+        while (curr != null) {
+            ancestors1.add(curr.getId());
+            curr = curr.getParent();
+        }
+        
+        curr = t2;
+        while (curr != null) {
+            if (ancestors1.contains(curr.getId())) {
+                return curr;
+            }
+            curr = curr.getParent();
+        }
+        return null;
     }
 }
