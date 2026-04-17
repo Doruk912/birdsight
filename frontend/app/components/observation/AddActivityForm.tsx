@@ -22,7 +22,7 @@ interface AddActivityFormProps {
   /** Observation images for ML prediction. */
   observationImages: ObservationImageResponse[];
   onCommentAdded: (comment: CommentResponse) => void;
-  onIdentificationAdded: (identification: IdentificationResponse) => void;
+  onIdentificationAdded: (identification: IdentificationResponse) => Promise<void> | void;
 }
 
 export default function AddActivityForm({
@@ -32,6 +32,8 @@ export default function AddActivityForm({
   onIdentificationAdded,
 }: AddActivityFormProps) {
   const { user } = useAuth();
+  const formatTaxonRank = (rank: TaxonResponse["rank"]) =>
+    rank.charAt(0) + rank.slice(1).toLowerCase();
   const [activeTab, setActiveTab] = useState<"suggest_id" | "comment">("suggest_id");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -139,7 +141,7 @@ export default function AddActivityForm({
         selectedTaxon.id,
         idComment.trim() || undefined
       );
-      onIdentificationAdded(newId);
+      await onIdentificationAdded(newId);
       setSelectedTaxon(null);
       setTaxonQuery("");
       setIdComment("");
@@ -164,7 +166,7 @@ export default function AddActivityForm({
           }}
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
             activeTab === "suggest_id"
-              ? "text-emerald-700 bg-white border-t-2 border-t-emerald-500 rounded-tl-2xl -mb-px"
+              ? "text-emerald-700 bg-white border-t-2 border-t-emerald-500 -mb-px"
               : "text-stone-500 hover:text-stone-700 hover:bg-stone-100"
           }`}
         >
@@ -178,7 +180,7 @@ export default function AddActivityForm({
           }}
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
             activeTab === "comment"
-              ? "text-sky-700 bg-white border-t-2 border-t-sky-500 rounded-tr-2xl -mb-px"
+              ? "text-emerald-700 bg-white border-t-2 border-t-emerald-500 -mb-px"
               : "text-stone-500 hover:text-stone-700 hover:bg-stone-100"
           }`}
         >
@@ -200,14 +202,14 @@ export default function AddActivityForm({
               value={commentBody}
               onChange={(e) => setCommentBody(e.target.value)}
               placeholder="Write a comment..."
-              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent min-h-25 resize-y"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-h-25 resize-y"
               disabled={isSubmitting}
             />
             <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={!commentBody.trim() || isSubmitting}
-                className="inline-flex items-center gap-2 bg-sky-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-sky-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {isSubmitting ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -334,7 +336,11 @@ export default function AddActivityForm({
                                   {taxon.commonName}
                                 </p>
                               )}
-                              <p className="text-xs text-stone-500 italic truncate">{taxon.scientificName}</p>
+                              <p className="text-xs text-stone-500 italic truncate">
+                                {taxon.rank !== "SPECIES" 
+                                  ? `${formatTaxonRank(taxon.rank)} ${taxon.scientificName}`
+                                  : taxon.scientificName}
+                              </p>
                             </div>
                           </button>
 

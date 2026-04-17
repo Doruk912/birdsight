@@ -162,3 +162,12 @@ export async function createObservation(formData: FormData): Promise<Observation
     formData
   );
 }
+
+export async function withdrawIdentification(
+  observationId: string,
+  identificationId: string
+): Promise<void> {
+  return apiClient.delete(
+    `${API_BASE}/api/v1/observations/${observationId}/identifications/${identificationId}`
+  );
+}

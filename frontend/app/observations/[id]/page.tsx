@@ -25,16 +25,19 @@ import {
   fetchObservationDetail,
   fetchIdentifications,
   fetchComments,
+  withdrawIdentification,
 } from "@/app/lib/observationService";
 import PhotoGallery from "@/app/components/observation/PhotoGallery";
 import ActivityFeed from "@/app/components/observation/ActivityFeed";
 import AddActivityForm from "@/app/components/observation/AddActivityForm";
+import DataQualityAssessment from "@/app/components/observation/DataQualityAssessment";
+import CommunityConsensus from "@/app/components/observation/CommunityConsensus";
 import "./observation.css";
 
 // Dynamic import for map (no SSR)
 const ObservationMiniMap = dynamic(
   () => import("@/app/components/observation/ObservationMiniMap"),
-  { ssr: false, loading: () => <div className="w-full h-45 bg-stone-100 rounded-2xl animate-pulse" /> }
+  { ssr: false, loading: () => <div className="w-full h-60 bg-stone-100 rounded-2xl animate-pulse" /> }
 );
 
 function formatDate(dateStr: string) {
@@ -43,6 +46,15 @@ function formatDate(dateStr: string) {
     month: "long",
     day: "numeric",
   });
+}
+
+async function refreshObservationActivity(observationId: string) {
+  const [updatedObservation, updatedIdentifications] = await Promise.all([
+    fetchObservationDetail(observationId),
+    fetchIdentifications(observationId),
+  ]);
+
+  return { updatedObservation, updatedIdentifications };
 }
 
 export default function ObservationPage() {
@@ -114,7 +126,11 @@ export default function ObservationPage() {
   }
 
   const isResearchGrade = observation.qualityGrade === "RESEARCH_GRADE";
-  const speciesName = observation.communityTaxon?.commonName || "Unknown species";
+  const baseSpeciesName = observation.communityTaxon?.commonName || observation.communityTaxon?.scientificName || "Unknown species";
+  const taxonRank = observation.communityTaxon?.rank;
+  const speciesName = taxonRank && taxonRank !== "SPECIES"
+    ? `${taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase()} ${baseSpeciesName}`
+    : baseSpeciesName;
   const scientificName = observation.communityTaxon?.scientificName;
   const observedDate = formatDate(observation.observedAt);
   const submittedDate = formatDate(observation.createdAt);
@@ -124,9 +140,23 @@ export default function ObservationPage() {
     setObservation((prev) => prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev);
   };
 
-  const handleIdentificationAdded = (newId: IdentificationResponse) => {
-    setIdentifications((prev) => [...prev, newId]);
-    setObservation((prev) => prev ? { ...prev, identificationCount: prev.identificationCount + 1 } : prev);
+  const handleIdentificationAdded = async () => {
+    if (!observation) return;
+    const { updatedObservation, updatedIdentifications } = await refreshObservationActivity(observation.id);
+    setObservation(updatedObservation);
+    setIdentifications(updatedIdentifications);
+  };
+
+  const handleWithdrawIdentification = async (identificationId: string) => {
+    if (!observation) return;
+    try {
+      await withdrawIdentification(observation.id, identificationId);
+      const { updatedObservation, updatedIdentifications } = await refreshObservationActivity(observation.id);
+      setObservation(updatedObservation);
+      setIdentifications(updatedIdentifications);
+    } catch (err: any) {
+      alert("Failed to withdraw identification: " + err.message);
+    }
   };
 
   return (
@@ -149,6 +179,7 @@ export default function ObservationPage() {
                 <ActivityFeed
                   identifications={identifications}
                   comments={comments}
+                  onWithdrawIdentification={handleWithdrawIdentification}
                 />
               </div>
               <div className="flex-none mt-auto">
@@ -193,7 +224,7 @@ export default function ObservationPage() {
                       {isResearchGrade ? "Research Grade" : "Needs ID"}
                     </span>
                   </div>
-                  {scientificName && (
+                  {scientificName && scientificName !== baseSpeciesName && (
                     <p className="text-sm text-stone-400 italic mt-0.5">
                       {scientificName}
                     </p>
@@ -300,6 +331,12 @@ export default function ObservationPage() {
                 locationName={observation.locationName}
               />
             </div>
+
+            {/* Community Consensus */}
+            <CommunityConsensus observation={observation} identifications={identifications} />
+
+            {/* Data Quality */}
+            <DataQualityAssessment observation={observation} identifications={identifications} />
           </div>
 
         </div>

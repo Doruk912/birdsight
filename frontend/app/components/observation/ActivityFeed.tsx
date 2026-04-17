@@ -5,10 +5,12 @@ import Link from "next/link";
 import { Leaf, MessageCircle } from "lucide-react";
 import { IdentificationResponse, CommentResponse } from "@/app/types/explore";
 import { timeAgo } from "@/app/lib/observationService";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface ActivityFeedProps {
   identifications: IdentificationResponse[];
   comments: CommentResponse[];
+  onWithdrawIdentification?: (id: string) => void;
 }
 
 type ActivityItem =
@@ -31,7 +33,7 @@ function UserAvatarSmall({
           className="w-9 h-9 rounded-full object-cover border border-stone-200"
         />
       ) : (
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-sm font-semibold border border-emerald-200">
+        <div className="w-9 h-9 rounded-full bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-sm font-semibold border border-emerald-200">
           {username.charAt(0).toUpperCase()}
         </div>
       )}
@@ -66,7 +68,9 @@ function TaxonThumbnail({
 export default function ActivityFeed({
   identifications,
   comments,
+  onWithdrawIdentification,
 }: ActivityFeedProps) {
+  const { user: currentUser } = useAuth();
   const items = useMemo<ActivityItem[]>(() => {
     const idItems: ActivityItem[] = identifications.map((id) => ({
       type: "identification" as const,
@@ -106,24 +110,31 @@ export default function ActivityFeed({
 
         if (item.type === "identification") {
           const id = item.data;
+          const isWithdrawn = id.withdrawn;
+          const isNotCurrent = !id.current && !id.withdrawn;
+          const isInvalid = isWithdrawn || isNotCurrent;
+          const statusLabel = isWithdrawn ? "Withdrawn" : null;
+          const statusDescription = isWithdrawn
+            ? "Identification status: Withdrawn"
+            : isNotCurrent
+              ? "Identification status: Superseded"
+              : "Identification is current";
+
           return (
             <div
               key={`id-${id.id}`}
               className={`
                 flex gap-3 p-4
                 ${!isLast ? "border-b border-stone-100" : ""}
+                ${isInvalid ? "bg-stone-50/60" : ""}
                 hover:bg-stone-50/50 transition-colors duration-150
               `}
             >
-              {/* User avatar with ID badge */}
               <div className="shrink-0 relative">
                 <UserAvatarSmall
                   avatarUrl={id.userAvatarUrl}
                   username={id.username}
                 />
-                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
-                  <Leaf size={10} className="text-white" strokeWidth={2.5} />
-                </div>
               </div>
 
               {/* Content */}
@@ -144,7 +155,13 @@ export default function ActivityFeed({
                 {/* Taxon badge — with image + clickable link */}
                 <Link
                   href={`/taxonomy/${id.taxonId}`}
-                  className="mt-2 inline-flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 hover:bg-emerald-100 hover:border-emerald-300 transition-colors group"
+                  title={statusDescription}
+                  aria-label={statusDescription}
+                  className={`mt-2 inline-flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors group ${
+                    isInvalid
+                      ? "bg-stone-100 border border-stone-200 hover:bg-stone-100 hover:border-stone-300"
+                      : "bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300"
+                  }`}
                 >
                   <TaxonThumbnail
                     coverImageUrl={id.taxonCoverImageUrl}
@@ -152,15 +169,31 @@ export default function ActivityFeed({
                   />
                   <div className="min-w-0">
                     {id.taxonCommonName && (
-                      <p className="text-sm font-semibold text-emerald-800 group-hover:text-emerald-900 leading-tight">
+                      <p
+                        className={`text-sm font-semibold leading-tight ${
+                          isInvalid
+                            ? "text-stone-700 line-through decoration-2"
+                            : "text-emerald-800 group-hover:text-emerald-900"
+                        }`}
+                      >
                         {id.taxonCommonName}
                       </p>
                     )}
-                    <p className="text-xs text-emerald-600 italic truncate mt-0.5">
+                    <p
+                      className={`text-xs italic truncate mt-0.5 ${
+                        isInvalid
+                          ? "text-stone-700 line-through decoration-2"
+                          : "text-emerald-600"
+                      }`}
+                    >
                       {id.taxonScientificName}
                     </p>
                   </div>
-                  <span className="ml-auto text-[10px] text-emerald-500 font-medium shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span
+                    className={`ml-auto text-[10px] font-medium shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ${
+                      isInvalid ? "text-stone-500" : "text-emerald-500"
+                    }`}
+                  >
                     View →
                   </span>
                 </Link>
@@ -172,12 +205,35 @@ export default function ActivityFeed({
                   </p>
                 )}
 
-                {/* Withdrawn badge */}
-                {id.withdrawn && (
-                  <span className="inline-block mt-1.5 text-[11px] font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
-                    Withdrawn
-                  </span>
-                )}
+                {/* Identification status & Actions */}
+                <div className="mt-1.5 flex items-center justify-between gap-3">
+                  <div>
+                    {statusLabel && (
+                      <span
+                        className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                          isWithdrawn
+                            ? "text-red-600 bg-red-50"
+                            : "text-stone-600 bg-stone-100"
+                        }`}
+                      >
+                        {statusLabel}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {currentUser?.id === id.userId && id.current && !isWithdrawn && onWithdrawIdentification && (
+                    <button
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to withdraw this identification?")) {
+                          onWithdrawIdentification(id.id);
+                        }
+                      }}
+                      className="text-xs font-medium text-stone-400 hover:text-red-600 transition-colors px-2 py-1 -mr-2 rounded-md hover:bg-red-50"
+                    >
+                      Withdraw
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -200,13 +256,6 @@ export default function ActivityFeed({
                 avatarUrl={comment.userAvatarUrl}
                 username={comment.username}
               />
-              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-sky-500 border-2 border-white flex items-center justify-center">
-                <MessageCircle
-                  size={10}
-                  className="text-white"
-                  strokeWidth={2.5}
-                />
-              </div>
             </div>
 
             {/* Content */}

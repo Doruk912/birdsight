@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sparkles, Loader2, AlertTriangle, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { predictSpecies } from "@/app/lib/mlService";
 import { MLPrediction } from "@/app/types/explore";
@@ -14,8 +14,8 @@ interface MLSuggestionsProps {
   imageFile?: File;
   /** An image URL to classify (for existing observation images). */
   imageUrl?: string;
-  /** When true, the component fires the prediction. Set to true on search-input focus. */
-  triggered: boolean;
+  /** When true, the component fires the prediction. Defaults to true for upload flows. */
+  triggered?: boolean;
   /** Called when the user clicks a suggestion. */
   onSelect: (taxonId: string, commonName: string | null, scientificName: string) => void;
   /** Optional CSS class for the container. */
@@ -30,22 +30,27 @@ const DISCLAIMER =
 export default function MLSuggestions({
   imageFile,
   imageUrl,
-  triggered,
+  triggered = true,
   onSelect,
   className = "",
 }: MLSuggestionsProps) {
   const [predictions, setPredictions] = useState<MLPrediction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [hasFired, setHasFired] = useState(false);
+  const hasFiredRef = useRef(false);
   const [showDetails, setShowDetails] = useState(false);
+
+  // Allow re-running prediction if the source image changes.
+  useEffect(() => {
+    hasFiredRef.current = false;
+  }, [imageFile, imageUrl]);
 
   // Fire prediction once when triggered becomes true
   useEffect(() => {
-    if (!triggered || hasFired) return;
+    if (!triggered || hasFiredRef.current) return;
     if (!imageFile && !imageUrl) return;
 
-    setHasFired(true);
+    hasFiredRef.current = true;
     let cancelled = false;
 
     (async () => {
@@ -76,7 +81,7 @@ export default function MLSuggestions({
     })();
 
     return () => { cancelled = true; };
-  }, [triggered, hasFired, imageFile, imageUrl]);
+  }, [triggered, imageFile, imageUrl]);
 
   // Nothing to show yet
   if (!triggered && !loading && predictions.length === 0 && !error) return null;
@@ -186,19 +191,34 @@ export default function MLSuggestions({
                 />
 
                 <div className="relative flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    {pred.commonName && (
-                      <p
-                        className={`font-semibold text-stone-800 truncate leading-tight group-hover:text-violet-800 transition-colors ${
-                          isHighConf && isTopPred ? "text-base" : "text-sm"
-                        }`}
-                      >
-                        {pred.commonName}
-                      </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {hasValidTaxon && (
+                      pred.coverImageUrl ? (
+                        <img
+                          src={pred.coverImageUrl}
+                          alt={pred.commonName || pred.species}
+                          className="w-10 h-10 rounded-lg object-cover border border-violet-200 shrink-0 bg-white"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center shrink-0 border border-violet-200">
+                          <Sparkles size={18} strokeWidth={1.5} className="text-violet-400" />
+                        </div>
+                      )
                     )}
-                    <p className="text-xs text-stone-500 italic truncate mt-0.5">
-                      {pred.species}
-                    </p>
+                    <div className="min-w-0">
+                      {pred.commonName && (
+                        <p
+                          className={`font-semibold text-stone-800 truncate leading-tight group-hover:text-violet-800 transition-colors ${
+                            isHighConf && isTopPred ? "text-base" : "text-sm"
+                          }`}
+                        >
+                          {pred.commonName}
+                        </p>
+                      )}
+                      <p className="text-xs text-stone-500 italic truncate mt-0.5">
+                        {pred.species}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">

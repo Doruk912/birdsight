@@ -24,8 +24,8 @@ export default function ObservationMiniMap({
 
   return (
     <div className="rounded-2xl overflow-hidden border border-stone-200 bg-white shadow-sm">
-      {/* Map — reduced height */}
-      <div className="w-full h-[180px]">
+      {/* Map */}
+      <div className="w-full h-60">
         <MapGL
           ref={mapRef}
           initialViewState={{

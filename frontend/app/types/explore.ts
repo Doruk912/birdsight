@@ -132,6 +132,7 @@ export interface MLPrediction {
   commonName: string | null;
   confidence: number;
   taxonId: string | null;
+  coverImageUrl?: string | null;
 }
 
 export interface MLPredictionResponse {

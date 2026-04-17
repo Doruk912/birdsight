@@ -10,7 +10,11 @@ const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 
 export default function ObservationCard({ observation }: ObservationCardProps) {
   const firstImage = observation.images?.[0]?.imageUrl || PLACEHOLDER_IMAGE;
-  const speciesName = observation.communityTaxon?.commonName || "Unknown species";
+  const baseSpeciesName = observation.communityTaxon?.commonName || observation.communityTaxon?.scientificName || "Unknown species";
+  const taxonRank = observation.communityTaxon?.rank;
+  const speciesName = taxonRank && taxonRank !== "SPECIES"
+    ? `${taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase()} ${baseSpeciesName}`
+    : baseSpeciesName;
   const scientificName = observation.communityTaxon?.scientificName;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -46,7 +50,7 @@ export default function ObservationCard({ observation }: ObservationCardProps) {
           <h3 className="text-lg font-bold text-stone-800 line-clamp-1 group-hover:text-emerald-600 transition-colors">
             {speciesName}
           </h3>
-          {scientificName && (
+          {scientificName && scientificName !== baseSpeciesName && (
             <p className="text-xs italic text-stone-500 line-clamp-1 mt-0.5">
               {scientificName}
             </p>
