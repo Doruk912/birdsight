@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import MapGL, { Marker, NavigationControl, MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MapPin } from "lucide-react";
+import { MapPin, ExternalLink } from "lucide-react";
 
 interface ObservationMiniMapProps {
   latitude: number;
@@ -20,10 +20,12 @@ export default function ObservationMiniMap({
   locationName,
 }: ObservationMiniMapProps) {
   const mapRef = useRef<MapRef>(null);
+  const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
   return (
     <div className="rounded-2xl overflow-hidden border border-stone-200 bg-white shadow-sm">
-      <div className="w-full h-[250px]">
+      {/* Map — reduced height */}
+      <div className="w-full h-[180px]">
         <MapGL
           ref={mapRef}
           initialViewState={{
@@ -51,18 +53,27 @@ export default function ObservationMiniMap({
         </MapGL>
       </div>
 
-      {/* Location info */}
-      <div className="px-4 py-3 bg-stone-50/80">
-        <div className="flex items-center gap-2 text-sm text-stone-600">
+      {/* Location info + Google Maps link */}
+      <div className="px-4 py-3 bg-stone-50/80 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm text-stone-600 min-w-0">
           <MapPin size={14} className="text-emerald-600 shrink-0" strokeWidth={2} />
           {locationName ? (
-            <span className="font-medium">{locationName}</span>
+            <span className="font-medium truncate">{locationName}</span>
           ) : (
-            <span className="text-stone-400">
+            <span className="text-stone-400 truncate">
               {latitude.toFixed(4)}, {longitude.toFixed(4)}
             </span>
           )}
         </div>
+        <a
+          href={googleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 whitespace-nowrap transition-colors"
+        >
+          <ExternalLink size={12} strokeWidth={2.5} />
+          View on Maps
+        </a>
       </div>
     </div>
   );

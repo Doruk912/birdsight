@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Leaf, MessageCircle, Send, Loader2, Search, X} from "lucide-react";
+import { Leaf, MessageCircle, Send, Loader2, Search, X, ExternalLink } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
 import {
   searchTaxa,
@@ -47,8 +47,9 @@ export default function AddActivityForm({
   const [idComment, setIdComment] = useState("");
   const taxonInputRef = useRef<HTMLInputElement>(null);
 
-  // ML suggestion state
+  // ML suggestion state — NOT triggered until search input is focused
   const firstImageUrl = observationImages.length > 0 ? observationImages[0].imageUrl : undefined;
+  const [mlTriggered, setMlTriggered] = useState(false);
   const [showMlSuggestions, setShowMlSuggestions] = useState(true);
 
   // Debounced Taxon Search
@@ -76,7 +77,6 @@ export default function AddActivityForm({
 
   const handleMLSelect = useCallback(
     async (taxonId: string, commonName: string | null, scientificName: string) => {
-      // Create a TaxonResponse-like object from ML prediction
       const taxon: TaxonResponse = {
         id: taxonId,
         scientificName,
@@ -118,7 +118,6 @@ export default function AddActivityForm({
       const newComment = await addComment(observationId, commentBody.trim());
       onCommentAdded(newComment);
       setCommentBody("");
-      // activeTab remains "comment"
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message || "Failed to post comment.");
@@ -145,6 +144,7 @@ export default function AddActivityForm({
       setTaxonQuery("");
       setIdComment("");
       setShowMlSuggestions(true);
+      setMlTriggered(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message || "Failed to suggest identification.");
@@ -200,7 +200,7 @@ export default function AddActivityForm({
               value={commentBody}
               onChange={(e) => setCommentBody(e.target.value)}
               placeholder="Write a comment..."
-              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent min-h-[100px] resize-y"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent min-h-25 resize-y"
               disabled={isSubmitting}
             />
             <div className="flex justify-end">
@@ -220,47 +220,58 @@ export default function AddActivityForm({
           </form>
         ) : (
           <form onSubmit={handleIdSubmit} className="space-y-4">
-            {/* ML Suggestions */}
-            {showMlSuggestions && firstImageUrl && !selectedTaxon && (
-              <MLSuggestions
-                imageUrl={firstImageUrl}
-                onSelect={handleMLSelect}
-                className="mb-2"
-              />
-            )}
-
             <div className="relative">
               {selectedTaxon ? (
                 // Selected Taxon Card
                 <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <Leaf size={16} className="text-emerald-600" />
-                    </div>
+                    {/* Taxon thumbnail */}
+                    {selectedTaxon.coverImageUrl ? (
+                      <img
+                        src={selectedTaxon.coverImageUrl}
+                        alt={selectedTaxon.commonName || selectedTaxon.scientificName}
+                        className="w-10 h-10 rounded-lg object-cover border border-emerald-200 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                        <Leaf size={16} className="text-emerald-600" />
+                      </div>
+                    )}
                     <div>
                       {selectedTaxon.commonName && (
                         <p className="text-sm font-semibold text-emerald-900">
                           {selectedTaxon.commonName}
                         </p>
                       )}
-                      <p className={`text-xs text-emerald-700 ${selectedTaxon.scientificName ? 'italic' : ''}`}>
+                      <p className={`text-xs text-emerald-700 ${selectedTaxon.scientificName ? "italic" : ""}`}>
                         {selectedTaxon.scientificName}
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedTaxon(null);
-                      setTaxonQuery("");
-                      setShowMlSuggestions(true);
-                      setTimeout(() => taxonInputRef.current?.focus(), 0);
-                    }}
-                    className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-full transition-colors"
-                    disabled={isSubmitting}
-                  >
-                    <X size={16} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/taxonomy/${selectedTaxon.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-full transition-colors"
+                      title="View taxon page"
+                    >
+                      <ExternalLink size={14} />
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedTaxon(null);
+                        setTaxonQuery("");
+                        setShowMlSuggestions(true);
+                        setTimeout(() => taxonInputRef.current?.focus(), 0);
+                      }}
+                      className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-full transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 // Taxon Search Input
@@ -274,6 +285,9 @@ export default function AddActivityForm({
                     type="text"
                     value={taxonQuery}
                     onChange={(e) => setTaxonQuery(e.target.value)}
+                    onFocus={() => {
+                      if (firstImageUrl) setMlTriggered(true);
+                    }}
                     placeholder="Search for a species..."
                     className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     autoComplete="off"
@@ -288,50 +302,84 @@ export default function AddActivityForm({
 
                   {/* Dropdown Results */}
                   {taxonResults.length > 0 && !selectedTaxon && (
-                    <div className="absolute z-10 top-full left-0 right-0 mt-2 bg-white border border-stone-200 rounded-xl shadow-lg max-h-60 overflow-y-auto py-2">
+                    <div className="absolute z-10 top-full left-0 right-0 mt-2 bg-white border border-stone-200 rounded-xl shadow-lg max-h-72 overflow-y-auto py-1">
                       {taxonResults.map((taxon) => (
-                        <button
+                        <div
                           key={taxon.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedTaxon(taxon);
-                            setTaxonResults([]);
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-stone-50 transition-colors flex items-center justify-between group"
+                          className="flex items-center gap-3 px-3 py-2.5 hover:bg-stone-50 transition-colors"
                         >
-                          <div>
-                            {taxon.commonName && (
-                              <p className="text-sm font-medium text-stone-800 group-hover:text-emerald-700">
-                                {taxon.commonName}
-                              </p>
+                          {/* Taxon image */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTaxon(taxon);
+                              setTaxonResults([]);
+                            }}
+                            className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                          >
+                            {taxon.coverImageUrl ? (
+                              <img
+                                src={taxon.coverImageUrl}
+                                alt={taxon.commonName || taxon.scientificName}
+                                className="w-10 h-10 rounded-lg object-cover border border-stone-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center shrink-0 border border-stone-200">
+                                <Leaf size={14} className="text-stone-400" />
+                              </div>
                             )}
-                            <p className="text-xs text-stone-500 italic">
-                              {taxon.scientificName}
-                            </p>
-                          </div>
-                          <span className="text-[10px] uppercase font-semibold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">
-                            {taxon.rank}
-                          </span>
-                        </button>
+                            <div className="min-w-0">
+                              {taxon.commonName && (
+                                <p className="text-sm font-medium text-stone-800 truncate hover:text-emerald-700">
+                                  {taxon.commonName}
+                                </p>
+                              )}
+                              <p className="text-xs text-stone-500 italic truncate">{taxon.scientificName}</p>
+                            </div>
+                          </button>
+
+                          {/* View taxon page */}
+                          <Link
+                            href={`/taxonomy/${taxon.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-stone-400 hover:text-emerald-600 border border-stone-200 hover:border-emerald-300 rounded-lg px-2 py-1 transition-colors"
+                            title="View species page"
+                          >
+                            <ExternalLink size={10} />
+                            View
+                          </Link>
+                        </div>
                       ))}
                     </div>
                   )}
+
                   {taxonQuery.length >= 2 &&
                     taxonResults.length === 0 &&
                     !isSearchingTaxa && (
                       <div className="absolute z-10 top-full left-0 right-0 mt-2 bg-white border border-stone-200 rounded-xl shadow-lg p-4 text-center text-sm text-stone-500">
-                        No species found.
+                        No species found for &#34;{taxonQuery}&#34;
                       </div>
                     )}
                 </div>
               )}
             </div>
 
+            {/* ML Suggestions — shown when search is focused and no taxon selected */}
+            {showMlSuggestions && firstImageUrl && !selectedTaxon && (
+              <MLSuggestions
+                imageUrl={firstImageUrl}
+                triggered={mlTriggered}
+                onSelect={handleMLSelect}
+              />
+            )}
+
             <textarea
               value={idComment}
               onChange={(e) => setIdComment(e.target.value)}
               placeholder="Add an optional comment explaining your ID..."
-              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-h-[80px] resize-y"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-h-20 resize-y"
               disabled={isSubmitting || !selectedTaxon}
             />
 

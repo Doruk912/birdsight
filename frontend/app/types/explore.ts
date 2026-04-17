@@ -62,6 +62,7 @@ export interface TaxonResponse {
   commonName: string | null;
   parentId: string | null;
   observationCount?: number;
+  coverImageUrl?: string | null;
 }
 
 export interface TopObserverDto {
@@ -109,6 +110,7 @@ export interface IdentificationResponse {
   taxonScientificName: string;
   taxonCommonName: string | null;
   taxonRank: "CLASS" | "ORDER" | "FAMILY" | "GENUS" | "SPECIES";
+  taxonCoverImageUrl: string | null;
   comment: string | null;
   current: boolean;
   withdrawn: boolean;

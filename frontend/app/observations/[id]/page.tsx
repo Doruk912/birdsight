@@ -9,12 +9,12 @@ import {
   Calendar,
   CheckCircle2,
   HelpCircle,
-  Clock,
-  Eye,
+  Upload,
   Leaf,
   MessageCircle,
   Loader2,
   AlertCircle,
+  Eye,
 } from "lucide-react";
 import {
   ObservationDetailResponse,
@@ -25,7 +25,6 @@ import {
   fetchObservationDetail,
   fetchIdentifications,
   fetchComments,
-  timeAgo,
 } from "@/app/lib/observationService";
 import PhotoGallery from "@/app/components/observation/PhotoGallery";
 import ActivityFeed from "@/app/components/observation/ActivityFeed";
@@ -35,8 +34,16 @@ import "./observation.css";
 // Dynamic import for map (no SSR)
 const ObservationMiniMap = dynamic(
   () => import("@/app/components/observation/ObservationMiniMap"),
-  { ssr: false, loading: () => <div className="w-full h-[250px] bg-stone-100 rounded-2xl animate-pulse" /> }
+  { ssr: false, loading: () => <div className="w-full h-45 bg-stone-100 rounded-2xl animate-pulse" /> }
 );
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 
 export default function ObservationPage() {
   const params = useParams();
@@ -51,7 +58,6 @@ export default function ObservationPage() {
   useEffect(() => {
     if (!id) return;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 
@@ -110,15 +116,11 @@ export default function ObservationPage() {
   const isResearchGrade = observation.qualityGrade === "RESEARCH_GRADE";
   const speciesName = observation.communityTaxon?.commonName || "Unknown species";
   const scientificName = observation.communityTaxon?.scientificName;
-  const observedDate = new Date(observation.observedAt).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const observedDate = formatDate(observation.observedAt);
+  const submittedDate = formatDate(observation.createdAt);
 
   const handleCommentAdded = (newComment: CommentResponse) => {
     setComments((prev) => [...prev, newComment]);
-    // Optionally increment the comment count on the observation object
     setObservation((prev) => prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev);
   };
 
@@ -129,28 +131,39 @@ export default function ObservationPage() {
 
   return (
     <div className="min-h-screen pt-16 bg-stone-50">
-
-
       {/* Main content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Left column — Photos + Map */}
+
+          {/* ── Left column — Photos + Activity ── */}
           <div className="lg:col-span-3 space-y-6 animate-fade-in-up">
             {/* Photo gallery */}
             <PhotoGallery images={observation.images} />
 
-            {/* Mini map */}
-            <div className="observation-mini-map">
-              <ObservationMiniMap
-                latitude={observation.latitude}
-                longitude={observation.longitude}
-                locationName={observation.locationName}
-              />
+            {/* Activity feed */}
+            <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden flex flex-col animate-fade-in-up-delay-3">
+              <div className="px-5 py-4 border-b border-stone-100 flex-none">
+                <h2 className="text-sm font-semibold text-stone-800">Activity</h2>
+              </div>
+              <div className="flex-1 overflow-y-auto max-h-150 custom-scrollbar">
+                <ActivityFeed
+                  identifications={identifications}
+                  comments={comments}
+                />
+              </div>
+              <div className="flex-none mt-auto">
+                <AddActivityForm
+                  observationId={observation.id}
+                  observationImages={observation.images}
+                  onCommentAdded={handleCommentAdded}
+                  onIdentificationAdded={handleIdentificationAdded}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Right column — Info + Activity */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* ── Right column — Info + Map ── */}
+          <div className="lg:col-span-2 space-y-4">
             {/* Species header card */}
             <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 animate-fade-in-up-delay-1">
               <div className="flex items-start gap-3">
@@ -208,7 +221,7 @@ export default function ObservationPage() {
                       className="w-11 h-11 rounded-full object-cover border-2 border-stone-100"
                     />
                   ) : (
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-base font-semibold border-2 border-emerald-100">
+                    <div className="w-11 h-11 rounded-full bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-base font-semibold border-2 border-emerald-100">
                       {observation.username.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -220,21 +233,29 @@ export default function ObservationPage() {
                       {observation.username}
                     </p>
                   </Link>
-                  <div className="flex items-center gap-3 mt-0.5 text-xs text-stone-400">
-                    <span className="flex items-center gap-1">
-                      <Calendar size={12} />
-                      {observedDate}
+
+                  {/* Dates — Observed (left) | Submitted (right) */}
+                  <div className="flex items-center gap-4 mt-1 flex-wrap">
+                    <span className="flex items-center gap-1 text-xs text-stone-400">
+                      <Calendar size={11} className="shrink-0" />
+                      <span>
+                        <span className="text-stone-500 font-medium">Observed</span>{" "}
+                        {observedDate}
+                      </span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} />
-                      {timeAgo(observation.observedAt)}
+                    <span className="flex items-center gap-1 text-xs text-stone-400">
+                      <Upload size={11} className="shrink-0" />
+                      <span>
+                        <span className="text-stone-500 font-medium">Submitted</span>{" "}
+                        {submittedDate}
+                      </span>
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Stats pills */}
+            {/* Stats pills — IDs | Comments | Photos */}
             <div className="flex gap-3 animate-fade-in-up-delay-2">
               <div className="flex-1 bg-white rounded-xl border border-stone-200 shadow-sm px-4 py-3 text-center">
                 <div className="flex items-center justify-center gap-1.5 text-emerald-600 mb-1">
@@ -271,29 +292,16 @@ export default function ObservationPage() {
               </div>
             </div>
 
-            {/* Activity feed */}
-            <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-fade-in-up-delay-3 flex flex-col">
-              <div className="px-5 py-4 border-b border-stone-100 flex-none">
-                <h2 className="text-sm font-semibold text-stone-800">
-                  Activity
-                </h2>
-              </div>
-              <div className="flex-1 overflow-y-auto max-h-[600px] custom-scrollbar">
-                <ActivityFeed
-                  identifications={identifications}
-                  comments={comments}
-                />
-              </div>
-              <div className="flex-none mt-auto">
-                <AddActivityForm 
-                  observationId={observation.id}
-                  observationImages={observation.images}
-                  onCommentAdded={handleCommentAdded}
-                  onIdentificationAdded={handleIdentificationAdded}
-                />
-              </div>
+            {/* Mini map */}
+            <div className="observation-mini-map animate-fade-in-up-delay-3">
+              <ObservationMiniMap
+                latitude={observation.latitude}
+                longitude={observation.longitude}
+                locationName={observation.locationName}
+              />
             </div>
           </div>
+
         </div>
       </div>
     </div>

@@ -39,6 +39,30 @@ function UserAvatarSmall({
   );
 }
 
+/** Small square taxon photo, or a leaf-icon placeholder */
+function TaxonThumbnail({
+  coverImageUrl,
+  name,
+}: {
+  coverImageUrl: string | null | undefined;
+  name: string;
+}) {
+  if (coverImageUrl) {
+    return (
+      <img
+        src={coverImageUrl}
+        alt={name}
+        className="w-10 h-10 rounded-lg object-cover border border-emerald-200 shrink-0"
+      />
+    );
+  }
+  return (
+    <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 border border-emerald-200">
+      <Leaf size={16} className="text-emerald-600" strokeWidth={2} />
+    </div>
+  );
+}
+
 export default function ActivityFeed({
   identifications,
   comments,
@@ -91,7 +115,7 @@ export default function ActivityFeed({
                 hover:bg-stone-50/50 transition-colors duration-150
               `}
             >
-              {/* Timeline dot */}
+              {/* User avatar with ID badge */}
               <div className="shrink-0 relative">
                 <UserAvatarSmall
                   avatarUrl={id.userAvatarUrl}
@@ -105,31 +129,41 @@ export default function ActivityFeed({
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Link href={`/profile/${id.username}`} className="text-sm font-semibold text-stone-800 hover:text-emerald-600 transition-colors hover:underline">
+                  <Link
+                    href={`/profile/${id.username}`}
+                    className="text-sm font-semibold text-stone-800 hover:text-emerald-600 transition-colors hover:underline"
+                  >
                     {id.username}
                   </Link>
-                  <span className="text-xs text-stone-400">
-                    suggested an ID
-                  </span>
+                  <span className="text-xs text-stone-400">suggested an ID</span>
                   <span className="text-[11px] text-stone-400">
                     · {timeAgo(id.createdAt)}
                   </span>
                 </div>
 
-                {/* Taxon badge */}
-                <div className="mt-1.5 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5">
-                  <Leaf size={14} className="text-emerald-600" strokeWidth={2} />
-                  <div>
+                {/* Taxon badge — with image + clickable link */}
+                <Link
+                  href={`/taxonomy/${id.taxonId}`}
+                  className="mt-2 inline-flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 hover:bg-emerald-100 hover:border-emerald-300 transition-colors group"
+                >
+                  <TaxonThumbnail
+                    coverImageUrl={id.taxonCoverImageUrl}
+                    name={id.taxonCommonName || id.taxonScientificName}
+                  />
+                  <div className="min-w-0">
                     {id.taxonCommonName && (
-                      <span className="text-sm font-semibold text-emerald-800">
+                      <p className="text-sm font-semibold text-emerald-800 group-hover:text-emerald-900 leading-tight">
                         {id.taxonCommonName}
-                      </span>
+                      </p>
                     )}
-                    <span className="text-xs text-emerald-600 italic ml-1.5">
+                    <p className="text-xs text-emerald-600 italic truncate mt-0.5">
                       {id.taxonScientificName}
-                    </span>
+                    </p>
                   </div>
-                </div>
+                  <span className="ml-auto text-[10px] text-emerald-500 font-medium shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    View →
+                  </span>
+                </Link>
 
                 {/* ID comment */}
                 {id.comment && (
@@ -178,7 +212,10 @@ export default function ActivityFeed({
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Link href={`/profile/${comment.username}`} className="text-sm font-semibold text-stone-800 hover:text-emerald-600 transition-colors hover:underline">
+                <Link
+                  href={`/profile/${comment.username}`}
+                  className="text-sm font-semibold text-stone-800 hover:text-emerald-600 transition-colors hover:underline"
+                >
                   {comment.username}
                 </Link>
                 <span className="text-xs text-stone-400">commented</span>
