@@ -1,7 +1,9 @@
 package com.birdsight.observation;
 
+import com.birdsight.comment.CommentRepository;
 import com.birdsight.common.exception.BadRequestException;
 import com.birdsight.common.exception.ResourceNotFoundException;
+import com.birdsight.identification.IdentificationRepository;
 import com.birdsight.observation.dto.*;
 import com.birdsight.storage.StorageService;
 import com.birdsight.taxonomy.Taxon;
@@ -38,6 +40,8 @@ public class ObservationService {
     private final UserRepository userRepository;
     private final TaxonRepository taxonRepository;
     private final StorageService storageService;
+    private final IdentificationRepository identificationRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public ObservationResponse createObservation(String userEmail, CreateObservationRequest request,
@@ -88,20 +92,30 @@ public class ObservationService {
 
         Specification<Observation> spec = ObservationSpecification.withFilters(filter, descendantIds);
         return observationRepository.findAll(spec, pageable)
-                .map(obs -> observationMapper.toResponse(obs, 0, 0));
+                .map(obs -> {
+                    int idCount = (int) identificationRepository.countByObservationId(obs.getId());
+                    int cmtCount = (int) commentRepository.countByObservationIdAndDeletedFalse(obs.getId());
+                    return observationMapper.toResponse(obs, idCount, cmtCount);
+                });
     }
 
     @Transactional(readOnly = true)
     public Page<ObservationResponse> getObservationsByUser(UUID userId, Pageable pageable) {
         return observationRepository.findByUserId(userId, pageable)
-                .map(obs -> observationMapper.toResponse(obs, 0, 0));
+                .map(obs -> {
+                    int idCount = (int) identificationRepository.countByObservationId(obs.getId());
+                    int cmtCount = (int) commentRepository.countByObservationIdAndDeletedFalse(obs.getId());
+                    return observationMapper.toResponse(obs, idCount, cmtCount);
+                });
     }
 
     @Transactional(readOnly = true)
     public ObservationResponse getObservationById(UUID id) {
         Observation obs = observationRepository.findByIdWithImages(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Observation", "id", id));
-        return observationMapper.toResponse(obs, 0, 0);
+        int idCount = (int) identificationRepository.countByObservationId(id);
+        int cmtCount = (int) commentRepository.countByObservationIdAndDeletedFalse(id);
+        return observationMapper.toResponse(obs, idCount, cmtCount);
     }
 
     @Transactional(readOnly = true)

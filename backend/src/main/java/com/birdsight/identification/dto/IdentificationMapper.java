@@ -17,6 +17,7 @@ public class IdentificationMapper {
                 .taxonScientificName(id.getTaxon().getScientificName())
                 .taxonCommonName(id.getTaxon().getCommonName())
                 .taxonRank(id.getTaxon().getRank())
+                .taxonCoverImageUrl(id.getTaxon().getCoverImageUrl())
                 .comment(id.getComment())
                 .current(id.isCurrent())
                 .withdrawn(id.isWithdrawn())

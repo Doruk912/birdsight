@@ -22,6 +22,7 @@ public class IdentificationResponse {
     private String taxonScientificName;
     private String taxonCommonName;
     private TaxonRank taxonRank;
+    private String taxonCoverImageUrl;
     private String comment;
     private boolean current;
     private boolean withdrawn;

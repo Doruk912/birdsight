@@ -15,6 +15,7 @@ public class TaxonMapper {
                 .scientificName(taxon.getScientificName())
                 .commonName(taxon.getCommonName())
                 .parentId(taxon.getParent() != null ? taxon.getParent().getId() : null)
+                .coverImageUrl(taxon.getCoverImageUrl())
                 .build();
     }
 

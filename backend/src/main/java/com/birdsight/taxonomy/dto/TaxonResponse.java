@@ -18,4 +18,5 @@ public class TaxonResponse {
     private String commonName;
     private UUID parentId;
     private long observationCount;
+    private String coverImageUrl;
 }
