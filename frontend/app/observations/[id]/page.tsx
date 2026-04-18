@@ -126,12 +126,15 @@ export default function ObservationPage() {
   }
 
   const isResearchGrade = observation.qualityGrade === "RESEARCH_GRADE";
-  const baseSpeciesName = observation.communityTaxon?.commonName || observation.communityTaxon?.scientificName || "Unknown species";
-  const taxonRank = observation.communityTaxon?.rank;
-  const speciesName = taxonRank && taxonRank !== "SPECIES"
-    ? `${taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase()} ${baseSpeciesName}`
-    : baseSpeciesName;
+  const commonName = observation.communityTaxon?.commonName;
   const scientificName = observation.communityTaxon?.scientificName;
+  const taxonRank = observation.communityTaxon?.rank;
+  const rankPrefix = taxonRank && taxonRank !== "SPECIES" 
+    ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
+    : "";
+  
+  const h1Title = commonName || (rankPrefix + (scientificName || "Unknown species"));
+  const subTitle = commonName ? (rankPrefix + scientificName) : null;
   const observedDate = formatDate(observation.observedAt);
   const submittedDate = formatDate(observation.createdAt);
 
@@ -175,7 +178,7 @@ export default function ObservationPage() {
               <div className="px-5 py-4 border-b border-stone-100 flex-none">
                 <h2 className="text-sm font-semibold text-stone-800">Activity</h2>
               </div>
-              <div className="flex-1 overflow-y-auto max-h-150 custom-scrollbar">
+              <div className="flex-1">
                 <ActivityFeed
                   identifications={identifications}
                   comments={comments}
@@ -197,15 +200,44 @@ export default function ObservationPage() {
           <div className="lg:col-span-2 space-y-4">
             {/* Species header card */}
             <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 animate-fade-in-up-delay-1">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-                  <Leaf size={20} className="text-emerald-600" strokeWidth={2} />
-                </div>
-                <div className="min-w-0">
+              <div className="flex items-start gap-4">
+                {observation.communityTaxon ? (
+                  <Link 
+                    href={`/taxonomy/${observation.communityTaxon.id}`}
+                    className="shrink-0 group relative"
+                  >
+                    {observation.communityTaxon.coverImageUrl ? (
+                      <img 
+                        src={observation.communityTaxon.coverImageUrl} 
+                        alt={h1Title}
+                        className="w-14 h-14 rounded-xl object-cover border border-emerald-100 group-hover:scale-105 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-100 transition-colors">
+                        <Leaf size={24} className="text-emerald-600" />
+                      </div>
+                    )}
+                  </Link>
+                ) : (
+                  <div className="w-14 h-14 rounded-xl bg-stone-50 flex items-center justify-center border border-stone-200">
+                    <Leaf size={24} className="text-stone-300" />
+                  </div>
+                )}
+                
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-xl font-bold text-stone-900 leading-tight">
-                      {speciesName}
-                    </h1>
+                    {observation.communityTaxon ? (
+                      <Link href={`/taxonomy/${observation.communityTaxon.id}`} className="hover:underline decoration-emerald-500/30">
+                        <h1 className="text-xl font-bold text-stone-900 leading-tight">
+                          {h1Title}
+                        </h1>
+                      </Link>
+                    ) : (
+                      <h1 className="text-xl font-bold text-stone-900 leading-tight">
+                        {h1Title}
+                      </h1>
+                    )}
+                    
                     <span
                       className={`
                         inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full
@@ -224,9 +256,9 @@ export default function ObservationPage() {
                       {isResearchGrade ? "Research Grade" : "Needs ID"}
                     </span>
                   </div>
-                  {scientificName && scientificName !== baseSpeciesName && (
+                  {subTitle && (
                     <p className="text-sm text-stone-400 italic mt-0.5">
-                      {scientificName}
+                      {subTitle}
                     </p>
                   )}
                 </div>

@@ -10,12 +10,16 @@ const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 
 export default function ObservationCard({ observation }: ObservationCardProps) {
   const firstImage = observation.images?.[0]?.imageUrl || PLACEHOLDER_IMAGE;
-  const baseSpeciesName = observation.communityTaxon?.commonName || observation.communityTaxon?.scientificName || "Unknown species";
   const taxonRank = observation.communityTaxon?.rank;
-  const speciesName = taxonRank && taxonRank !== "SPECIES"
-    ? `${taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase()} ${baseSpeciesName}`
-    : baseSpeciesName;
+  const rankPrefix = taxonRank && taxonRank !== "SPECIES" 
+    ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
+    : "";
+  
+  const commonName = observation.communityTaxon?.commonName;
   const scientificName = observation.communityTaxon?.scientificName;
+  
+  const h1Title = commonName || (rankPrefix + (scientificName || "Unknown species"));
+  const subTitle = commonName ? (rankPrefix + scientificName) : null;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
@@ -28,10 +32,10 @@ export default function ObservationCard({ observation }: ObservationCardProps) {
       className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative"
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/3] bg-stone-100 overflow-hidden">
+      <div className="relative aspect-4/3 bg-stone-100 overflow-hidden">
         <img
           src={firstImage}
-          alt={speciesName}
+          alt={h1Title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           onError={handleImageError}
         />
@@ -48,17 +52,17 @@ export default function ObservationCard({ observation }: ObservationCardProps) {
       <div className="p-5 flex flex-col flex-1 gap-4">
         <div>
           <h3 className="text-lg font-bold text-stone-800 line-clamp-1 group-hover:text-emerald-600 transition-colors">
-            {speciesName}
+            {h1Title}
           </h3>
-          {scientificName && scientificName !== baseSpeciesName && (
+          {subTitle && (
             <p className="text-xs italic text-stone-500 line-clamp-1 mt-0.5">
-              {scientificName}
+              {subTitle}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-2 mt-auto">
-          <div className="flex flex-col gap-1.5 min-h-[44px]">
+          <div className="flex flex-col gap-1.5 min-h-11">
             {observation.locationName && (
               <div className="flex items-start gap-1.5 text-xs text-stone-600">
                 <MapPin size={14} className="shrink-0 text-stone-400 mt-0.5" />
@@ -82,7 +86,7 @@ export default function ObservationCard({ observation }: ObservationCardProps) {
                   <User size={12} className="text-stone-400" />
                 </div>
               )}
-              <span className="truncate max-w-[100px]">{observation.username}</span>
+              <span className="truncate max-w-25">{observation.username}</span>
             </div>
             <span className="shrink-0 tabular-nums">
               {new Date(observation.observedAt).toLocaleDateString(undefined, {

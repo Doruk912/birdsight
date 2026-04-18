@@ -150,6 +150,27 @@ export default function ActivityFeed({
                   <span className="text-[11px] text-stone-400">
                     · {timeAgo(id.createdAt)}
                   </span>
+
+                  {id.disagreeing && !isWithdrawn && (
+                    <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 uppercase tracking-tight">
+                      Disagreeing
+                    </span>
+                  )}
+
+                  {currentUser?.id === id.userId && id.current && !isWithdrawn && onWithdrawIdentification && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (window.confirm("Are you sure you want to withdraw this identification?")) {
+                          onWithdrawIdentification(id.id);
+                        }
+                      }}
+                      className="ml-auto text-[11px] font-medium text-stone-400 hover:text-red-600 transition-colors px-2 py-1 rounded-md hover:bg-red-50"
+                    >
+                      Withdraw
+                    </button>
+                  )}
                 </div>
 
                 {/* Taxon badge — with image + clickable link */}
@@ -186,6 +207,11 @@ export default function ActivityFeed({
                           : "text-emerald-600"
                       }`}
                     >
+                      {id.taxonRank && id.taxonRank !== "SPECIES" && (
+                        <span className="not-italic mr-1">
+                          {id.taxonRank.charAt(0).toUpperCase() + id.taxonRank.slice(1).toLowerCase()}
+                        </span>
+                      )}
                       {id.taxonScientificName}
                     </p>
                   </div>
@@ -205,35 +231,20 @@ export default function ActivityFeed({
                   </p>
                 )}
 
-                {/* Identification status & Actions */}
-                <div className="mt-1.5 flex items-center justify-between gap-3">
-                  <div>
-                    {statusLabel && (
-                      <span
-                        className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                          isWithdrawn
-                            ? "text-red-600 bg-red-50"
-                            : "text-stone-600 bg-stone-100"
-                        }`}
-                      >
-                        {statusLabel}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {currentUser?.id === id.userId && id.current && !isWithdrawn && onWithdrawIdentification && (
-                    <button
-                      onClick={() => {
-                        if (window.confirm("Are you sure you want to withdraw this identification?")) {
-                          onWithdrawIdentification(id.id);
-                        }
-                      }}
-                      className="text-xs font-medium text-stone-400 hover:text-red-600 transition-colors px-2 py-1 -mr-2 rounded-md hover:bg-red-50"
+                {/* Identification status */}
+                {statusLabel && (
+                  <div className="mt-2 text-left">
+                    <span
+                      className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                        isWithdrawn
+                          ? "text-red-600 bg-red-50"
+                          : "text-stone-600 bg-stone-100"
+                      }`}
                     >
-                      Withdraw
-                    </button>
-                  )}
-                </div>
+                      {statusLabel}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           );

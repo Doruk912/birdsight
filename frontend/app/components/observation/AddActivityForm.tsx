@@ -246,6 +246,11 @@ export default function AddActivityForm({
                         </p>
                       )}
                       <p className={`text-xs text-emerald-700 ${selectedTaxon.scientificName ? "italic" : ""}`}>
+                        {selectedTaxon.rank && selectedTaxon.rank !== "SPECIES" && (
+                          <span className="not-italic mr-1">
+                            {selectedTaxon.rank.charAt(0).toUpperCase() + selectedTaxon.rank.slice(1).toLowerCase()}
+                          </span>
+                        )}
                         {selectedTaxon.scientificName}
                       </p>
                     </div>
