@@ -84,18 +84,28 @@ public class IdentificationService {
     }
 
     private boolean checkDisagreement(Identification target, List<Identification> allIds) {
-        // An ID disagrees if there's a prior (created before) active ID that is not compatible.
+        // Collect taxa of all active identifications created strictly before the target ID
+        List<Taxon> priorTaxa = new java.util.ArrayList<>();
         for (Identification prior : allIds) {
-            if (prior.getCreatedAt().isAfter(target.getCreatedAt())) break;
-            if (prior.getId().equals(target.getId())) continue;
+            if (!prior.getCreatedAt().isBefore(target.getCreatedAt())) {
+                break; // Since list is ordered by createdAt ascending, we can stop here
+            }
             
             if (prior.isCurrent() && !prior.isWithdrawn()) {
-                if (!isCompatible(target.getTaxon(), prior.getTaxon())) {
-                    return true;
-                }
+                priorTaxa.add(prior.getTaxon());
             }
         }
-        return false;
+
+        if (priorTaxa.isEmpty()) {
+            return false;
+        }
+
+        Taxon priorCommunityTaxon = observationService.calculateCommunityTaxon(priorTaxa);
+        if (priorCommunityTaxon == null) {
+            return false;
+        }
+        
+        return !isCompatible(target.getTaxon(), priorCommunityTaxon);
     }
 
     private boolean isCompatible(Taxon t1, Taxon t2) {

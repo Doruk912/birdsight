@@ -141,24 +141,11 @@ public class ObservationService {
         observationRepository.saveAndFlush(obs);
     }
 
-    /**
-     * Recomputes the community taxon and quality grade based on current identifications.
-     * Called whenever an identification is added or withdrawn.
-     */
-    @Transactional
-    public void recomputeQualityGrade(UUID observationId, List<UUID> currentTaxonIds) {
-        Observation obs = observationRepository.findByIdAndDeletedFalse(observationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Observation", "id", observationId));
-
-        if (currentTaxonIds.isEmpty()) {
-            obs.setCommunityTaxon(null);
-            obs.setQualityGrade(QualityGrade.NEEDS_ID);
-            observationRepository.saveAndFlush(obs);
-            return;
+    public Taxon calculateCommunityTaxon(List<Taxon> currentTaxa) {
+        if (currentTaxa == null || currentTaxa.isEmpty()) {
+            return null;
         }
 
-        List<Taxon> currentTaxa = taxonRepository.findAllById(currentTaxonIds);
-        
         // 1. Build lineages for all current identifications
         List<List<Taxon>> lineages = new ArrayList<>();
         for (Taxon taxon : currentTaxa) {
@@ -208,7 +195,7 @@ public class ObservationService {
                 }
                 
                 // Consensus threshold: > 2/3 of IDs must NOT disagree
-                long totalVotes = currentTaxonIds.size();
+                long totalVotes = currentTaxa.size();
                 if ((totalVotes - disagreement) * 3 > totalVotes * 2) {
                     // This child is a valid candidate for consensus.
                     // If multiple children are valid (e.g. some IDs are vague), pick the one with more direct support.
@@ -227,12 +214,38 @@ public class ObservationService {
             }
         }
         
+        return communityTaxon;
+    }
+
+    /**
+     * Recomputes the community taxon and quality grade based on current identifications.
+     * Called whenever an identification is added or withdrawn.
+     */
+    @Transactional
+    public void recomputeQualityGrade(UUID observationId, List<UUID> currentTaxonIds) {
+        Observation obs = observationRepository.findByIdAndDeletedFalse(observationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Observation", "id", observationId));
+
+        if (currentTaxonIds.isEmpty()) {
+            obs.setCommunityTaxon(null);
+            obs.setQualityGrade(QualityGrade.NEEDS_ID);
+            observationRepository.saveAndFlush(obs);
+            return;
+        }
+
+        List<Taxon> currentTaxa = taxonRepository.findAllById(currentTaxonIds);
+        Taxon communityTaxon = calculateCommunityTaxon(currentTaxa);
+        
         obs.setCommunityTaxon(communityTaxon);
 
         // 3. Determine Quality Grade
-        // Only Research Grade if community taxon is at species level AND we have at least 2 IDs
+        // Only Research Grade if community taxon is at species level AND we have at least 2 IDs at species level
         boolean isSpeciesLevel = communityTaxon.getRank().name().equals("SPECIES");
-        if (isSpeciesLevel && currentTaxonIds.size() >= 2) {
+        long speciesLevelIdCount = currentTaxa.stream()
+                .filter(t -> t.getRank().name().equals("SPECIES"))
+                .count();
+
+        if (isSpeciesLevel && speciesLevelIdCount >= 2) {
             obs.setQualityGrade(QualityGrade.RESEARCH_GRADE);
         } else {
             obs.setQualityGrade(QualityGrade.NEEDS_ID);
