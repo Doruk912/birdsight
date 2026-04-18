@@ -64,14 +64,57 @@ public class IdentificationService {
         // Recompute community taxon and quality grade
         recomputeForObservation(observationId);
 
-        return identificationMapper.toResponse(saved);
+        List<Identification> allIds = identificationRepository.findByObservationIdOrderByCreatedAtAsc(observationId);
+        IdentificationResponse response = identificationMapper.toResponse(saved);
+        response.setDisagreeing(checkDisagreement(saved, allIds));
+        
+        return response;
     }
 
     @Transactional(readOnly = true)
     public List<IdentificationResponse> getIdentifications(UUID observationId) {
-        return identificationRepository.findByObservationIdOrderByCreatedAtAsc(observationId).stream()
-                .map(identificationMapper::toResponse)
+        List<Identification> ids = identificationRepository.findByObservationIdOrderByCreatedAtAsc(observationId);
+        return ids.stream()
+                .map(id -> {
+                    IdentificationResponse resp = identificationMapper.toResponse(id);
+                    resp.setDisagreeing(checkDisagreement(id, ids));
+                    return resp;
+                })
                 .toList();
+    }
+
+    private boolean checkDisagreement(Identification target, List<Identification> allIds) {
+        // An ID disagrees if there's a prior (created before) active ID that is not compatible.
+        for (Identification prior : allIds) {
+            if (prior.getCreatedAt().isAfter(target.getCreatedAt())) break;
+            if (prior.getId().equals(target.getId())) continue;
+            
+            if (prior.isCurrent() && !prior.isWithdrawn()) {
+                if (!isCompatible(target.getTaxon(), prior.getTaxon())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isCompatible(Taxon t1, Taxon t2) {
+        if (t1.getId().equals(t2.getId())) return true;
+
+        // Check lineage compatibility
+        Taxon curr = t1;
+        while (curr != null) {
+            if (curr.getId().equals(t2.getId())) return true;
+            curr = curr.getParent();
+        }
+
+        curr = t2;
+        while (curr != null) {
+            if (curr.getId().equals(t1.getId())) return true;
+            curr = curr.getParent();
+        }
+
+        return false;
     }
 
     @Transactional

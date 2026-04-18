@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -161,60 +158,86 @@ public class ObservationService {
         }
 
         List<Taxon> currentTaxa = taxonRepository.findAllById(currentTaxonIds);
-        Map<UUID, Long> voteCounts = currentTaxonIds.stream()
-                .collect(Collectors.groupingBy(id -> id, Collectors.counting()));
+        
+        // 1. Build lineages for all current identifications
+        List<List<Taxon>> lineages = new ArrayList<>();
+        for (Taxon taxon : currentTaxa) {
+            List<Taxon> lineage = new ArrayList<>();
+            Taxon cur = taxon;
+            while (cur != null) {
+                lineage.addFirst(cur);
+                cur = cur.getParent();
+            }
+            lineages.add(lineage);
+        }
 
-        long totalVotes = currentTaxonIds.size();
-
-        Map.Entry<UUID, Long> topEntry = voteCounts.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .orElse(null);
-
-        boolean hasConsensus = totalVotes >= 2 && topEntry != null && topEntry.getValue() * 3 > totalVotes * 2;
-
-        if (hasConsensus) {
-            Taxon topTaxon = currentTaxa.stream()
-                    .filter(t -> t.getId().equals(topEntry.getKey()))
-                    .findFirst()
-                    .orElse(null);
-            obs.setCommunityTaxon(topTaxon);
-
-            boolean isSpeciesLevel = topTaxon != null && topTaxon.getRank().name().equals("SPECIES");
-            if (isSpeciesLevel) {
-                obs.setQualityGrade(QualityGrade.RESEARCH_GRADE);
+        // 2. Find community taxon by descending the tree where consensus exists
+        // A taxon is acceptable if > 2/3 of IDs don't disagree with it.
+        // Disagreement = ID is in a different branch (neither ancestor nor descendant).
+        Taxon communityTaxon = lineages.getFirst().getFirst(); // Start at Root (all lineages must share a root)
+        int depth = 0;
+        
+        while (true) {
+            // Find all unique children of the current communityTaxon that appear in the lineages
+            Map<UUID, Taxon> childrenMap = new HashMap<>();
+            for (List<Taxon> lineage : lineages) {
+                if (lineage.size() > depth + 1 && lineage.get(depth).getId().equals(communityTaxon.getId())) {
+                    Taxon child = lineage.get(depth + 1);
+                    childrenMap.put(child.getId(), child);
+                }
+            }
+            
+            if (childrenMap.isEmpty()) break;
+            
+            Taxon bestChild = null;
+            long bestSupport = -1;
+            
+            for (Taxon candidate : childrenMap.values()) {
+                long disagreement = 0;
+                long support = 0; // Explicit support (is candidate or descendant)
+                
+                for (List<Taxon> lineage : lineages) {
+                    if (lineage.size() > depth + 1 && lineage.get(depth + 1).getId().equals(candidate.getId())) {
+                        // This ID follows this branch
+                        support++;
+                    } else if (lineage.size() > depth + 1) {
+                        // This ID follows a different branch at this level
+                        disagreement++;
+                    }
+                    // If lineage.size() <= depth + 1, it's an ancestor/parent ID which doesn't disagree
+                }
+                
+                // Consensus threshold: > 2/3 of IDs must NOT disagree
+                long totalVotes = currentTaxonIds.size();
+                if ((totalVotes - disagreement) * 3 > totalVotes * 2) {
+                    // This child is a valid candidate for consensus.
+                    // If multiple children are valid (e.g. some IDs are vague), pick the one with more direct support.
+                    if (support > bestSupport) {
+                        bestSupport = support;
+                        bestChild = candidate;
+                    }
+                }
+            }
+            
+            if (bestChild != null) {
+                communityTaxon = bestChild;
+                depth++;
             } else {
-                obs.setQualityGrade(QualityGrade.NEEDS_ID);
+                break;
             }
+        }
+        
+        obs.setCommunityTaxon(communityTaxon);
+
+        // 3. Determine Quality Grade
+        // Only Research Grade if community taxon is at species level AND we have at least 2 IDs
+        boolean isSpeciesLevel = communityTaxon.getRank().name().equals("SPECIES");
+        if (isSpeciesLevel && currentTaxonIds.size() >= 2) {
+            obs.setQualityGrade(QualityGrade.RESEARCH_GRADE);
         } else {
-            // Find Lowest Common Ancestor
-            Taxon lca = currentTaxa.getFirst();
-            for (int i = 1; i < currentTaxa.size(); i++) {
-                lca = findLca(lca, currentTaxa.get(i));
-            }
-            obs.setCommunityTaxon(lca);
             obs.setQualityGrade(QualityGrade.NEEDS_ID);
         }
 
         observationRepository.saveAndFlush(obs);
-    }
-
-    private Taxon findLca(Taxon t1, Taxon t2) {
-        if (t1 == null || t2 == null) return null;
-        
-        java.util.Set<UUID> ancestors1 = new java.util.HashSet<>();
-        Taxon curr = t1;
-        while (curr != null) {
-            ancestors1.add(curr.getId());
-            curr = curr.getParent();
-        }
-        
-        curr = t2;
-        while (curr != null) {
-            if (ancestors1.contains(curr.getId())) {
-                return curr;
-            }
-            curr = curr.getParent();
-        }
-        return null;
     }
 }

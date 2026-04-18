@@ -26,5 +26,6 @@ public class IdentificationResponse {
     private String comment;
     private boolean current;
     private boolean withdrawn;
+    private boolean disagreeing;
     private Instant createdAt;
 }
