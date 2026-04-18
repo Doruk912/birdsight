@@ -10,14 +10,26 @@ interface DataQualityAssessmentProps {
 export default function DataQualityAssessment({ observation, identifications }: DataQualityAssessmentProps) {
   const isResearchGrade = observation.qualityGrade === "RESEARCH_GRADE";
   const currentIdentifications = identifications.filter(i => i.current && !i.withdrawn);
-  const uniqueUsers = new Set(currentIdentifications.map(i => i.userId));
-  const hasMultipleIds = uniqueUsers.size >= 2;
+  
+  const uniqueUsersWithSpecies = new Set(
+    currentIdentifications.filter(i => i.taxonRank === "SPECIES").map(i => i.userId)
+  );
+
   const hasSpeciesLevelId = observation.communityTaxon?.rank === "SPECIES";
+  const hasMultipleSpeciesIds = hasSpeciesLevelId && uniqueUsersWithSpecies.size >= 2;
+  
+  const uniqueTaxonIds = new Set(currentIdentifications.map(i => i.taxonId));
+  // Disagreement means multiple different taxons were suggested AND they couldn't reach consensus on a species
+  const hasDisagreement = uniqueTaxonIds.size > 1 && !hasSpeciesLevelId;
   
   const checks = [
     { label: "Community ID at species level", criteria: hasSpeciesLevelId },
-    { label: "ID supported by two or more", criteria: hasMultipleIds },
+    { label: "ID supported by two or more", criteria: hasMultipleSpeciesIds },
   ];
+
+  if (hasDisagreement) {
+    checks.push({ label: "Community consensus on species level ID", criteria: false });
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-5 animate-fade-in-up-delay-3">
