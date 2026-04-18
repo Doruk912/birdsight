@@ -114,6 +114,7 @@ export interface IdentificationResponse {
   comment: string | null;
   current: boolean;
   withdrawn: boolean;
+  disagreeing?: boolean;
   createdAt: string;
 }
 

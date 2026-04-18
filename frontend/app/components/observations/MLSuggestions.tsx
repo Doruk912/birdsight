@@ -145,12 +145,12 @@ export default function MLSuggestions({
           )}
           {isMedConf && (
             <p className="text-xs text-violet-700 font-medium leading-snug">
-              Top AI prediction — but these species are also possible:
+              Top AI prediction - but these species are also possible:
             </p>
           )}
           {!isHighConf && !isMedConf && (
             <p className="text-xs text-violet-700 font-medium leading-snug">
-              The model is uncertain — here are its best guesses:
+              The model is uncertain - here are its best guesses:
             </p>
           )}
 

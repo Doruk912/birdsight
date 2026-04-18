@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import MapGL, { Marker, NavigationControl } from "react-map-gl/maplibre";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { MapPin, Crosshair } from "lucide-react";
 
 const MAP_STYLE = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
@@ -13,9 +14,9 @@ interface LocationPickerProps {
 export default function LocationPicker({ onLocationChange }: LocationPickerProps) {
   // Default roughly centered, user can pan or use current location
   const [viewState, setViewState] = useState({
-    longitude: -0.1276,
-    latitude: 51.5072,
-    zoom: 8
+    longitude: 28.9784,
+    latitude: 41.0082,
+    zoom: 10
   });
   const [marker, setMarker] = useState<{lat: number; lng: number} | null>(null);
 
@@ -50,7 +51,7 @@ export default function LocationPicker({ onLocationChange }: LocationPickerProps
         </button>
       </div>
 
-      <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm relative h-[360px] bg-stone-100">
+      <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm relative h-90 bg-stone-100">
         <MapGL
           {...viewState}
           onMove={evt => setViewState(evt.viewState)}
@@ -62,7 +63,12 @@ export default function LocationPicker({ onLocationChange }: LocationPickerProps
           <NavigationControl position="top-right" showCompass={false} />
           {marker && (
             <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
-              <MapPin size={32} className="text-emerald-600 drop-shadow-md" fill="white" />
+              <div className="relative z-10 flex items-center justify-center" aria-label="Selected location marker">
+                <span className="absolute w-8 h-8 rounded-full bg-emerald-500/25 animate-pulse" />
+                <span className="relative flex items-center justify-center w-9 h-9 rounded-full bg-emerald-600 border-2 border-white shadow-lg">
+                  <MapPin size={16} className="text-white" />
+                </span>
+              </div>
             </Marker>
           )}
         </MapGL>

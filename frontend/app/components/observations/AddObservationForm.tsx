@@ -7,7 +7,13 @@ import LocationPicker from "./LocationPicker";
 import TaxonSearch from "./TaxonSearch";
 import DateTimePicker from "./DateTimePicker";
 import MLSuggestions from "./MLSuggestions";
+import ImageCropperModal from "./ImageCropperModal";
 import { createObservation, addIdentification } from "@/app/lib/observationService";
+
+interface PendingImage {
+  file: File;
+  url: string;
+}
 
 export default function AddObservationForm() {
   const router = useRouter();
@@ -20,37 +26,35 @@ export default function AddObservationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Cropping state flow
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+
   // ML suggestion state
-  const [mlImageFile, setMlImageFile] = useState<File | undefined>();
+  const [activeMlIndex, setActiveMlIndex] = useState<number>(0);
   const [taxonSearchKey, setTaxonSearchKey] = useState(0);
 
   useEffect(() => {
     return () => {
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      pendingImages.forEach((img) => URL.revokeObjectURL(img.url));
     };
-  }, [previewUrls]);
+  }, [previewUrls, pendingImages]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      // Revoke existing URLs before replacing them
-      previewUrls.forEach((url) => URL.revokeObjectURL(url));
-
       const selected = Array.from(e.target.files);
-      const newImages = [...images, ...selected].slice(0, 5); // Max 5
-      setImages(newImages);
+      if (selected.length === 0) return;
 
-      const urls = newImages.map((file) => URL.createObjectURL(file));
-      setPreviewUrls(urls);
-
-      // Trigger ML prediction on the first image
-      if (newImages.length > 0) {
-        setMlImageFile(newImages[0]);
-      }
+      const newPending = selected.map(file => ({
+        file,
+        url: URL.createObjectURL(file)
+      }));
+      
+      setPendingImages(prev => [...prev, ...newPending]);
     }
   };
 
   const removeImage = (index: number) => {
-    // Revoke the URL we're removing
     const urlToRemove = previewUrls[index];
     if (urlToRemove) URL.revokeObjectURL(urlToRemove);
 
@@ -62,14 +66,50 @@ export default function AddObservationForm() {
     newUrls.splice(index, 1);
     setPreviewUrls(newUrls);
 
-    // Update ML image if the first image was removed
-    if (index === 0) {
-      setMlImageFile(newImages.length > 0 ? newImages[0] : undefined);
+    // Adjust activeMlIndex
+    if (activeMlIndex === index) {
+      setActiveMlIndex(0);
+    } else if (activeMlIndex > index) {
+      setActiveMlIndex(activeMlIndex - 1);
     }
   };
 
+  const handleCropComplete = (croppedBlob: Blob) => {
+    const currentPending = pendingImages[0];
+    const croppedFile = new File([croppedBlob], currentPending.file.name, { type: "image/jpeg" });
+    const newImageUrl = URL.createObjectURL(croppedBlob);
+    
+    if (images.length < 5) {
+      setImages(prev => [...prev, croppedFile]);
+      setPreviewUrls(prev => [...prev, newImageUrl]);
+    } else {
+      URL.revokeObjectURL(newImageUrl); // max 5
+    }
+    
+    // Remove from pending
+    URL.revokeObjectURL(currentPending.url);
+    setPendingImages(prev => prev.slice(1));
+  };
+
+  const handleCropCancel = () => {
+    const currentPending = pendingImages[0];
+    URL.revokeObjectURL(currentPending.url);
+    setPendingImages(prev => prev.slice(1));
+  };
+
+  const handleCropSkip = () => {
+    const currentPending = pendingImages[0];
+    if (images.length < 5) {
+      setImages(prev => [...prev, currentPending.file]);
+      setPreviewUrls(prev => [...prev, currentPending.url]);
+    } else {
+      URL.revokeObjectURL(currentPending.url);
+    }
+    setPendingImages(prev => prev.slice(1));
+  };
+
   const handleMLSelect = useCallback(
-    (selectedTaxonId: string, commonName: string | null, scientificName: string) => {
+    (selectedTaxonId: string) => {
       setTaxonId(selectedTaxonId);
       // Force TaxonSearch to re-render with the selected suggestion
       setTaxonSearchKey((k) => k + 1);
@@ -127,26 +167,31 @@ export default function AddObservationForm() {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-stone-200 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05),0_10px_20px_-2px_rgba(0,0,0,0.02)] p-6 md:p-10 mb-20 max-w-4xl mx-auto overflow-hidden relative">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
+    <div className="bg-white rounded-3xl border border-stone-200 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05),0_10px_20px_-2px_rgba(0,0,0,0.02)] p-6 md:p-8 mb-16 max-w-4xl mx-auto overflow-hidden relative">
+      {/* Cropper Modal triggers automatically if pendingImages has items and under max 5 boundary */}
+      {pendingImages.length > 0 && images.length < 5 && (
+        <ImageCropperModal
+          imageUrl={pendingImages[0].url}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          onSkip={handleCropSkip}
+          title={`Crop Photo (${images.length + 1} of 5)`}
+        />
+      )}
+
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-emerald-400 to-emerald-600"></div>
       
-      <div className="mb-10 mt-2">
+      <div className="mb-8 mt-2">
         <h1 className="text-[2.2rem] leading-tight font-extrabold tracking-tight text-stone-800">Add Observation</h1>
         <p className="text-stone-500 mt-2 text-base font-medium">Contribute to the BirdSight community by sharing what you saw.</p>
       </div>
 
-      {error && (
-        <div className="mb-8 p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100 font-semibold flex items-center">
-          <div className="w-1.5 h-full min-h-[1.5rem] bg-red-500 rounded-full mr-3"></div>
-          {error}
-        </div>
-      )}
+      <form onSubmit={handleSubmit} className="space-y-10">
 
-      <form onSubmit={handleSubmit} className="space-y-12">
-        
-        {/* Images section */}
-        <section>
-          <div className="flex items-center justify-between mb-5">
+        <div className="space-y-10">
+          {/* Images section */}
+          <section>
+          <div className="flex items-center justify-between mb-4">
             <label className="text-lg font-bold tracking-tight text-stone-800 flex items-center gap-2.5">
               <span className="flex items-center justify-center p-1.5 bg-emerald-100 rounded-lg text-emerald-700">
                 <Camera size={20} strokeWidth={2.5} />
@@ -158,12 +203,20 @@ export default function AddObservationForm() {
 
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             {previewUrls.map((url, i) => (
-              <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-stone-200 shadow-sm group">
+              <div 
+                key={i} 
+                onClick={() => setActiveMlIndex(i)}
+                className={`relative aspect-square rounded-2xl overflow-hidden shadow-sm group cursor-pointer transition-all duration-200 border-2 ${activeMlIndex === i ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-stone-200 hover:border-violet-300'}`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+
                 <button
                   type="button"
-                  onClick={() => removeImage(i)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeImage(i);
+                  }}
                   className="absolute top-2 right-2 bg-stone-900/60 backdrop-blur-sm text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
                 >
                   <X size={14} strokeWidth={2.5} />
@@ -172,7 +225,7 @@ export default function AddObservationForm() {
             ))}
             
             {images.length < 5 && (
-              <label className="aspect-square flex flex-col items-center justify-center gap-2.5 border-2 border-dashed border-stone-300 rounded-2xl bg-stone-50 hover:bg-emerald-50/50 hover:border-emerald-400 hover:text-emerald-600 transition-all cursor-pointer text-stone-500 shadow-sm group">
+              <label className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-stone-300 rounded-2xl bg-stone-50 hover:bg-emerald-50/50 hover:border-emerald-400 hover:text-emerald-600 transition-all cursor-pointer text-stone-500 shadow-sm group">
                 <div className="p-3 bg-white rounded-full shadow-sm group-hover:bg-emerald-100 transition-colors">
                   <ImagePlus size={22} strokeWidth={2} />
                 </div>
@@ -181,30 +234,34 @@ export default function AddObservationForm() {
                   type="file"
                   accept="image/*"
                   multiple
+                  // Fix so event triggers when same file appended twice consecutively
+                  onClick={(e) => (e.target as HTMLInputElement).value = ''}
                   onChange={handleImageChange}
                   className="hidden"
                 />
               </label>
             )}
           </div>
-        </section>
 
-        {/* ML Suggestions — shown after photos are uploaded */}
-        {mlImageFile && (
-          <section>
-            <MLSuggestions
-              imageFile={mlImageFile}
-              onSelect={handleMLSelect}
-            />
           </section>
-        )}
 
-        <hr className="border-stone-100" />
+          {/* ML Suggestions — shown based on currently selected active image */}
+          {images.length > 0 && images[activeMlIndex] && (
+            <section>
+              <MLSuggestions
+                imageFile={images[activeMlIndex]}
+                onSelect={handleMLSelect}
+              />
+            </section>
+          )}
 
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14">
-          <section className="space-y-8">
+          <hr className="border-stone-100" />
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-10">
+          <section className="space-y-6">
             <div>
-              <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2.5">When did you see it? <span className="text-red-500">*</span></label>
+              <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">When did you see it? <span className="text-red-500">*</span></label>
               <DateTimePicker
                 value={observedAtDate}
                 onChange={setObservedAtDate}
@@ -213,7 +270,7 @@ export default function AddObservationForm() {
             </div>
             
             <div>
-              <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2.5">Description <span className="text-stone-400 font-normal">(Optional)</span></label>
+              <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">Description <span className="text-stone-400 font-normal">(Optional)</span></label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -223,8 +280,8 @@ export default function AddObservationForm() {
               />
             </div>
 
-            <div className="pt-2">
-              <TaxonSearch key={taxonSearchKey} onSelect={setTaxonId} initialTaxonId={taxonId} />
+            <div>
+              <TaxonSearch key={taxonSearchKey} onSelect={setTaxonId} initialTaxonId={taxonId} label="Identification" />
             </div>
           </section>
 
@@ -233,11 +290,18 @@ export default function AddObservationForm() {
           </section>
         </div>
 
-        <div className="flex justify-end pt-8 mt-4 border-t border-stone-100">
+        {error && (
+          <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100 font-semibold flex items-center">
+            <div className="min-w-1 h-full min-h-6 bg-red-500 rounded-full mr-3"></div>
+            {error}
+          </div>
+        )}
+
+        <div className="flex justify-end pt-6 mt-2 border-t border-stone-100">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold py-3.5 px-8 rounded-full transition-all flex items-center justify-center min-w-[220px] shadow-[0_8px_16px_-6px_rgba(5,150,105,0.4)] hover:shadow-[0_12px_20px_-8px_rgba(5,150,105,0.6)] transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-none"
+            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold py-3.5 px-8 rounded-full transition-all flex items-center justify-center min-w-55 shadow-[0_8px_16px_-6px_rgba(5,150,105,0.4)] hover:shadow-[0_12px_20px_-8px_rgba(5,150,105,0.6)] transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-none"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
