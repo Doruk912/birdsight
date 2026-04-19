@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
@@ -39,6 +40,7 @@ public class ObservationService {
     private final StorageService storageService;
     private final IdentificationRepository identificationRepository;
     private final CommentRepository commentRepository;
+    private final ReverseGeocodingService reverseGeocodingService;
 
     @Transactional
     public ObservationResponse createObservation(String userEmail, CreateObservationRequest request,
@@ -58,7 +60,7 @@ public class ObservationService {
                 .description(request.getDescription())
                 .observedAt(Instant.parse(request.getObservedAt()))
                 .location(GEOMETRY_FACTORY.createPoint(new Coordinate(request.getLongitude(), request.getLatitude())))
-                .locationName(request.getLocationName())
+                .locationName(resolveLocationName(request))
                 .qualityGrade(QualityGrade.NEEDS_ID)
                 .build();
 
@@ -77,6 +79,20 @@ public class ObservationService {
         }
 
         return observationMapper.toResponse(saved, 0, 0);
+    }
+
+    private String resolveLocationName(CreateObservationRequest request) {
+        if (StringUtils.hasText(request.getLocationName())) {
+            return request.getLocationName().trim();
+        }
+
+        if (request.getLatitude() == null || request.getLongitude() == null) {
+            return null;
+        }
+
+        return reverseGeocodingService
+                .reverseGeocode(request.getLatitude(), request.getLongitude())
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
