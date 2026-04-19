@@ -44,7 +44,7 @@ public class ObservationMapper {
                 .build();
     }
 
-    public ObservationMapResponse toMapResponse(Observation obs) {
+    public ObservationMapResponse toMapResponse(Observation obs, int identificationCount) {
         String thumbnail = obs.getImages().isEmpty() ? null : obs.getImages().getFirst().getImageUrl();
         return ObservationMapResponse.builder()
                 .id(obs.getId())
@@ -58,6 +58,10 @@ public class ObservationMapper {
                         : null)
                 .qualityGrade(obs.getQualityGrade())
                 .thumbnailUrl(thumbnail)
+                .observedAt(obs.getObservedAt())
+                .identificationCount(identificationCount)
+                .username(obs.getUser().getUsername())
+                .locationName(obs.getLocationName())
                 .build();
     }
 }

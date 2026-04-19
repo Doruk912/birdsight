@@ -3,6 +3,7 @@ package com.birdsight.observation.dto;
 import com.birdsight.observation.QualityGrade;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -22,4 +23,8 @@ public class ObservationMapResponse {
     private String speciesScientificName;
     private QualityGrade qualityGrade;
     private String thumbnailUrl;
+    private Instant observedAt;
+    private int identificationCount;
+    private String username;
+    private String locationName;
 }

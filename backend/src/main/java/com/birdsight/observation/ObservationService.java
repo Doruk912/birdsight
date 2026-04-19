@@ -142,7 +142,10 @@ public class ObservationService {
         Specification<Observation> spec = ObservationSpecification.withFilters(filter, descendantIds);
         return observationRepository.findAll(spec)
                 .stream()
-                .map(observationMapper::toMapResponse)
+                .map(obs -> {
+                    int idCount = (int) identificationRepository.countByObservationId(obs.getId());
+                    return observationMapper.toMapResponse(obs, idCount);
+                })
                 .toList();
     }
 
@@ -249,7 +252,20 @@ public class ObservationService {
             return;
         }
 
-        List<Taxon> currentTaxa = taxonRepository.findAllById(currentTaxonIds);
+        // Resolve each taxon ID individually to preserve duplicates.
+        // JPA's findAllById deduplicates, which breaks consensus + grade checks
+        // when multiple users identify the same species.
+        Map<UUID, Taxon> taxonCache = new HashMap<>();
+        for (UUID tid : currentTaxonIds) {
+            if (!taxonCache.containsKey(tid)) {
+                taxonRepository.findById(tid).ifPresent(t -> taxonCache.put(tid, t));
+            }
+        }
+        List<Taxon> currentTaxa = currentTaxonIds.stream()
+                .map(taxonCache::get)
+                .filter(Objects::nonNull)
+                .toList();
+
         Taxon communityTaxon = calculateCommunityTaxon(currentTaxa);
         
         obs.setCommunityTaxon(communityTaxon);
