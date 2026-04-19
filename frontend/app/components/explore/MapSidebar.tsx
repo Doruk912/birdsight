@@ -233,6 +233,7 @@ export default function MapSidebar({
                     onSelect={(taxonId) => updatePending({ taxonId })}
                     initialTaxonId={pendingFilters.taxonId}
                     label=""
+                    hideOptional
                   />
                 </div>
 

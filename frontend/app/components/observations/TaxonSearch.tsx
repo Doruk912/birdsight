@@ -13,9 +13,10 @@ interface TaxonSearchProps {
   /** Optional initial taxon ID to pre-populate (e.g. from ML suggestion). */
   initialTaxonId?: string;
   label?: string;
+  hideOptional?: boolean;
 }
 
-export default function TaxonSearch({ onSelect, initialTaxonId, label = "Identification" }: TaxonSearchProps) {
+export default function TaxonSearch({ onSelect, initialTaxonId, label = "Identification", hideOptional = false }: TaxonSearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TaxonResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,9 +99,11 @@ export default function TaxonSearch({ onSelect, initialTaxonId, label = "Identif
 
   return (
     <div className="relative" ref={wrapperRef}>
-      <label className="block text-sm font-medium text-stone-700 mb-2">
-        {label} <span className="text-stone-400 font-normal">(Optional)</span>
-      </label>
+      {label && (
+        <label className="block text-sm font-medium text-stone-700 mb-2">
+          {label} {!hideOptional && <span className="text-stone-400 font-normal">(Optional)</span>}
+        </label>
+      )}
       
       {selected ? (
         <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">

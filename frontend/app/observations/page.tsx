@@ -150,6 +150,7 @@ export default function ObservationsPage() {
                   onSelect={(taxonId) => updatePending({ taxonId })}
                   initialTaxonId={pendingFilters.taxonId}
                   label=""
+                  hideOptional
                 />
               </div>
 
