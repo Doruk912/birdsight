@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { MapObservation, ObservationFilterParams } from "@/app/types/explore";
 import { fetchMapObservations } from "@/app/lib/observationService";
@@ -18,58 +18,23 @@ export default function ExplorePage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Filters (shared between sidebar and map)
+  // Active filters = what is currently applied
   const [filters, setFilters] = useState<ObservationFilterParams>({});
-  const [bounds, setBounds] = useState<{
-    swLat: number;
-    swLng: number;
-    neLat: number;
-    neLng: number;
-  } | null>(null);
-
-  // Debounce timer ref
-  const boundsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Handle viewport bounds change from the map (debounced)
-  const handleBoundsChange = useCallback(
-    (newBounds: {
-      swLat: number;
-      swLng: number;
-      neLat: number;
-      neLng: number;
-    }) => {
-      if (boundsTimerRef.current) {
-        clearTimeout(boundsTimerRef.current);
-      }
-      boundsTimerRef.current = setTimeout(() => {
-        setBounds(newBounds);
-      }, 600);
-    },
-    []
+  // Pending filters = what the user is editing (not yet applied)
+  const [pendingFilters, setPendingFilters] = useState<ObservationFilterParams>(
+    {}
   );
 
-  // Fetch observations whenever filters or bounds change
+  // Fetch observations whenever active filters change
   useEffect(() => {
-    const combinedFilters: ObservationFilterParams = {
-      ...filters,
-      ...(bounds
-        ? {
-            swLat: bounds.swLat,
-            swLng: bounds.swLng,
-            neLat: bounds.neLat,
-            neLng: bounds.neLng,
-          }
-        : {}),
-    };
-
     setLoading(true);
-    fetchMapObservations(combinedFilters)
+    fetchMapObservations(filters)
       .then((data) => {
         setObservations(data);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [filters, bounds]);
+  }, [filters]);
 
   const handleSelectObservation = useCallback(
     (obs: MapObservation | null) => {
@@ -78,23 +43,61 @@ export default function ExplorePage() {
     []
   );
 
-  const handleSidebarSelect = useCallback(
-    (obs: MapObservation) => {
-      setSelectedId(obs.id);
-      window.dispatchEvent(
-        new CustomEvent("birdsight:flyto", {
-          detail: { longitude: obs.longitude, latitude: obs.latitude },
-        })
-      );
+  const handleSidebarSelect = useCallback((obs: MapObservation) => {
+    setSelectedId(obs.id);
+    window.dispatchEvent(
+      new CustomEvent("birdsight:flyto", {
+        detail: { longitude: obs.longitude, latitude: obs.latitude },
+      })
+    );
+  }, []);
+
+  // Apply pending filters → become active filters
+  const handleApplyFilters = useCallback(() => {
+    setFilters({ ...pendingFilters });
+  }, [pendingFilters]);
+
+  // Clear all filters
+  const handleClearFilters = useCallback(() => {
+    setPendingFilters({});
+    setFilters({});
+  }, []);
+
+  // Bounding box from map drawing
+  const handleBoundingBoxDraw = useCallback(
+    (
+      bounds: {
+        swLat: number;
+        swLng: number;
+        neLat: number;
+        neLng: number;
+      } | null
+    ) => {
+      if (bounds) {
+        const updated = {
+          ...pendingFilters,
+          swLat: bounds.swLat,
+          swLng: bounds.swLng,
+          neLat: bounds.neLat,
+          neLng: bounds.neLng,
+        };
+        setPendingFilters(updated);
+        // Auto-apply when a bounding box is drawn
+        setFilters(updated);
+      } else {
+        const { swLat, swLng, neLat, neLng, ...rest } = pendingFilters;
+        setPendingFilters(rest);
+        setFilters(rest);
+      }
     },
-    []
+    [pendingFilters]
   );
 
   return (
     <div className="fixed inset-0 top-16 bg-stone-50">
       {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/60 backdrop-blur-sm pointer-events-none">
           <div className="flex items-center gap-3 text-stone-500">
             <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
               <circle
@@ -122,7 +125,7 @@ export default function ExplorePage() {
         observations={observations}
         selectedId={selectedId}
         onSelectObservation={handleSelectObservation}
-        onBoundsChange={handleBoundsChange}
+        onBoundingBoxDraw={handleBoundingBoxDraw}
       />
 
       {/* Sidebar overlays on top of the map */}
@@ -130,8 +133,11 @@ export default function ExplorePage() {
         observations={observations}
         selectedId={selectedId}
         onSelectObservation={handleSidebarSelect}
-        filters={filters}
-        onFiltersChange={setFilters}
+        pendingFilters={pendingFilters}
+        onPendingFiltersChange={setPendingFilters}
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
+        loading={loading}
       />
     </div>
   );

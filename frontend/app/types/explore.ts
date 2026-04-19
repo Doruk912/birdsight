@@ -2,13 +2,14 @@ export interface MapObservation {
   id: string;
   species: string;
   speciesScientific?: string;
-  location: string;
-  user: string;
-  timeAgo: string;
   qualityGrade: "NEEDS_ID" | "RESEARCH_GRADE";
   latitude: number;
   longitude: number;
   thumbnailUrl?: string;
+  observedAt?: string;
+  identificationCount: number;
+  username?: string;
+  locationName?: string;
 }
 
 export interface PageResponse<T> {
@@ -27,6 +28,10 @@ export interface ObservationMapApiResponse {
   speciesScientificName: string | null;
   qualityGrade: "NEEDS_ID" | "RESEARCH_GRADE";
   thumbnailUrl: string | null;
+  observedAt: string | null;
+  identificationCount: number;
+  username: string | null;
+  locationName: string | null;
 }
 
 export interface ObservationDetailResponse {

@@ -3,27 +3,33 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import MapGL, {
-  Marker,
-  Popup,
   NavigationControl,
   GeolocateControl,
   ScaleControl,
   MapRef,
-  ViewStateChangeEvent,
+  Source,
+  Layer,
 } from "react-map-gl/maplibre";
+import type { MapLayerMouseEvent, GeoJSONSource } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapObservation } from "@/app/types/explore";
+import {
+  Calendar,
+  MessageCircle,
+  Pencil,
+  X,
+} from "lucide-react";
 
 interface ObservationMapProps {
   observations: MapObservation[];
   selectedId: string | null;
   onSelectObservation: (obs: MapObservation | null) => void;
-  onBoundsChange?: (bounds: {
+  onBoundingBoxDraw?: (bounds: {
     swLat: number;
     swLng: number;
     neLat: number;
     neLng: number;
-  }) => void;
+  } | null) => void;
 }
 
 const INITIAL_VIEW = {
@@ -35,64 +41,174 @@ const INITIAL_VIEW = {
 const MAP_STYLE =
   "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
 
+function observationsToGeoJSON(observations: MapObservation[]) {
+  return {
+    type: "FeatureCollection" as const,
+    features: observations.map((obs) => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [obs.longitude, obs.latitude],
+      },
+      properties: {
+        id: obs.id,
+        species: obs.species,
+        speciesScientific: obs.speciesScientific || "",
+        qualityGrade: obs.qualityGrade,
+        thumbnailUrl: obs.thumbnailUrl || "",
+        observedAt: obs.observedAt || "",
+        identificationCount: obs.identificationCount ?? 0,
+        username: obs.username || "",
+        locationName: obs.locationName || "",
+      },
+    })),
+  };
+}
+
 export default function ObservationMap({
   observations,
-  selectedId,
   onSelectObservation,
-  onBoundsChange,
+  onBoundingBoxDraw,
 }: ObservationMapProps) {
   const mapRef = useRef<MapRef>(null);
-  const [popupObs, setPopupObs] = useState<MapObservation | null>(null);
+  const [popupData, setPopupData] = useState<{
+    obs: MapObservation;
+    x: number;
+    y: number;
+  } | null>(null);
 
-  const handleMarkerClick = useCallback(
-    (obs: MapObservation) => {
-      onSelectObservation(obs);
-      setPopupObs(obs);
-      mapRef.current?.flyTo({
-        center: [obs.longitude, obs.latitude],
-        zoom: Math.max(mapRef.current.getZoom(), 12),
-        duration: 1200,
+  // Bounding box drawing state
+  const [drawingMode, setDrawingMode] = useState(false);
+  const [drawStart, setDrawStart] = useState<{
+    lng: number;
+    lat: number;
+  } | null>(null);
+  const [drawnBox, setDrawnBox] = useState<{
+    swLat: number;
+    swLng: number;
+    neLat: number;
+    neLng: number;
+  } | null>(null);
+
+  const geojson = observationsToGeoJSON(observations);
+
+  // --- Click handlers ---
+
+  const handleMapClick = useCallback(
+    (e: MapLayerMouseEvent) => {
+      if (drawingMode) return;
+
+      const map = mapRef.current?.getMap();
+      if (!map) return;
+
+      // Check cluster click first
+      const clusterFeatures = map.queryRenderedFeatures(e.point, {
+        layers: ["cluster-circles"],
       });
+      if (clusterFeatures.length > 0) {
+        const feature = clusterFeatures[0];
+        const clusterId = feature.properties?.cluster_id;
+        const source = map.getSource("observations") as GeoJSONSource;
+        if (source && clusterId !== undefined) {
+          source.getClusterExpansionZoom(clusterId).then((zoom) => {
+            const geom = feature.geometry;
+            if (geom.type === "Point") {
+              map.flyTo({
+                center: [geom.coordinates[0], geom.coordinates[1]],
+                zoom: zoom + 1,
+                duration: 800,
+              });
+            }
+          });
+        }
+        return;
+      }
+
+      // Check unclustered point click
+      const pointFeatures = map.queryRenderedFeatures(e.point, {
+        layers: ["unclustered-points"],
+      });
+      if (pointFeatures.length > 0) {
+        const props = pointFeatures[0].properties;
+        if (!props) return;
+        const obs: MapObservation = {
+          id: props.id,
+          species: props.species,
+          speciesScientific: props.speciesScientific || undefined,
+          qualityGrade: props.qualityGrade,
+          latitude: e.lngLat.lat,
+          longitude: e.lngLat.lng,
+          thumbnailUrl: props.thumbnailUrl || undefined,
+          observedAt: props.observedAt || undefined,
+          identificationCount: props.identificationCount ?? 0,
+          username: props.username || undefined,
+          locationName: props.locationName || undefined,
+        };
+        onSelectObservation(obs);
+        setPopupData({ obs, x: e.point.x, y: e.point.y });
+        return;
+      }
+
+      // Clicked empty map
+      setPopupData(null);
     },
-    [onSelectObservation]
+    [drawingMode, onSelectObservation]
   );
 
-  const handleClosePopup = useCallback(() => {
-    setPopupObs(null);
+  // Close popup
+  const closePopup = useCallback(() => {
+    setPopupData(null);
   }, []);
 
-  // Emit viewport bounds when the map stops moving
-  const handleMoveEnd = useCallback(
-    (e: ViewStateChangeEvent) => {
-      if (!onBoundsChange || !mapRef.current) return;
-      const map = mapRef.current.getMap();
-      const b = map.getBounds();
-      if (b) {
-        onBoundsChange({
-          swLat: b.getSouthWest().lat,
-          swLng: b.getSouthWest().lng,
-          neLat: b.getNorthEast().lat,
-          neLng: b.getNorthEast().lng,
-        });
-      }
+  // --- Bounding box drawing ---
+  const handleMouseDown = useCallback(
+    (e: MapLayerMouseEvent) => {
+      if (!drawingMode) return;
+      e.preventDefault();
+      setDrawStart({ lng: e.lngLat.lng, lat: e.lngLat.lat });
     },
-    [onBoundsChange]
+    [drawingMode]
   );
 
-  // Emit initial bounds once the map loads
-  const handleLoad = useCallback(() => {
-    if (!onBoundsChange || !mapRef.current) return;
-    const map = mapRef.current.getMap();
-    const b = map.getBounds();
-    if (b) {
-      onBoundsChange({
-        swLat: b.getSouthWest().lat,
-        swLng: b.getSouthWest().lng,
-        neLat: b.getNorthEast().lat,
-        neLng: b.getNorthEast().lng,
-      });
+  const handleMouseUp = useCallback(
+    (e: MapLayerMouseEvent) => {
+      if (!drawingMode || !drawStart) return;
+      const box = {
+        swLat: Math.min(drawStart.lat, e.lngLat.lat),
+        swLng: Math.min(drawStart.lng, e.lngLat.lng),
+        neLat: Math.max(drawStart.lat, e.lngLat.lat),
+        neLng: Math.max(drawStart.lng, e.lngLat.lng),
+      };
+      setDrawnBox(box);
+      setDrawStart(null);
+      setDrawingMode(false);
+      onBoundingBoxDraw?.(box);
+    },
+    [drawingMode, drawStart, onBoundingBoxDraw]
+  );
+
+  const clearBoundingBox = useCallback(() => {
+    setDrawnBox(null);
+    onBoundingBoxDraw?.(null);
+  }, [onBoundingBoxDraw]);
+
+  // Toggle drawing mode cursor
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+    map.getCanvas().style.cursor = drawingMode ? "crosshair" : "";
+  }, [drawingMode]);
+
+  // Disable map drag during drawing
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+    if (drawingMode) {
+      map.dragPan.disable();
+    } else {
+      map.dragPan.enable();
     }
-  }, [onBoundsChange]);
+  }, [drawingMode]);
 
   // Listen for fly-to events from the sidebar
   useEffect(() => {
@@ -100,7 +216,7 @@ export default function ObservationMap({
       const { longitude, latitude } = (e as CustomEvent).detail;
       mapRef.current?.flyTo({
         center: [longitude, latitude],
-        zoom: Math.max(mapRef.current.getZoom(), 12),
+        zoom: Math.max(mapRef.current.getZoom(), 14),
         duration: 1200,
       });
     };
@@ -108,15 +224,62 @@ export default function ObservationMap({
     return () => window.removeEventListener("birdsight:flyto", handler);
   }, []);
 
-  const getGradeStyle = (grade: string) => {
-    if (grade === "RESEARCH_GRADE") return "bg-emerald-100 text-emerald-700";
-    return "bg-amber-100 text-amber-700";
-  };
+  // Hover cursor for interactive layers
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
 
-  const getGradeLabel = (grade: string) => {
-    if (grade === "RESEARCH_GRADE") return "Research Grade";
-    return "Needs ID";
-  };
+    const setCursor = () => {
+      if (!drawingMode) map.getCanvas().style.cursor = "pointer";
+    };
+    const resetCursor = () => {
+      if (!drawingMode) map.getCanvas().style.cursor = "";
+    };
+
+    map.on("mouseenter", "cluster-circles", setCursor);
+    map.on("mouseleave", "cluster-circles", resetCursor);
+    map.on("mouseenter", "unclustered-points", setCursor);
+    map.on("mouseleave", "unclustered-points", resetCursor);
+
+    return () => {
+      map.off("mouseenter", "cluster-circles", setCursor);
+      map.off("mouseleave", "cluster-circles", resetCursor);
+      map.off("mouseenter", "unclustered-points", setCursor);
+      map.off("mouseleave", "unclustered-points", resetCursor);
+    };
+  }, [drawingMode]);
+
+  // Build bounding box GeoJSON for drawing overlay
+  const bboxGeoJSON = drawnBox
+    ? {
+        type: "FeatureCollection" as const,
+        features: [
+          {
+            type: "Feature" as const,
+            geometry: {
+              type: "Polygon" as const,
+              coordinates: [
+                [
+                  [drawnBox.swLng, drawnBox.swLat],
+                  [drawnBox.neLng, drawnBox.swLat],
+                  [drawnBox.neLng, drawnBox.neLat],
+                  [drawnBox.swLng, drawnBox.neLat],
+                  [drawnBox.swLng, drawnBox.swLat],
+                ],
+              ],
+            },
+            properties: {},
+          },
+        ],
+      }
+    : { type: "FeatureCollection" as const, features: [] };
+
+  const getGradeLabel = (grade: string) =>
+    grade === "RESEARCH_GRADE" ? "Research Grade" : "Needs ID";
+  const getGradeStyle = (grade: string) =>
+    grade === "RESEARCH_GRADE"
+      ? "bg-emerald-100 text-emerald-700"
+      : "bg-amber-100 text-amber-700";
 
   return (
     <div className="relative w-full h-full">
@@ -127,122 +290,304 @@ export default function ObservationMap({
         mapStyle={MAP_STYLE}
         attributionControl={false}
         reuseMaps
-        onMoveEnd={handleMoveEnd}
-        onLoad={handleLoad}
+        interactiveLayerIds={["cluster-circles", "unclustered-points"]}
+        onClick={handleMapClick}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       >
         {/* Controls */}
         <NavigationControl position="bottom-right" showCompass visualizePitch />
         <GeolocateControl position="bottom-right" />
         <ScaleControl position="bottom-left" />
 
-        {/* Markers */}
-        {observations.map((obs) => {
-          const isSelected = selectedId === obs.id;
-          const isResearchGrade = obs.qualityGrade === "RESEARCH_GRADE";
+        {/* Observation GeoJSON Source with clustering */}
+        <Source
+          id="observations"
+          type="geojson"
+          data={geojson}
+          cluster={true}
+          clusterMaxZoom={14}
+          clusterRadius={60}
+        >
+          {/* Heatmap layer — visible at low zoom */}
+          <Layer
+            id="heatmap-layer"
+            type="heatmap"
+            maxzoom={11}
+            paint={{
+              "heatmap-weight": 1,
+              "heatmap-intensity": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                0,
+                0.6,
+                11,
+                1.2,
+              ],
+              "heatmap-color": [
+                "interpolate",
+                ["linear"],
+                ["heatmap-density"],
+                0,
+                "rgba(16,185,129,0)",
+                0.1,
+                "rgba(16,185,129,0.15)",
+                0.3,
+                "rgba(16,185,129,0.35)",
+                0.5,
+                "rgba(5,150,105,0.55)",
+                0.7,
+                "rgba(4,120,87,0.7)",
+                1,
+                "rgba(6,95,70,0.9)",
+              ],
+              "heatmap-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                0,
+                8,
+                6,
+                25,
+                11,
+                40,
+              ],
+              "heatmap-opacity": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                9,
+                0.8,
+                11,
+                0,
+              ],
+            }}
+          />
 
-          return (
-            <Marker
-              key={obs.id}
-              longitude={obs.longitude}
-              latitude={obs.latitude}
-              anchor="center"
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                handleMarkerClick(obs);
-              }}
+          {/* Cluster circle layer — visible at medium zoom */}
+          <Layer
+            id="cluster-circles"
+            type="circle"
+            filter={["has", "point_count"]}
+            paint={{
+              "circle-color": [
+                "step",
+                ["get", "point_count"],
+                "#6ee7b7",
+                5,
+                "#34d399",
+                15,
+                "#10b981",
+                30,
+                "#059669",
+              ],
+              "circle-radius": [
+                "step",
+                ["get", "point_count"],
+                18,
+                5,
+                22,
+                15,
+                28,
+                30,
+                34,
+              ],
+              "circle-stroke-width": 2,
+              "circle-stroke-color": "rgba(255,255,255,0.8)",
+              "circle-opacity": 0.9,
+            }}
+          />
+
+          {/* Cluster count label */}
+          <Layer
+            id="cluster-count"
+            type="symbol"
+            filter={["has", "point_count"]}
+            layout={{
+              "text-field": "{point_count_abbreviated}",
+              "text-size": 13,
+              "text-font": ["Open Sans Bold"],
+              "text-allow-overlap": true,
+            }}
+            paint={{
+              "text-color": "#fff",
+            }}
+          />
+
+          {/* Unclustered individual points */}
+          <Layer
+            id="unclustered-points"
+            type="circle"
+            filter={["!", ["has", "point_count"]]}
+            paint={{
+              "circle-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                10,
+                4,
+                14,
+                6,
+                18,
+                8,
+              ],
+              "circle-color": [
+                "case",
+                ["==", ["get", "qualityGrade"], "RESEARCH_GRADE"],
+                "#10b981",
+                "#f59e0b",
+              ],
+              "circle-stroke-width": 2,
+              "circle-stroke-color": "#fff",
+              "circle-opacity": 0.9,
+            }}
+          />
+        </Source>
+
+        {/* Bounding box overlay */}
+        <Source id="bbox-overlay" type="geojson" data={bboxGeoJSON}>
+          <Layer
+            id="bbox-fill"
+            type="fill"
+            paint={{
+              "fill-color": "#10b981",
+              "fill-opacity": 0.08,
+            }}
+          />
+          <Layer
+            id="bbox-outline"
+            type="line"
+            paint={{
+              "line-color": "#10b981",
+              "line-width": 2,
+              "line-dasharray": [4, 3],
+            }}
+          />
+        </Source>
+      </MapGL>
+
+      {/* Popup — rendered as an HTML overlay for rich content */}
+      {popupData && (
+        <div
+          className="map-popup-container"
+          style={{
+            position: "absolute",
+            left: popupData.x,
+            top: popupData.y,
+            transform: "translate(-50%, -100%) translateY(-12px)",
+            zIndex: 50,
+          }}
+        >
+          <div className="map-popup">
+            <button
+              onClick={closePopup}
+              className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer"
             >
-              <div
-                className={`
-                  relative flex items-center justify-center cursor-pointer
-                  transition-all duration-300 ease-out
-                  ${isSelected ? "scale-125 z-10" : "hover:scale-110"}
-                `}
-              >
-                {/* Pulse ring for research grade */}
-                {isResearchGrade && (
-                  <span className="absolute w-10 h-10 rounded-full bg-emerald-400/30 animate-ping" />
-                )}
+              <X size={12} />
+            </button>
 
-                {/* Marker dot */}
-                <span
-                  className={`
-                    relative flex items-center justify-center
-                    w-9 h-9 rounded-full shadow-lg
-                    border-2 text-base
-                    transition-colors duration-200
-                    ${
-                      isSelected
-                        ? "bg-emerald-500 border-white shadow-emerald-500/40"
-                        : isResearchGrade
-                          ? "bg-white border-emerald-500 hover:border-emerald-600"
-                          : "bg-white border-amber-400 hover:border-amber-500"
-                    }
-                  `}
-                >
-                  <span className="select-none leading-none">🐦</span>
-                </span>
+            {/* Thumbnail */}
+            {popupData.obs.thumbnailUrl && (
+              <div className="w-full h-28 overflow-hidden rounded-t-xl">
+                <img
+                  src={popupData.obs.thumbnailUrl}
+                  alt={popupData.obs.species}
+                  className="w-full h-full object-cover"
+                />
               </div>
-            </Marker>
-          );
-        })}
+            )}
 
-        {/* Popup */}
-        {popupObs && (
-          <Popup
-            longitude={popupObs.longitude}
-            latitude={popupObs.latitude}
-            anchor="bottom"
-            offset={20}
-            closeOnClick={false}
-            onClose={handleClosePopup}
-            className="observation-popup"
-            maxWidth="280px"
-          >
-            <div className="p-1">
+            <div className="p-3 space-y-2">
               {/* Species header */}
-              <div className="flex items-start justify-between gap-2 mb-1.5">
+              <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="font-semibold text-stone-900 text-sm leading-tight truncate">
-                    {popupObs.species}
+                    {popupData.obs.species}
                   </h3>
-                  {popupObs.speciesScientific && (
+                  {popupData.obs.speciesScientific && (
                     <p className="text-[11px] text-stone-400 italic truncate">
-                      {popupObs.speciesScientific}
+                      {popupData.obs.speciesScientific}
                     </p>
                   )}
                 </div>
                 <span
-                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${getGradeStyle(popupObs.qualityGrade)}`}
+                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${getGradeStyle(popupData.obs.qualityGrade)}`}
                 >
-                  {getGradeLabel(popupObs.qualityGrade)}
+                  {getGradeLabel(popupData.obs.qualityGrade)}
                 </span>
               </div>
 
-              {/* Details */}
+              {/* Meta info */}
               <div className="flex flex-col gap-1 text-xs text-stone-500">
-                {popupObs.location && (
+                {popupData.obs.observedAt && (
+                  <span className="flex items-center gap-1.5">
+                    <Calendar size={11} className="shrink-0" />
+                    {new Date(popupData.obs.observedAt).toLocaleDateString(
+                      undefined,
+                      { month: "short", day: "numeric", year: "numeric" }
+                    )}
+                  </span>
+                )}
+                <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1">
-                    📍 {popupObs.location}
+                    <MessageCircle size={11} />
+                    {popupData.obs.identificationCount} IDs
                   </span>
-                )}
-                {popupObs.user && (
-                  <span className="font-medium text-stone-600">
-                    @{popupObs.user}
-                  </span>
-                )}
+                  {popupData.obs.username && (
+                    <span className="font-medium text-stone-600">
+                      @{popupData.obs.username}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* View observation link */}
               <Link
-                href={`/observations/${popupObs.id}`}
-                className="mt-2 flex items-center justify-center gap-1 w-full text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg py-1.5 transition-colors duration-200"
+                href={`/observations/${popupData.obs.id}`}
+                className="flex items-center justify-center gap-1 w-full text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg py-1.5 transition-colors duration-200"
               >
                 View observation →
               </Link>
             </div>
-          </Popup>
+          </div>
+        </div>
+      )}
+
+      {/* Bounding box drawing toolbar */}
+      <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+        <button
+          onClick={() => {
+            if (drawingMode) {
+              setDrawingMode(false);
+              setDrawStart(null);
+            } else {
+              setDrawingMode(true);
+              setPopupData(null);
+            }
+          }}
+          className={`
+            w-9 h-9 rounded-lg flex items-center justify-center
+            shadow-md border transition-all duration-200 cursor-pointer
+            ${
+              drawingMode
+                ? "bg-emerald-500 text-white border-emerald-400"
+                : "bg-white/90 backdrop-blur-md text-stone-600 hover:text-stone-900 border-stone-200 hover:bg-white"
+            }
+          `}
+          title={drawingMode ? "Cancel drawing" : "Draw bounding box"}
+        >
+          <Pencil size={15} strokeWidth={1.8} />
+        </button>
+        {drawnBox && (
+          <button
+            onClick={clearBoundingBox}
+            className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/90 backdrop-blur-md border border-stone-200 shadow-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-all duration-200 cursor-pointer"
+            title="Clear bounding box"
+          >
+            <X size={15} strokeWidth={1.8} />
+          </button>
         )}
-      </MapGL>
+      </div>
     </div>
   );
 }

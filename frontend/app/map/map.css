@@ -31,20 +31,6 @@
   border-top-color: rgba(255, 255, 255, 0.92);
 }
 
-/* ── Marker animations ── */
-
-@keyframes marker-ping {
-  0% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
 /* ── Attribution ── */
 .maplibregl-ctrl-attrib {
   font-size: 10px !important;
@@ -68,6 +54,46 @@
 /* ── Geolocate control ── */
 .maplibregl-ctrl-geolocate {
   border-radius: 10px !important;
+}
+
+/* ── Custom map popup ── */
+.map-popup-container {
+  pointer-events: auto;
+}
+
+.map-popup {
+  position: relative;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(214, 211, 209, 0.4);
+  overflow: hidden;
+  width: 260px;
+  animation: popup-appear 0.2s ease-out;
+}
+
+.map-popup::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-right: 1px solid rgba(214, 211, 209, 0.4);
+  border-bottom: 1px solid rgba(214, 211, 209, 0.4);
+}
+
+@keyframes popup-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Scrollbar in sidebar ── */

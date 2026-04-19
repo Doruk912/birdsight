@@ -95,13 +95,14 @@ export default function TaxonDetailPage() {
             id: obs.id as string,
             species: (obs.speciesCommonName as string) || "Unknown species",
             speciesScientific: (obs.speciesScientificName as string) || undefined,
-            location: "",
-            user: "",
-            timeAgo: "",
             qualityGrade: obs.qualityGrade as "NEEDS_ID" | "RESEARCH_GRADE",
             latitude: obs.latitude as number,
             longitude: obs.longitude as number,
             thumbnailUrl: (obs.thumbnailUrl as string) || undefined,
+            observedAt: (obs.observedAt as string) || undefined,
+            identificationCount: (obs.identificationCount as number) ?? 0,
+            username: (obs.username as string) || undefined,
+            locationName: (obs.locationName as string) || undefined,
           }))
         );
       }

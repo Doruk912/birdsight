@@ -62,13 +62,14 @@ export async function fetchMapObservations(
     id: obs.id,
     species: obs.speciesCommonName || "Unknown species",
     speciesScientific: obs.speciesScientificName || undefined,
-    location: "",
-    user: "",
-    timeAgo: "",
     qualityGrade: obs.qualityGrade,
     latitude: obs.latitude,
     longitude: obs.longitude,
     thumbnailUrl: obs.thumbnailUrl || undefined,
+    observedAt: obs.observedAt || undefined,
+    identificationCount: obs.identificationCount ?? 0,
+    username: obs.username || undefined,
+    locationName: obs.locationName || undefined,
   }));
 }
 
