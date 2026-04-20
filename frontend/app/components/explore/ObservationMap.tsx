@@ -6,6 +6,7 @@ import MapGL, {
   NavigationControl,
   GeolocateControl,
   ScaleControl,
+  Popup,
   MapRef,
   Source,
   Layer,
@@ -67,15 +68,16 @@ function observationsToGeoJSON(observations: MapObservation[]) {
 
 export default function ObservationMap({
   observations,
+  selectedId,
   onSelectObservation,
   onBoundingBoxDraw,
 }: ObservationMapProps) {
   const mapRef = useRef<MapRef>(null);
-  const [popupData, setPopupData] = useState<{
-    obs: MapObservation;
-    x: number;
-    y: number;
-  } | null>(null);
+
+  const selectedObservation =
+    selectedId != null
+      ? observations.find((obs) => obs.id === selectedId) ?? null
+      : null;
 
   // Bounding box drawing state
   const [drawingMode, setDrawingMode] = useState(false);
@@ -131,61 +133,61 @@ export default function ObservationMap({
       if (pointFeatures.length > 0) {
         const props = pointFeatures[0].properties;
         if (!props) return;
+        const geometry = pointFeatures[0].geometry;
+        const featureId = String(props.id);
+        const matched = observations.find((obs) => obs.id === featureId);
+        const [lng, lat] =
+          geometry.type === "Point"
+            ? geometry.coordinates
+            : [e.lngLat.lng, e.lngLat.lat];
         const obs: MapObservation = {
-          id: props.id,
+          id: featureId,
           species: props.species,
           speciesScientific: props.speciesScientific || undefined,
           qualityGrade: props.qualityGrade,
-          latitude: e.lngLat.lat,
-          longitude: e.lngLat.lng,
+          latitude: lat,
+          longitude: lng,
           thumbnailUrl: props.thumbnailUrl || undefined,
           observedAt: props.observedAt || undefined,
           identificationCount: props.identificationCount ?? 0,
           username: props.username || undefined,
           locationName: props.locationName || undefined,
         };
-        onSelectObservation(obs);
-        setPopupData({ obs, x: e.point.x, y: e.point.y });
+        onSelectObservation(matched ?? obs);
         return;
       }
 
       // Clicked empty map
-      setPopupData(null);
+      onSelectObservation(null);
     },
-    [drawingMode, onSelectObservation]
+    [drawingMode, onSelectObservation, observations]
   );
 
   // Close popup
   const closePopup = useCallback(() => {
-    setPopupData(null);
-  }, []);
+    onSelectObservation(null);
+  }, [onSelectObservation]);
 
   // --- Bounding box drawing ---
-  const handleMouseDown = useCallback(
-    (e: MapLayerMouseEvent) => {
-      if (!drawingMode) return;
-      e.preventDefault();
-      setDrawStart({ lng: e.lngLat.lng, lat: e.lngLat.lat });
-    },
-    [drawingMode]
-  );
+  const handleMouseDown = (e: MapLayerMouseEvent) => {
+    if (!drawingMode) return;
+    e.preventDefault();
+    setDrawStart({ lng: e.lngLat.lng, lat: e.lngLat.lat });
+  };
 
-  const handleMouseUp = useCallback(
-    (e: MapLayerMouseEvent) => {
-      if (!drawingMode || !drawStart) return;
-      const box = {
-        swLat: Math.min(drawStart.lat, e.lngLat.lat),
-        swLng: Math.min(drawStart.lng, e.lngLat.lng),
-        neLat: Math.max(drawStart.lat, e.lngLat.lat),
-        neLng: Math.max(drawStart.lng, e.lngLat.lng),
-      };
-      setDrawnBox(box);
-      setDrawStart(null);
-      setDrawingMode(false);
-      onBoundingBoxDraw?.(box);
-    },
-    [drawingMode, drawStart, onBoundingBoxDraw]
-  );
+  const handleMouseUp = (e: MapLayerMouseEvent) => {
+    if (!drawingMode || !drawStart) return;
+    const box = {
+      swLat: Math.min(drawStart.lat, e.lngLat.lat),
+      swLng: Math.min(drawStart.lng, e.lngLat.lng),
+      neLat: Math.max(drawStart.lat, e.lngLat.lat),
+      neLng: Math.max(drawStart.lng, e.lngLat.lng),
+    };
+    setDrawnBox(box);
+    setDrawStart(null);
+    setDrawingMode(false);
+    onBoundingBoxDraw?.(box);
+  };
 
   const clearBoundingBox = useCallback(() => {
     setDrawnBox(null);
@@ -465,93 +467,93 @@ export default function ObservationMap({
             }}
           />
         </Source>
-      </MapGL>
 
-      {/* Popup — rendered as an HTML overlay for rich content */}
-      {popupData && (
-        <div
-          className="map-popup-container"
-          style={{
-            position: "absolute",
-            left: popupData.x,
-            top: popupData.y,
-            transform: "translate(-50%, -100%) translateY(-12px)",
-            zIndex: 50,
-          }}
-        >
-          <div className="map-popup">
-            <button
-              onClick={closePopup}
-              className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer"
-            >
-              <X size={12} />
-            </button>
+        {/* Popup must stay inside MapGL so react-map-gl context is available */}
+        {selectedObservation && (
+          <Popup
+            className="observation-popup"
+            longitude={selectedObservation.longitude}
+            latitude={selectedObservation.latitude}
+            anchor="bottom"
+            offset={12}
+            closeButton={false}
+            closeOnClick={false}
+            onClose={closePopup}
+          >
+            <div className="map-popup relative">
+              <button
+                onClick={closePopup}
+                className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer"
+              >
+                <X size={12} />
+              </button>
 
-            {/* Thumbnail */}
-            {popupData.obs.thumbnailUrl && (
-              <div className="w-full h-28 overflow-hidden rounded-t-xl">
-                <img
-                  src={popupData.obs.thumbnailUrl}
-                  alt={popupData.obs.species}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            <div className="p-3 space-y-2">
-              {/* Species header */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-stone-900 text-sm leading-tight truncate">
-                    {popupData.obs.species}
-                  </h3>
-                  {popupData.obs.speciesScientific && (
-                    <p className="text-[11px] text-stone-400 italic truncate">
-                      {popupData.obs.speciesScientific}
-                    </p>
-                  )}
+              {/* Thumbnail */}
+              {selectedObservation.thumbnailUrl && (
+                <div className="w-full h-28 overflow-hidden rounded-t-xl">
+                  <img
+                    src={selectedObservation.thumbnailUrl}
+                    alt={selectedObservation.species}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <span
-                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${getGradeStyle(popupData.obs.qualityGrade)}`}
-                >
-                  {getGradeLabel(popupData.obs.qualityGrade)}
-                </span>
-              </div>
+              )}
 
-              {/* Meta info */}
-              <div className="flex flex-col gap-1 text-xs text-stone-500">
-                {popupData.obs.observedAt && (
-                  <span className="flex items-center gap-1.5">
-                    <Calendar size={11} className="shrink-0" />
-                    {new Date(popupData.obs.observedAt).toLocaleDateString(
-                      undefined,
-                      { month: "short", day: "numeric", year: "numeric" }
+              <div className="p-3 space-y-2">
+                {/* Species header */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-stone-900 text-sm leading-tight truncate">
+                      {selectedObservation.species}
+                    </h3>
+                    {selectedObservation.speciesScientific && (
+                      <p className="text-[11px] text-stone-400 italic truncate">
+                        {selectedObservation.speciesScientific}
+                      </p>
                     )}
+                  </div>
+                  <span
+                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${getGradeStyle(selectedObservation.qualityGrade)}`}
+                  >
+                    {getGradeLabel(selectedObservation.qualityGrade)}
                   </span>
-                )}
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1">
-                    <MessageCircle size={11} />
-                    {popupData.obs.identificationCount} IDs
-                  </span>
-                  {popupData.obs.username && (
-                    <span className="font-medium text-stone-600">
-                      @{popupData.obs.username}
+                </div>
+
+                {/* Meta info */}
+                <div className="flex flex-col gap-1 text-xs text-stone-500">
+                  {selectedObservation.observedAt && (
+                    <span className="flex items-center gap-1.5">
+                      <Calendar size={11} className="shrink-0" />
+                      {new Date(selectedObservation.observedAt).toLocaleDateString(
+                        undefined,
+                        { month: "short", day: "numeric", year: "numeric" }
+                      )}
                     </span>
                   )}
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <MessageCircle size={11} />
+                      {selectedObservation.identificationCount} IDs
+                    </span>
+                    {selectedObservation.username && (
+                      <span className="font-medium text-stone-600">
+                        @{selectedObservation.username}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <Link
-                href={`/observations/${popupData.obs.id}`}
-                className="flex items-center justify-center gap-1 w-full text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg py-1.5 transition-colors duration-200"
-              >
-                View observation →
-              </Link>
+                <Link
+                  href={`/observations/${selectedObservation.id}`}
+                  className="flex items-center justify-center gap-1 w-full text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg py-1.5 transition-colors duration-200"
+                >
+                  View observation →
+                </Link>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </Popup>
+        )}
+      </MapGL>
 
       {/* Bounding box drawing toolbar */}
       <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
@@ -562,7 +564,7 @@ export default function ObservationMap({
               setDrawStart(null);
             } else {
               setDrawingMode(true);
-              setPopupData(null);
+              onSelectObservation(null);
             }
           }}
           className={`
