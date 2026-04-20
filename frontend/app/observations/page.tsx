@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { fetchAllObservations } from "@/app/lib/observationService";
 import {
   ObservationDetailResponse,
@@ -20,6 +21,9 @@ const GRADES = [
 ];
 
 export default function ObservationsPage() {
+  const searchParams = useSearchParams();
+  const queryAuthor = searchParams.get("author")?.trim() || "";
+
   const [observations, setObservations] = useState<ObservationDetailResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -27,7 +31,7 @@ export default function ObservationsPage() {
 
   // Active filters
   const [filters, setFilters] = useState<ObservationFilterParams>({});
-  
+
   // Pending filters (edited before apply)
   const [pendingFilters, setPendingFilters] = useState<ObservationFilterParams>({});
 
@@ -108,6 +112,39 @@ export default function ObservationsPage() {
   useEffect(() => {
     loadObservations();
   }, [loadObservations]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const hydrateAuthorFilter = async () => {
+      if (!queryAuthor) {
+        return;
+      }
+
+      try {
+        const matchedUser = await userService.getByUsername(queryAuthor);
+
+        if (ignore) return;
+
+        setPendingFilters((prev) => ({ ...prev, userId: matchedUser.id }));
+        setFilters((prev) => ({ ...prev, userId: matchedUser.id }));
+        setSelectedUserName(matchedUser.displayName || matchedUser.username);
+        setPage(0);
+      } catch {
+        if (ignore) return;
+
+        setPendingFilters((prev) => ({ ...prev, userId: undefined }));
+        setFilters((prev) => ({ ...prev, userId: undefined }));
+        setSelectedUserName(null);
+      }
+    };
+
+    hydrateAuthorFilter();
+
+    return () => {
+      ignore = true;
+    };
+  }, [queryAuthor]);
 
   const handleApplyFilters = useCallback(() => {
     setFilters({ ...pendingFilters });
@@ -347,4 +384,3 @@ export default function ObservationsPage() {
     </div>
   );
 }
-

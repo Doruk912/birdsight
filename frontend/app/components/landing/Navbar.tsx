@@ -125,7 +125,10 @@ export default function Navbar() {
                   <Plus size={16} strokeWidth={1.8} /> Add Observation
                 </Link>
                 <Link
-                  href="/observations"
+                  href={{
+                    pathname: "/observations",
+                    query: { author: user.username },
+                  }}
                   className="flex items-center gap-3 text-sm font-medium text-stone-700 hover:text-emerald-600 transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >

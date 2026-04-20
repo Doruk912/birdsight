@@ -39,7 +39,14 @@ export default function UserDropdown({ user, logout }: UserDropdownProps) {
 
   const menuItems = [
     { label: "Profile", href: `/profile/${user.username}`, icon: User },
-    { label: "My Observations", href: "/observations", icon: Binoculars },
+    {
+      label: "My Observations",
+      href: {
+        pathname: "/observations",
+        query: { author: user.username },
+      },
+      icon: Binoculars,
+    },
     { label: "Settings", href: "/settings", icon: Settings },
   ];
 
@@ -107,4 +114,3 @@ export default function UserDropdown({ user, logout }: UserDropdownProps) {
     </div>
   );
 }
-
