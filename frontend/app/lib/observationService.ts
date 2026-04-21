@@ -8,7 +8,9 @@ import {
   MapObservation,
   ObservationFilterParams,
   PageResponse,
+  UserStatsResponse,
 } from "@/app/types/explore";
+
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -171,4 +173,14 @@ export async function withdrawIdentification(
   return apiClient.delete(
     `${API_BASE}/api/v1/observations/${observationId}/identifications/${identificationId}`
   );
+}
+
+export async function fetchUserStats(userId: string): Promise<UserStatsResponse> {
+  const response = await fetch(`${API_BASE}/api/v1/observations/user/${userId}/stats`, {
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch user stats: ${response.statusText}`);
+  }
+  return response.json();
 }

@@ -1,49 +1,61 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, notFound } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  MapPin,
-  Calendar,
-  Feather,
   AlertCircle,
+  Camera,
+  CalendarDays
 } from "lucide-react";
-import { useAuth } from "@/app/hooks/useAuth";
-import UserAvatar from "@/app/components/shared/UserAvatar";
 import { userService, UserResponse } from "@/app/lib/userService";
+import { fetchUserStats, fetchAllObservations } from "@/app/lib/observationService";
+import { UserStatsResponse, ObservationDetailResponse } from "@/app/types/explore";
+import ObservationCard from "@/app/components/observations/ObservationCard";
 
-// ── stat card ─────────────────────────────────────────────────────────────────
+// ── stat item ─────────────────────────────────────────────────────────────────
 
-function StatCard({ value, label }: { value: string | number; label: string }) {
+function StatItem({ value, label, isLoading }: { value: string | number; label: string; isLoading: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-0.5">
-      <span className="text-xl font-bold text-stone-800">{value}</span>
-      <span className="text-xs text-stone-400 uppercase tracking-widest">{label}</span>
+    <div className="flex flex-col items-start sm:items-center">
+      {isLoading ? (
+        <div className="h-7 w-12 bg-stone-200 animate-pulse rounded mb-1" />
+      ) : (
+        <span className="text-2xl font-bold text-stone-900 leading-none">{value}</span>
+      )}
+      <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider mt-1">{label}</span>
     </div>
   );
 }
 
 // ── skeleton ──────────────────────────────────────────────────────────────────
 
-function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-stone-200 ${className ?? ""}`} />;
-}
-
 function ProfileSkeleton() {
   return (
-    <div className="min-h-screen bg-stone-50 pt-16">
-      <div className="max-w-3xl mx-auto px-6 py-10 flex flex-col gap-6">
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="h-32 bg-gradient-to-r from-emerald-100 to-teal-100" />
-          <div className="px-8 pb-8">
-            <div className="-mt-14 mb-4">
-              <Skeleton className="h-28 w-28 rounded-full" />
-            </div>
-            <Skeleton className="h-7 w-48 mb-2" />
-            <Skeleton className="h-4 w-32 mb-4" />
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-3/4" />
+    <div className="min-h-screen bg-white pt-16 pb-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        
+        {/* Header Skeleton */}
+        <div className="flex flex-col md:flex-row gap-6 md:items-center py-8 border-b border-stone-100 mb-10">
+          <div className="h-24 w-24 rounded-full bg-stone-200 animate-pulse shrink-0" />
+          <div className="flex-1 space-y-3">
+            <div className="h-7 w-48 bg-stone-200 animate-pulse rounded-md" />
+            <div className="h-4 w-32 bg-stone-200 animate-pulse rounded-md" />
+            <div className="h-4 w-full max-w-lg bg-stone-200 animate-pulse rounded-md pt-2" />
+          </div>
+          <div className="flex gap-8 mt-4 md:mt-0">
+            <div className="h-10 w-20 bg-stone-200 animate-pulse rounded-md" />
+            <div className="h-10 w-20 bg-stone-200 animate-pulse rounded-md" />
+          </div>
+        </div>
+
+        {/* Grid Skeleton */}
+        <div>
+          <div className="h-7 w-48 bg-stone-200 animate-pulse rounded-md mb-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            <div className="aspect-square md:aspect-auto md:h-72 bg-stone-100 rounded-2xl" />
+            <div className="aspect-square md:aspect-auto md:h-72 bg-stone-100 rounded-2xl" />
+            <div className="aspect-square md:aspect-auto md:h-72 bg-stone-100 rounded-2xl" />
           </div>
         </div>
       </div>
@@ -56,151 +68,162 @@ function ProfileSkeleton() {
 export default function PublicProfilePage() {
   const params = useParams();
   const username = params?.username as string;
-  const { user: authUser } = useAuth();
-
   const [profile, setProfile] = useState<UserResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<UserStatsResponse | null>(null);
+  const [recentObs, setRecentObs] = useState<ObservationDetailResponse[]>([]);
+  
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [notFoundError, setNotFoundError] = useState(false);
 
   useEffect(() => {
     if (!username) return;
+    
+    setIsLoadingProfile(true);
     userService
       .getByUsername(username)
-      .then((data) => setProfile(data))
+      .then((data) => {
+        setProfile(data);
+        return data;
+      })
+      .then((data) => {
+        Promise.all([
+          fetchUserStats(data.id).catch(() => null),
+          fetchAllObservations(0, { userId: data.id }).catch(() => null)
+        ]).then(([statsData, obsData]) => {
+          if (statsData) setStats(statsData);
+          if (obsData) setRecentObs(obsData.content);
+        }).finally(() => {
+          setIsLoadingData(false);
+        });
+      })
       .catch((err) => {
         if (err?.status === 404) setNotFoundError(true);
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => setIsLoadingProfile(false));
   }, [username]);
 
-  if (isLoading) return <ProfileSkeleton />;
+  if (isLoadingProfile) return <ProfileSkeleton />;
 
-  if (notFoundError) {
-    notFound();
-  }
-
-  if (!profile) {
+  if (notFoundError || !profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-stone-50">
-        <AlertCircle className="text-stone-400" size={32} />
-        <p className="text-stone-500 text-sm">Could not load this profile.</p>
-        <Link href="/" className="text-sm text-emerald-600 hover:underline">Go home</Link>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white">
+        <AlertCircle className="text-stone-300" size={48} />
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-stone-800">Profile Not Found</h2>
+          <p className="text-stone-500 mt-2">This user doesn&#39;t exist or has been removed.</p>
+        </div>
+        <Link href="/" className="mt-6 px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition">
+          Return Home
+        </Link>
       </div>
     );
   }
-
-  const isOwnProfile = authUser?.username === profile.username;
 
   const joinedDate = new Date(profile.createdAt).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
 
-  // Gradient banner seeded from username for a unique but consistent colour per user
-  const bannerGradients = [
-    "from-emerald-200 to-teal-300",
-    "from-sky-200 to-blue-300",
-    "from-violet-200 to-purple-300",
-    "from-rose-200 to-pink-300",
-    "from-amber-200 to-orange-300",
-    "from-lime-200 to-green-300",
-  ];
-  const bannerIndex =
-    profile.username.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) %
-    bannerGradients.length;
-  const banner = bannerGradients[bannerIndex];
-
   return (
-    <div className="min-h-screen bg-stone-50 pt-16">
-      <main className="max-w-3xl mx-auto px-6 py-8 flex flex-col gap-6">
-        {/* ── Hero card ─────────────────────────────────────────────── */}
-        <section className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-          {/* Banner */}
-          <div className={`h-32 bg-gradient-to-br ${banner}`} />
+    <div className="min-h-screen bg-white pt-16 pb-24">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6">
+        
+        {/* ── Compact Horizontal Header ────────────────────────────────────────────── */}
+        <section className="flex flex-col md:flex-row gap-6 md:items-center py-8 border-b border-stone-100 mb-10">
+          
+          {/* Avatar Area */}
+          <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 bg-emerald-50 ring-1 ring-stone-200 flex items-center justify-center">
+            {profile.avatarUrl ? (
+              <img
+                src={profile.avatarUrl}
+                alt={profile.displayName || profile.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-3xl font-semibold text-emerald-700">
+                {(profile.displayName || profile.username).charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
 
-          <div className="px-8 pb-8">
-            {/* Avatar — overlaps banner */}
-            <div className="flex items-end justify-between -mt-14 mb-5">
-              <div className="rounded-full ring-4 ring-white shadow-sm">
-                <UserAvatar
-                  avatarUrl={profile.avatarUrl}
-                  displayName={profile.displayName}
-                  username={profile.username}
-                  size="xl"
-                />
-              </div>
-            </div>
-
-            {/* Name & username */}
-            <h1 className="text-2xl font-bold text-stone-900 leading-tight">
+          {/* Identity & Bio */}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold text-stone-900 truncate">
               {profile.displayName || profile.username}
             </h1>
-            <p className="text-sm text-stone-400 mt-0.5 mb-4">@{profile.username}</p>
-
-            {/* Bio */}
+            <div className="flex items-center gap-3 mt-1 text-sm text-stone-500">
+              <span>@{profile.username}</span>
+              <span className="w-1 h-1 rounded-full bg-stone-300"></span>
+              <span className="flex items-center gap-1.5 line-clamp-1">
+                 <CalendarDays size={14}/> Joined {joinedDate}
+              </span>
+            </div>
+            
             {profile.bio && (
-              <p className="text-sm text-stone-600 leading-relaxed mb-5 max-w-xl">
+              <p className="mt-4 text-stone-700 text-sm leading-relaxed max-w-2xl line-clamp-3 md:line-clamp-none">
                 {profile.bio}
               </p>
             )}
-
-            {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-stone-400">
-              <span className="flex items-center gap-1.5">
-                <Calendar size={13} />
-                Joined {joinedDate}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Feather size={13} />
-                BirdSight member
-              </span>
-              {isOwnProfile && (
-                <span className="flex items-center gap-1.5">
-                  <MapPin size={13} />
-                  {profile.email}
-                </span>
-              )}
-            </div>
           </div>
+
+          {/* Stats Box */}
+          <div className="flex gap-8 md:gap-12 pt-4 md:pt-0 mt-2 md:mt-0 border-t border-stone-100 md:border-none md:pl-8 md:border-l">
+            <StatItem 
+              value={stats?.observationCount ?? 0} 
+              label="Observations" 
+              isLoading={isLoadingData}
+            />
+            <StatItem 
+              value={stats?.speciesCount ?? 0} 
+              label="Species" 
+              isLoading={isLoadingData}
+            />
+          </div>
+
         </section>
 
-        {/* ── Stats row ─────────────────────────────────────────────── */}
-        <section className="bg-white rounded-2xl border border-stone-200 shadow-sm px-8 py-6">
-          <div className="grid grid-cols-3 divide-x divide-stone-100">
-            <StatCard value={0} label="Observations" />
-            <StatCard value={0} label="Species" />
-            <StatCard value={0} label="Lifers" />
-          </div>
-        </section>
-
-        {/* ── Recent activity ───────────────────────────────────────── */}
-        <section className="bg-white rounded-2xl border border-stone-200 shadow-sm p-8">
-          <h2 className="text-sm font-semibold text-stone-700 mb-5">Recent Observations</h2>
-
-          {/* Empty state */}
-          <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <div className="h-14 w-14 rounded-full bg-emerald-50 flex items-center justify-center">
-              <Feather size={24} className="text-emerald-400" strokeWidth={1.5} />
-            </div>
-            <p className="text-sm font-medium text-stone-600">No observations yet</p>
-            <p className="text-xs text-stone-400 max-w-xs">
-              {isOwnProfile
-                ? "Start logging your bird sightings and they'll appear here."
-                : `${profile.displayName || profile.username} hasn't logged any observations yet.`}
-            </p>
-            {isOwnProfile && (
-              <Link
-                href="/"
-                className="mt-1 text-xs font-semibold text-emerald-600 border border-emerald-200 rounded-lg px-4 py-2 hover:bg-emerald-50 transition-colors"
+        {/* ── Recent Observations Grid ───────────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-stone-900">Recent Observations</h2>
+            {!isLoadingData && recentObs.length > 0 && (
+              <Link 
+                href={{ pathname: "/observations", query: { author: profile.username } }}
+                className="text-emerald-600 hover:text-emerald-700 font-medium text-sm transition-colors flex items-center gap-1"
+                prefetch={false}
               >
-                Log your first sighting
+                View all →
               </Link>
             )}
           </div>
+
+          {isLoadingData ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+               {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="aspect-square md:aspect-auto md:h-72 bg-stone-100 animate-pulse rounded-2xl" />
+              ))}
+            </div>
+          ) : recentObs.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentObs.slice(0, 6).map((obs) => (
+                <ObservationCard key={obs.id} observation={obs} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center bg-stone-50 rounded-2xl border border-stone-100 border-dashed">
+              <Camera size={32} className="text-stone-300" strokeWidth={1.5} />
+              <div>
+                <p className="text-base font-semibold text-stone-700">No observations yet</p>
+                <p className="text-sm text-stone-500 mt-1 max-w-xs mx-auto">
+                  {profile.username} hasn&#39;t uploaded any sightings yet.
+                </p>
+              </div>
+            </div>
+          )}
         </section>
+
       </main>
     </div>
   );
 }
-
-

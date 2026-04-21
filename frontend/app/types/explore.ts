@@ -164,3 +164,9 @@ export interface UserSearchResult {
   displayName: string | null;
   avatarUrl: string | null;
 }
+
+export interface UserStatsResponse {
+  userId: string;
+  observationCount: number;
+  speciesCount: number;
+}
