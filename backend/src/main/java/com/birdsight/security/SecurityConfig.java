@@ -64,6 +64,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/avatar").authenticated()
                         // User search — public (for filter autocomplete)
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/search").permitAll()
+                        // Public user profile access
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/username/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}").permitAll()
                         // User management — admin only for write operations
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")

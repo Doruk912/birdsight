@@ -116,4 +116,9 @@ public class ObservationController {
         observationService.deleteObservation(id, principal.getUsername());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/user/{userId}/stats")
+    public ResponseEntity<com.birdsight.observation.dto.UserStatsResponse> getUserStats(@PathVariable UUID userId) {
+        return ResponseEntity.ok(observationService.getUserStats(userId));
+    }
 }

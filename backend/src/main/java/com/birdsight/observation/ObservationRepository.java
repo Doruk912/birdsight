@@ -45,4 +45,10 @@ public interface ObservationRepository extends JpaRepository<Observation, UUID>,
             ORDER BY o.created_at DESC
             """, nativeQuery = true)
     java.util.List<Observation> findByTaxonAndDescendants(@Param("taxonId") UUID taxonId);
+
+    @Query("SELECT COUNT(o) FROM Observation o WHERE o.deleted = false AND o.user.id = :userId")
+    long countObservationsByUserId(@Param("userId") UUID userId);
+
+    @Query("SELECT COUNT(DISTINCT o.communityTaxon.id) FROM Observation o WHERE o.deleted = false AND o.user.id = :userId AND o.communityTaxon IS NOT NULL AND o.communityTaxon.rank = 'SPECIES'")
+    long countDistinctSpeciesByUserId(@Param("userId") UUID userId);
 }

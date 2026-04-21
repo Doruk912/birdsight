@@ -160,6 +160,18 @@ public class ObservationService {
         observationRepository.saveAndFlush(obs);
     }
 
+    @Transactional(readOnly = true)
+    public UserStatsResponse getUserStats(UUID userId) {
+        long observationCount = observationRepository.countObservationsByUserId(userId);
+        long speciesCount = observationRepository.countDistinctSpeciesByUserId(userId);
+        
+        return UserStatsResponse.builder()
+                .userId(userId)
+                .observationCount(observationCount)
+                .speciesCount(speciesCount)
+                .build();
+    }
+
     public Taxon calculateCommunityTaxon(List<Taxon> currentTaxa) {
         if (currentTaxa == null || currentTaxa.isEmpty()) {
             return null;
