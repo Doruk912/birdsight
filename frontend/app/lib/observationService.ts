@@ -179,6 +179,13 @@ export async function createObservation(formData: FormData): Promise<Observation
   );
 }
 
+export async function updateObservation(id: string, formData: FormData): Promise<ObservationDetailResponse> {
+  return apiClient.putForm<ObservationDetailResponse>(
+    `${API_BASE}/api/v1/observations/${id}`,
+    formData
+  );
+}
+
 export async function withdrawIdentification(
   observationId: string,
   identificationId: string

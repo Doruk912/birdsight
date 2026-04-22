@@ -11,13 +11,13 @@ const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 export default function ObservationCard({ observation }: ObservationCardProps) {
   const firstImage = observation.images?.[0]?.imageUrl || PLACEHOLDER_IMAGE;
   const taxonRank = observation.communityTaxon?.rank;
-  const rankPrefix = taxonRank && taxonRank !== "SPECIES" 
+  const rankPrefix = taxonRank && taxonRank !== "SPECIES"
     ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
     : "";
-  
+
   const commonName = observation.communityTaxon?.commonName;
   const scientificName = observation.communityTaxon?.scientificName;
-  
+
   const h1Title = commonName || (rankPrefix + (scientificName || "Unknown species"));
   const subTitle = commonName ? (rankPrefix + scientificName) : null;
 
@@ -72,7 +72,7 @@ export default function ObservationCard({ observation }: ObservationCardProps) {
               </div>
             )}
           </div>
-          
+
           <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
             <div className="flex items-center gap-1.5 font-medium truncate">
               {observation.userAvatarUrl ? (

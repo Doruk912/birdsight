@@ -105,6 +105,16 @@ export const apiClient = {
     });
   },
 
+  putForm: <T>(url: string, formData: FormData, options?: RequestOptions) => {
+    const { headers = {}, ...rest } = options ?? {};
+    return request<T>(url, {
+      method: "PUT",
+      body: formData,
+      headers,
+      ...rest,
+    });
+  },
+
   put: <T>(url: string, body: unknown, options?: RequestOptions) =>
     request<T>(url, { method: "PUT", body: JSON.stringify(body), ...options }),
 

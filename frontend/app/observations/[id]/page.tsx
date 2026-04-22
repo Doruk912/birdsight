@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useAuth } from "@/app/hooks/useAuth";
 import {
   ArrowLeft,
   Calendar,
@@ -15,6 +16,7 @@ import {
   Loader2,
   AlertCircle,
   Eye,
+  Edit,
 } from "lucide-react";
 import {
   ObservationDetailResponse,
@@ -32,6 +34,7 @@ import ActivityFeed from "@/app/components/observation/ActivityFeed";
 import AddActivityForm from "@/app/components/observation/AddActivityForm";
 import DataQualityAssessment from "@/app/components/observation/DataQualityAssessment";
 import CommunityConsensus from "@/app/components/observation/CommunityConsensus";
+import EditObservationModal from "@/app/components/observations/EditObservationModal";
 import "./observation.css";
 
 // Dynamic import for map (no SSR)
@@ -60,12 +63,14 @@ async function refreshObservationActivity(observationId: string) {
 export default function ObservationPage() {
   const params = useParams();
   const id = params.id as string;
+  const { user } = useAuth();
 
   const [observation, setObservation] = useState<ObservationDetailResponse | null>(null);
   const [identifications, setIdentifications] = useState<IdentificationResponse[]>([]);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -129,10 +134,10 @@ export default function ObservationPage() {
   const commonName = observation.communityTaxon?.commonName;
   const scientificName = observation.communityTaxon?.scientificName;
   const taxonRank = observation.communityTaxon?.rank;
-  const rankPrefix = taxonRank && taxonRank !== "SPECIES" 
+  const rankPrefix = taxonRank && taxonRank !== "SPECIES"
     ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
     : "";
-  
+
   const h1Title = commonName || (rankPrefix + (scientificName || "Unknown species"));
   const subTitle = commonName ? (rankPrefix + scientificName) : null;
   const observedDate = formatDate(observation.observedAt);
@@ -202,13 +207,13 @@ export default function ObservationPage() {
             <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 animate-fade-in-up-delay-1">
               <div className="flex items-start gap-4">
                 {observation.communityTaxon ? (
-                  <Link 
+                  <Link
                     href={`/taxonomy/${observation.communityTaxon.id}`}
                     className="shrink-0 group relative"
                   >
                     {observation.communityTaxon.coverImageUrl ? (
-                      <img 
-                        src={observation.communityTaxon.coverImageUrl} 
+                      <img
+                        src={observation.communityTaxon.coverImageUrl}
                         alt={h1Title}
                         className="w-14 h-14 rounded-xl object-cover border border-emerald-100 group-hover:scale-105 transition-transform"
                       />
@@ -223,7 +228,7 @@ export default function ObservationPage() {
                     <Leaf size={24} className="text-stone-300" />
                   </div>
                 )}
-                
+
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-3 flex-wrap">
                     {observation.communityTaxon ? (
@@ -237,14 +242,13 @@ export default function ObservationPage() {
                         {h1Title}
                       </h1>
                     )}
-                    
+
                     <span
                       className={`
                         inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full
-                        ${
-                          isResearchGrade
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
+                        ${isResearchGrade
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700"
                         }
                       `}
                     >
@@ -315,6 +319,16 @@ export default function ObservationPage() {
                     </span>
                   </div>
                 </div>
+
+                {user?.username === observation.username && (
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="ml-auto shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors"
+                  >
+                    <Edit size={14} />
+                    Edit
+                  </button>
+                )}
               </div>
             </div>
 
@@ -373,6 +387,17 @@ export default function ObservationPage() {
 
         </div>
       </div>
+
+      {isEditModalOpen && observation && (
+        <EditObservationModal
+          observation={observation}
+          onClose={() => setIsEditModalOpen(false)}
+          onSuccess={(updated) => {
+            setObservation(updated);
+            setIsEditModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

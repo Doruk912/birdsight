@@ -9,16 +9,19 @@ const MAP_STYLE = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
 
 interface LocationPickerProps {
   onLocationChange: (lat: number, lng: number) => void;
+  initialLocation?: { lat: number; lng: number; name?: string };
 }
 
-export default function LocationPicker({ onLocationChange }: LocationPickerProps) {
+export default function LocationPicker({ onLocationChange, initialLocation }: LocationPickerProps) {
   // Default roughly centered, user can pan or use current location
   const [viewState, setViewState] = useState({
-    longitude: 28.9784,
-    latitude: 41.0082,
-    zoom: 10
+    longitude: initialLocation?.lng || 28.9784,
+    latitude: initialLocation?.lat || 41.0082,
+    zoom: initialLocation ? 14 : 10
   });
-  const [marker, setMarker] = useState<{lat: number; lng: number} | null>(null);
+  const [marker, setMarker] = useState<{lat: number; lng: number} | null>(
+    initialLocation ? { lat: initialLocation.lat, lng: initialLocation.lng } : null
+  );
 
   const handleMapClick = (e: { lngLat: { lat: number; lng: number } }) => {
     const lat = e.lngLat.lat;
