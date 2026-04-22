@@ -32,7 +32,7 @@ public class StorageService {
     }
 
     public void deleteAvatar(String avatarUrl) {
-        deleteByUrl(avatarUrl);
+        deleteFileByUrl(avatarUrl);
     }
 
     public String uploadObservationImage(UUID observationId, MultipartFile file) {
@@ -79,7 +79,7 @@ public class StorageService {
         return minioProperties.getEndpoint() + "/" + minioProperties.getBucketName() + "/" + objectKey;
     }
 
-    private void deleteByUrl(String fileUrl) {
+    public void deleteFileByUrl(String fileUrl) {
         if (fileUrl == null || fileUrl.isBlank()) return;
 
         String prefix = minioProperties.getEndpoint() + "/" + minioProperties.getBucketName() + "/";

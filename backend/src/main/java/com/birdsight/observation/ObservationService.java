@@ -13,6 +13,7 @@ import com.birdsight.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -147,6 +148,80 @@ public class ObservationService {
                     return observationMapper.toMapResponse(obs, idCount);
                 })
                 .toList();
+    }
+
+    @Transactional
+    public ObservationResponse updateObservation(UUID id, String userEmail, UpdateObservationRequest request, List<MultipartFile> newImages) {
+        if (request.getImageOrder() == null || request.getImageOrder().isEmpty()) {
+            throw new BadRequestException("At least 1 image is required.");
+        }
+        if (request.getImageOrder().size() > MAX_IMAGES) {
+            throw new BadRequestException("Maximum " + MAX_IMAGES + " images allowed.");
+        }
+
+        Observation obs = observationRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Observation", "id", id));
+
+        if (!obs.getUser().getEmail().equals(userEmail)) {
+            throw new BadRequestException("You can only edit your own observations.");
+        }
+
+        obs.setDescription(request.getDescription());
+        obs.setObservedAt(Instant.parse(request.getObservedAt()));
+
+        Point newLocation = GEOMETRY_FACTORY.createPoint(new Coordinate(request.getLongitude(), request.getLatitude()));
+        if (!obs.getLocation().equalsExact(newLocation)) {
+            obs.setLocation(newLocation);
+            obs.setLocationName(reverseGeocodingService.reverseGeocode(request.getLatitude(), request.getLongitude()).orElse(null));
+        }
+
+        List<ObservationImage> existingImages = obs.getImages();
+        Map<String, ObservationImage> existingImagesMap = new HashMap<>();
+        for (ObservationImage img : existingImages) {
+            existingImagesMap.put(img.getImageUrl(), img);
+        }
+
+        List<ObservationImage> newImageList = new ArrayList<>();
+        List<String> order = request.getImageOrder();
+
+        for (int i = 0; i < order.size(); i++) {
+            String item = order.get(i);
+            if (item.startsWith("new_")) {
+                int newIdx = Integer.parseInt(item.substring(4));
+                if (newImages == null || newIdx >= newImages.size()) {
+                    throw new BadRequestException("Invalid new image index.");
+                }
+                MultipartFile file = newImages.get(newIdx);
+                String url = storageService.uploadObservationImage(obs.getId(), file);
+                ObservationImage newImg = ObservationImage.builder()
+                        .observation(obs)
+                        .imageUrl(url)
+                        .position(i)
+                        .build();
+                newImageList.add(newImg);
+            } else {
+                ObservationImage existing = existingImagesMap.get(item);
+                if (existing == null) {
+                    throw new BadRequestException("Invalid existing image URL.");
+                }
+                existing.setPosition(i);
+                newImageList.add(existing);
+                existingImagesMap.remove(item);
+            }
+        }
+
+        for (ObservationImage removedImg : existingImagesMap.values()) {
+            storageService.deleteFileByUrl(removedImg.getImageUrl());
+        }
+
+        obs.getImages().clear();
+        obs.getImages().addAll(newImageList);
+
+        Observation saved = observationRepository.saveAndFlush(obs);
+
+        int idCount = (int) identificationRepository.countByObservationId(id);
+        int cmtCount = (int) commentRepository.countByObservationIdAndDeletedFalse(id);
+        return observationMapper.toResponse(saved, idCount, cmtCount);
     }
 
     @Transactional

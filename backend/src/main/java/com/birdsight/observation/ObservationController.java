@@ -110,6 +110,18 @@ public class ObservationController {
         return ResponseEntity.ok(observationService.getMapObservations(filter));
     }
 
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ObservationResponse> updateObservation(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @Valid @RequestPart("observation") com.birdsight.observation.dto.UpdateObservationRequest request,
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) {
+
+        ObservationResponse updated = observationService.updateObservation(
+                id, principal.getUsername(), request, newImages);
+        return ResponseEntity.ok(updated);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteObservation(@PathVariable UUID id,
                                                     @AuthenticationPrincipal CustomUserDetails principal) {
