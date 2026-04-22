@@ -56,6 +56,9 @@ public class ObservationMapper {
                 .speciesScientificName(obs.getCommunityTaxon() != null
                         ? obs.getCommunityTaxon().getScientificName()
                         : null)
+                .taxonRank(obs.getCommunityTaxon() != null
+                        ? obs.getCommunityTaxon().getRank()
+                        : null)
                 .qualityGrade(obs.getQualityGrade())
                 .thumbnailUrl(thumbnail)
                 .observedAt(obs.getObservedAt())

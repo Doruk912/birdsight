@@ -1,6 +1,7 @@
 package com.birdsight.observation.dto;
 
 import com.birdsight.observation.QualityGrade;
+import com.birdsight.taxonomy.TaxonRank;
 import lombok.*;
 
 import java.time.Instant;
@@ -21,6 +22,7 @@ public class ObservationMapResponse {
     private Double longitude;
     private String speciesCommonName;
     private String speciesScientificName;
+    private TaxonRank taxonRank;
     private QualityGrade qualityGrade;
     private String thumbnailUrl;
     private Instant observedAt;
