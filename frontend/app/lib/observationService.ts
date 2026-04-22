@@ -60,19 +60,32 @@ export async function fetchMapObservations(
 
   const data: ObservationMapApiResponse[] = await response.json();
 
-  return data.map((obs) => ({
-    id: obs.id,
-    species: obs.speciesCommonName || "Unknown species",
-    speciesScientific: obs.speciesScientificName || undefined,
-    qualityGrade: obs.qualityGrade,
-    latitude: obs.latitude,
-    longitude: obs.longitude,
-    thumbnailUrl: obs.thumbnailUrl || undefined,
-    observedAt: obs.observedAt || undefined,
-    identificationCount: obs.identificationCount ?? 0,
-    username: obs.username || undefined,
-    locationName: obs.locationName || undefined,
-  }));
+  return data.map((obs) => {
+    const rankPrefix = obs.taxonRank && obs.taxonRank !== "SPECIES"
+      ? obs.taxonRank.charAt(0).toUpperCase() + obs.taxonRank.slice(1).toLowerCase() + " "
+      : "";
+      
+    const commonName = obs.speciesCommonName;
+    const scientificName = obs.speciesScientificName;
+
+    const speciesTitle = commonName || (scientificName ? rankPrefix + scientificName : "Unknown species");
+    const speciesSubTitle = commonName && scientificName ? (rankPrefix + scientificName) : undefined;
+
+    return {
+      id: obs.id,
+      species: speciesTitle,
+      speciesScientific: speciesSubTitle,
+      taxonRank: obs.taxonRank || undefined,
+      qualityGrade: obs.qualityGrade,
+      latitude: obs.latitude,
+      longitude: obs.longitude,
+      thumbnailUrl: obs.thumbnailUrl || undefined,
+      observedAt: obs.observedAt || undefined,
+      identificationCount: obs.identificationCount ?? 0,
+      username: obs.username || undefined,
+      locationName: obs.locationName || undefined,
+    };
+  });
 }
 
 export async function fetchObservationDetail(

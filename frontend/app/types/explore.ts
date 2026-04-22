@@ -2,6 +2,7 @@ export interface MapObservation {
   id: string;
   species: string;
   speciesScientific?: string;
+  taxonRank?: "CLASS" | "ORDER" | "FAMILY" | "GENUS" | "SPECIES";
   qualityGrade: "NEEDS_ID" | "RESEARCH_GRADE";
   latitude: number;
   longitude: number;
@@ -26,6 +27,7 @@ export interface ObservationMapApiResponse {
   longitude: number;
   speciesCommonName: string | null;
   speciesScientificName: string | null;
+  taxonRank: "CLASS" | "ORDER" | "FAMILY" | "GENUS" | "SPECIES" | null;
   qualityGrade: "NEEDS_ID" | "RESEARCH_GRADE";
   thumbnailUrl: string | null;
   observedAt: string | null;
