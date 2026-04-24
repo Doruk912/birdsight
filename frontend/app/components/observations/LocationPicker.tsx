@@ -3,7 +3,7 @@
 import { useState } from "react";
 import MapGL, { Marker, NavigationControl } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MapPin, Crosshair } from "lucide-react";
+import { MapPin, Crosshair, Loader2 } from "lucide-react";
 
 const MAP_STYLE = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
 
@@ -22,23 +22,51 @@ export default function LocationPicker({ onLocationChange, initialLocation }: Lo
   const [marker, setMarker] = useState<{lat: number; lng: number} | null>(
     initialLocation ? { lat: initialLocation.lat, lng: initialLocation.lng } : null
   );
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const handleMapClick = (e: { lngLat: { lat: number; lng: number } }) => {
     const lat = e.lngLat.lat;
     const lng = e.lngLat.lng;
     setMarker({ lat, lng });
+    setLocationError(null);
     onLocationChange(lat, lng);
   };
 
   const useCurrentLocation = () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition((position) => {
+    if (!("geolocation" in navigator)) {
+      setLocationError("Could not get your current location.");
+      return;
+    }
+
+    setIsLocating(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
         const { latitude, longitude } = position.coords;
         setViewState((prev) => ({ ...prev, latitude, longitude, zoom: 14 }));
         setMarker({ lat: latitude, lng: longitude });
         onLocationChange(latitude, longitude);
-      });
-    }
+        setLocationError(null);
+        setIsLocating(false);
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError("Location access is blocked. Please allow location permission and try again.");
+        } else if (error.code === error.TIMEOUT) {
+          setLocationError("Could not get your current location.");
+        } else {
+          setLocationError("Could not get your current location.");
+        }
+        setIsLocating(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
   };
 
   return (
@@ -48,11 +76,17 @@ export default function LocationPicker({ onLocationChange, initialLocation }: Lo
         <button
           type="button"
           onClick={useCurrentLocation}
-          className="flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 font-medium bg-emerald-50 px-3 py-1.5 rounded-full transition-colors"
+          disabled={isLocating}
+          className="flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 font-medium bg-emerald-50 px-3 py-1.5 rounded-full transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <Crosshair size={14} /> Use Current Location
+          {isLocating ? <Loader2 size={14} className="animate-spin" /> : <Crosshair size={14} />}
+          {isLocating ? "Locating..." : "Use Current Location"}
         </button>
       </div>
+
+      {locationError && (
+        <p className="text-xs font-medium text-red-500/80">{locationError}</p>
+      )}
 
       <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm relative h-90 bg-stone-100">
         <MapGL
