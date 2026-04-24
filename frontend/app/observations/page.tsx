@@ -23,6 +23,11 @@ const GRADES = [
 export default function ObservationsPage() {
   const searchParams = useSearchParams();
   const queryAuthor = searchParams.get("author")?.trim() || "";
+  const queryTaxonId = searchParams.get("taxonId")?.trim() || "";
+  const querySearch = searchParams.get("search")?.trim() || "";
+  const queryGrade = searchParams.get("grade")?.trim() || "";
+  const queryDateFrom = searchParams.get("dateFrom")?.trim() || "";
+  const queryDateTo = searchParams.get("dateTo")?.trim() || "";
 
   const [observations, setObservations] = useState<ObservationDetailResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,38 +118,46 @@ export default function ObservationsPage() {
     loadObservations();
   }, [loadObservations]);
 
+  // Hydrate filters from URL
   useEffect(() => {
     let ignore = false;
 
-    const hydrateAuthorFilter = async () => {
-      if (!queryAuthor) {
-        return;
+    const hydrateFilters = async () => {
+      const initialFilters: ObservationFilterParams = {};
+      if (queryTaxonId) initialFilters.taxonId = queryTaxonId;
+      if (querySearch) initialFilters.search = querySearch;
+      if (queryGrade) initialFilters.grade = queryGrade;
+      if (queryDateFrom) initialFilters.dateFrom = queryDateFrom;
+      if (queryDateTo) initialFilters.dateTo = queryDateTo;
+
+      // Handle author (requires username -> userId lookup)
+      if (queryAuthor) {
+        try {
+          const matchedUser = await userService.getByUsername(queryAuthor);
+          if (!ignore) {
+            initialFilters.userId = matchedUser.id;
+            setSelectedUserName(matchedUser.displayName || matchedUser.username);
+          }
+        } catch (err) {
+          console.error("Failed to hydrate author filter:", err);
+        }
       }
 
-      try {
-        const matchedUser = await userService.getByUsername(queryAuthor);
+      if (ignore) return;
 
-        if (ignore) return;
-
-        setPendingFilters((prev) => ({ ...prev, userId: matchedUser.id }));
-        setFilters((prev) => ({ ...prev, userId: matchedUser.id }));
-        setSelectedUserName(matchedUser.displayName || matchedUser.username);
+      if (Object.keys(initialFilters).length > 0) {
+        setPendingFilters((prev) => ({ ...prev, ...initialFilters }));
+        setFilters((prev) => ({ ...prev, ...initialFilters }));
         setPage(0);
-      } catch {
-        if (ignore) return;
-
-        setPendingFilters((prev) => ({ ...prev, userId: undefined }));
-        setFilters((prev) => ({ ...prev, userId: undefined }));
-        setSelectedUserName(null);
       }
     };
 
-    hydrateAuthorFilter();
+    hydrateFilters();
 
     return () => {
       ignore = true;
     };
-  }, [queryAuthor]);
+  }, [queryAuthor, queryTaxonId, querySearch, queryGrade, queryDateFrom, queryDateTo]);
 
   const handleApplyFilters = useCallback(() => {
     setFilters({ ...pendingFilters });

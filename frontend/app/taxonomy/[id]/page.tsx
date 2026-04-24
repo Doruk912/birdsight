@@ -238,7 +238,7 @@ export default function TaxonDetailPage() {
                   <div className="flex items-center justify-between">
                     <span className="taxon-stats-value text-3xl font-bold text-stone-800">{taxon.observationCount.toLocaleString()}</span>
                     <Link
-                      href={`/observations?search=${encodeURIComponent(taxon.scientificName)}`}
+                      href={`/observations?taxonId=${taxon.id}`}
                       className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-semibold rounded-md hover:bg-emerald-100 transition-colors"
                     >
                       View Observations
@@ -505,7 +505,7 @@ export default function TaxonDetailPage() {
                   </div>
                   <div className="mt-6 text-center">
                     <Link
-                      href={`/observations?search=${encodeURIComponent(taxon.scientificName)}`}
+                      href={`/observations?taxonId=${taxon.id}`}
                       className="taxon-observations-link inline-flex"
                     >
                       <Eye size={15} />
