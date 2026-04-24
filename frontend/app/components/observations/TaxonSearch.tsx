@@ -14,9 +14,16 @@ interface TaxonSearchProps {
   initialTaxonId?: string;
   label?: string;
   hideOptional?: boolean;
+  required?: boolean;
 }
 
-export default function TaxonSearch({ onSelect, initialTaxonId, label = "Identification", hideOptional = false }: TaxonSearchProps) {
+export default function TaxonSearch({ 
+  onSelect, 
+  initialTaxonId, 
+  label = "Identification", 
+  hideOptional = false,
+  required = false 
+}: TaxonSearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TaxonResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -101,7 +108,7 @@ export default function TaxonSearch({ onSelect, initialTaxonId, label = "Identif
     <div className="relative" ref={wrapperRef}>
       {label && (
         <label className="block text-sm font-medium text-stone-700 mb-2">
-          {label} {!hideOptional && <span className="text-stone-400 font-normal">(Optional)</span>}
+          {label} {required && <span className="text-red-500">*</span>} {!required && !hideOptional && <span className="text-stone-400 font-normal">(Optional)</span>}
         </label>
       )}
       

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, Loader2, ImagePlus, X } from "lucide-react";
+import { Camera, Loader2, ImagePlus, X, Sparkles } from "lucide-react";
 import LocationPicker from "./LocationPicker";
 import TaxonSearch from "./TaxonSearch";
 import DateTimePicker from "./DateTimePicker";
@@ -125,6 +125,10 @@ export default function AddObservationForm() {
       setError("At least 1 photo is required.");
       return;
     }
+    if (!taxonId) {
+      setError("Identification is required. Please select a species from the suggestions or search for one.");
+      return;
+    }
     if (!observedAtDate) {
       setError("Observation date & time is required.");
       return;
@@ -189,102 +193,120 @@ export default function AddObservationForm() {
       <form onSubmit={handleSubmit} className="space-y-10">
 
         <div className="space-y-10">
-          {/* Images section */}
+          {/* Photos Section */}
           <section>
-          <div className="flex items-center justify-between mb-4">
-            <label className="text-lg font-bold tracking-tight text-stone-800 flex items-center gap-2.5">
-              <span className="flex items-center justify-center p-1.5 bg-emerald-100 rounded-lg text-emerald-700">
-                <Camera size={20} strokeWidth={2.5} />
-              </span>
-              Photos <span className="text-red-500">*</span>
-            </label>
-            <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 bg-stone-100 px-2 py-1 rounded-md">{images.length} / 5</span>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            {previewUrls.map((url, i) => (
-              <div 
-                key={i} 
-                onClick={() => setActiveMlIndex(i)}
-                className={`relative aspect-square rounded-2xl overflow-hidden shadow-sm group cursor-pointer transition-all duration-200 border-2 ${activeMlIndex === i ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-stone-200 hover:border-violet-300'}`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeImage(i);
-                  }}
-                  className="absolute top-2 right-2 bg-stone-900/60 backdrop-blur-sm text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
-                >
-                  <X size={14} strokeWidth={2.5} />
-                </button>
-              </div>
-            ))}
-            
-            {images.length < 5 && (
-              <label className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-stone-300 rounded-2xl bg-stone-50 hover:bg-emerald-50/50 hover:border-emerald-400 hover:text-emerald-600 transition-all cursor-pointer text-stone-500 shadow-sm group">
-                <div className="p-3 bg-white rounded-full shadow-sm group-hover:bg-emerald-100 transition-colors">
-                  <ImagePlus size={22} strokeWidth={2} />
-                </div>
-                <span className="text-[13px] font-semibold tracking-wide">Add Photo</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  // Fix so event triggers when same file appended twice consecutively
-                  onClick={(e) => (e.target as HTMLInputElement).value = ''}
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
+            <div className="flex items-center justify-between mb-4">
+              <label className="text-lg font-bold tracking-tight text-stone-800 flex items-center gap-2.5">
+                <span className="flex items-center justify-center p-1.5 bg-emerald-100 rounded-lg text-emerald-700">
+                  <Camera size={20} strokeWidth={2.5} />
+                </span>
+                Photos <span className="text-red-500">*</span>
               </label>
-            )}
-          </div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 bg-stone-100 px-2 py-1 rounded-md">{images.length} / 5</span>
+            </div>
 
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              {previewUrls.map((url, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => setActiveMlIndex(i)}
+                  className={`relative aspect-square rounded-2xl overflow-hidden shadow-sm group cursor-pointer transition-all duration-200 border-2 ${activeMlIndex === i ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-stone-200 hover:border-violet-300'}`}
+                >
+                  <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(i);
+                    }}
+                    className="absolute top-2 right-2 bg-stone-900/60 backdrop-blur-sm text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                  >
+                    <X size={14} strokeWidth={2.5} />
+                  </button>
+                </div>
+              ))}
+              
+              {images.length < 5 && (
+                <label className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-stone-300 rounded-2xl bg-stone-50 hover:bg-emerald-50/50 hover:border-emerald-400 hover:text-emerald-600 transition-all cursor-pointer text-stone-500 shadow-sm group">
+                  <div className="p-3 bg-white rounded-full shadow-sm group-hover:bg-emerald-100 transition-colors">
+                    <ImagePlus size={22} strokeWidth={2} />
+                  </div>
+                  <span className="text-[13px] font-semibold tracking-wide">Add Photo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onClick={(e) => (e.target as HTMLInputElement).value = ''}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
           </section>
-
-          {/* ML Suggestions — shown based on currently selected active image */}
-          {images.length > 0 && images[activeMlIndex] && (
-            <section>
-              <MLSuggestions
-                imageFile={images[activeMlIndex]}
-                onSelect={handleMLSelect}
-              />
-            </section>
-          )}
 
           <hr className="border-stone-100" />
-        </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-10">
-          <section className="space-y-6">
-            <div>
-              <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">When did you see it? <span className="text-red-500">*</span></label>
-              <DateTimePicker
-                value={observedAtDate}
-                onChange={setObservedAtDate}
-                maxDate={new Date()}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">Description <span className="text-stone-400 font-normal">(Optional)</span></label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="What was it doing? How was the weather? etc."
-                rows={4}
-                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none placeholder:text-stone-400 font-medium text-stone-900"
-              />
+          {/* Middle Section: AI Suggestions + Form Fields */}
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-10">
+            {/* Left Column: AI Suggestions */}
+            <div className="space-y-6">
+              {images.length > 0 && images[activeMlIndex] ? (
+                <MLSuggestions
+                  imageFile={images[activeMlIndex]}
+                  onSelect={handleMLSelect}
+                />
+              ) : (
+                <div className="h-full min-h-[200px] flex flex-col items-center justify-center border-2 border-dashed border-stone-200 rounded-2xl bg-stone-50/50 p-6 text-center">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+                    <Sparkles className="text-stone-300" size={24} />
+                  </div>
+                  <p className="text-sm font-semibold text-stone-500">AI Suggestions</p>
+                  <p className="text-xs text-stone-400 mt-1 max-w-[200px]">Add a photo to see automatic species identification</p>
+                </div>
+              )}
             </div>
 
-            <div>
-              <TaxonSearch key={taxonSearchKey} onSelect={setTaxonId} initialTaxonId={taxonId} label="Identification" />
-            </div>
-          </section>
+            {/* Right Column: Form Fields */}
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">
+                  Identification <span className="text-red-500">*</span>
+                </label>
+                <TaxonSearch
+                  key={taxonSearchKey}
+                  onSelect={setTaxonId}
+                  initialTaxonId={taxonId}
+                  label=""
+                  required={true}
+                />
+              </div>
 
+              <div>
+                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">When did you see it? <span className="text-red-500">*</span></label>
+                <DateTimePicker
+                  value={observedAtDate}
+                  onChange={setObservedAtDate}
+                  maxDate={new Date()}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">Description <span className="text-stone-400 font-normal">(Optional)</span></label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="What was it doing? How was the weather? etc."
+                  rows={4}
+                  className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none placeholder:text-stone-400 font-medium text-stone-900"
+                />
+              </div>
+            </div>
+          </div>
+
+          <hr className="border-stone-100" />
+
+          {/* Bottom Section: Location */}
           <section>
             <LocationPicker onLocationChange={(lat, lng) => setLocation({lat, lng})} />
           </section>
