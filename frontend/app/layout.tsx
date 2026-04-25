@@ -10,7 +10,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "BirdSight — Discover & Share Bird Sightings",
+  title: "BirdSight - Share Bird Sightings",
   description:
     "BirdSight is a community platform for birdwatchers. Log observations, explore the map, learn about species, and connect with other birders worldwide.",
 };
