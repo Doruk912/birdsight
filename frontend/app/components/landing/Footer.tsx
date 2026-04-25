@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bird } from "lucide-react";
+import Image from "next/image";
 import { FOOTER_LINKS } from "@/app/constants/footer";
 
 export default function Footer() {
@@ -10,8 +10,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-2 text-white font-semibold">
-              <Bird className="text-emerald-500" size={22} strokeWidth={1.8} />
-              <span className="text-lg tracking-tight">BirdSight</span>
+              <Image
+                src="/logo-white.svg"
+                alt="BirdSight"
+                width={389}
+                height={326}
+                className="h-16 w-auto"
+              />
             </Link>
             <p className="text-sm leading-relaxed text-stone-500">
               A community platform for birdwatchers everywhere. Log, explore,
@@ -54,7 +59,3 @@ export default function Footer() {
     </footer>
   );
 }
-
-
-
-

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bird, Menu, X, User, Binoculars, Settings, LogOut, Plus } from "lucide-react";
+import Image from "next/image";
+import { Menu, X, User, Binoculars, Settings, LogOut, Plus } from "lucide-react";
 import { NAV_LINKS } from "@/app/constants/navigation";
 import { useAuth } from "@/app/hooks/useAuth";
 import UserDropdown from "@/app/components/shared/UserDropdown";
@@ -17,8 +18,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-semibold text-stone-800">
-          <Bird className="text-emerald-600" size={26} strokeWidth={1.8} />
-          <span className="text-xl tracking-tight">BirdSight</span>
+          <Image
+            src="/logo.svg"
+            alt="BirdSight"
+            width={389}
+            height={326}
+            className="h-20 w-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop nav */}

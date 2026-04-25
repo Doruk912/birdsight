@@ -1,4 +1,4 @@
-import { Bird } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface AuthCardProps {
@@ -25,7 +25,7 @@ export default function AuthCard({
   footerLinkHref,
 }: AuthCardProps) {
   return (
-    <div className="min-h-screen bg-stone-950 flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-dvh bg-stone-950 flex items-start md:items-center justify-center px-4 pt-20 md:pt-24 pb-10 relative overflow-y-auto overflow-x-hidden">
       {/* Background gradient blobs — matches Hero */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-emerald-900/40 blur-[120px]" />
@@ -48,8 +48,14 @@ export default function AuthCard({
           href="/"
           className="flex items-center justify-center gap-2 font-semibold text-white mb-8"
         >
-          <Bird className="text-emerald-400" size={28} strokeWidth={1.8} />
-          <span className="text-2xl tracking-tight">BirdSight</span>
+          <Image
+            src="/logo-white.svg"
+            alt="BirdSight"
+            width={389}
+            height={326}
+            className="h-20 w-auto"
+            priority
+          />
         </Link>
 
         {/* Card */}
@@ -74,4 +80,3 @@ export default function AuthCard({
     </div>
   );
 }
-
