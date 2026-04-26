@@ -152,6 +152,7 @@ export interface ObservationFilterParams {
   grade?: string;
   taxonId?: string;
   userId?: string;
+  notIdentifiedByUserId?: string;
   dateFrom?: string;
   dateTo?: string;
   swLat?: number;

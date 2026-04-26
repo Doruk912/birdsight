@@ -33,6 +33,7 @@ function buildFilterParams(filters: ObservationFilterParams): URLSearchParams {
   if (filters.grade) params.append("grade", filters.grade);
   if (filters.taxonId) params.append("taxonId", filters.taxonId);
   if (filters.userId) params.append("userId", filters.userId);
+  if (filters.notIdentifiedByUserId) params.append("notIdentifiedByUserId", filters.notIdentifiedByUserId);
   if (filters.dateFrom) params.append("dateFrom", filters.dateFrom);
   if (filters.dateTo) params.append("dateTo", filters.dateTo);
   if (filters.swLat !== undefined) params.append("swLat", filters.swLat.toString());
