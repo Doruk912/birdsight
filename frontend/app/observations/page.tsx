@@ -179,7 +179,7 @@ export default function ObservationsPage() {
     !!filters.dateTo;
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-stone-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
         {/* Header */}
         <div>

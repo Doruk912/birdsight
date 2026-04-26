@@ -160,11 +160,11 @@ export default function IdentifyPage() {
   const hasFilters = !!(activeFilters.taxonId || activeFilters.userId || activeFilters.dateFrom || activeFilters.dateTo);
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-stone-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold text-stone-900 tracking-tight">Identify</h1>
             <p className="text-stone-500 mt-1">
