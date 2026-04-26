@@ -8,7 +8,7 @@ import { AuthUser } from "@/app/types/auth";
 
 interface UserDropdownProps {
   user: AuthUser;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export default function UserDropdown({ user, logout }: UserDropdownProps) {

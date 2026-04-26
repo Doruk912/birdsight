@@ -42,7 +42,7 @@ function userFromResponse(response: AuthResponse): AuthUser | null {
 interface AuthContextValue extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (partial: Partial<AuthUser>) => void;
 }
 
@@ -97,8 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/");
   }, [router]);
 
-  const logout = useCallback(() => {
-    authService.logout();
+  const logout = useCallback(async () => {
+    await authService.logout();
     setState({ user: null, accessToken: null, isLoading: false });
     router.push("/");
   }, [router]);

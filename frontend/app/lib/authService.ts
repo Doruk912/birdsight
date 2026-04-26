@@ -21,7 +21,13 @@ export const authService = {
     return data;
   },
 
-  logout: (): void => {
-    tokenStore.clear();
+  logout: async (): Promise<void> => {
+    try {
+      await apiClient.post("/api/auth/logout", {}, { skipAuth: true });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      tokenStore.clear();
+    }
   },
 };
