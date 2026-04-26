@@ -45,6 +45,7 @@ public class ObservationController {
             @RequestParam(required = false) QualityGrade grade,
             @RequestParam(required = false) UUID taxonId,
             @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) UUID notIdentifiedByUserId,
             @RequestParam(required = false) Instant dateFrom,
             @RequestParam(required = false) Instant dateTo,
             @RequestParam(required = false) Double swLat,
@@ -58,6 +59,7 @@ public class ObservationController {
                 .grade(grade)
                 .taxonId(taxonId)
                 .userId(userId)
+                .notIdentifiedByUserId(notIdentifiedByUserId)
                 .dateFrom(dateFrom)
                 .dateTo(dateTo)
                 .swLat(swLat)

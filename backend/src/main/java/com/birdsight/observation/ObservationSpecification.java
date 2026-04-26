@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.birdsight.identification.Identification;
+
 public class ObservationSpecification {
 
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
@@ -54,6 +56,18 @@ public class ObservationSpecification {
             }
             if (filter.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("observedAt"), filter.getDateTo()));
+            }
+
+            // NOT identified by a specific user (for Identify page default filter)
+            if (filter.getNotIdentifiedByUserId() != null) {
+                Subquery<UUID> subquery = query.subquery(UUID.class);
+                Root<Identification> idRoot = subquery.from(Identification.class);
+                subquery.select(idRoot.get("observation").get("id"))
+                        .where(
+                                cb.equal(idRoot.get("user").get("id"), filter.getNotIdentifiedByUserId()),
+                                cb.isFalse(idRoot.get("withdrawn"))
+                        );
+                predicates.add(cb.not(root.get("id").in(subquery)));
             }
 
             // Geographic bounding box using native PostGIS function

@@ -17,6 +17,7 @@ public class ObservationFilterRequest {
     private QualityGrade grade;
     private UUID taxonId;
     private UUID userId;
+    private UUID notIdentifiedByUserId;
     private Instant dateFrom;
     private Instant dateTo;
 
@@ -37,6 +38,7 @@ public class ObservationFilterRequest {
                 || userId != null
                 || dateFrom != null
                 || dateTo != null
-                || hasBoundingBox();
+                || hasBoundingBox()
+                || notIdentifiedByUserId != null;
     }
 }
