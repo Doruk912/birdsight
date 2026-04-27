@@ -26,6 +26,7 @@ export interface HowItWorksStep {
   title: string;
   description: string;
   accent: string;
+  image?: string;
 }
 
 export interface NavLink {
