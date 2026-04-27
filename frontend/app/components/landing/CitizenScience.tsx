@@ -24,7 +24,7 @@ export default function CitizenScience() {
           <p className="mt-4 text-stone-400 text-lg leading-relaxed">
             You don&apos;t need a laboratory. When birdwatchers like you log
             what they see, that data becomes part of the world&apos;s largest
-            living record of wildlife — and real science happens as a result.
+            living record of wildlife, and real science happens as a result.
           </p>
         </div>
 

@@ -7,7 +7,7 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
     icon: Binoculars,
     title: "Spot a bird",
     description:
-      "You're out in the field. You see something interesting — note the habitat, behaviour, and snap a photo.",
+      "You're out in the field. You see something interesting: note the habitat, behaviour, and snap a photo.",
     accent: "text-amber-600 bg-amber-50 border-amber-200",
   },
   {

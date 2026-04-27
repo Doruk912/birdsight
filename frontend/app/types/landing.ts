@@ -28,12 +28,6 @@ export interface HowItWorksStep {
   accent: string;
 }
 
-export interface CitizenScienceStat {
-  value: string;
-  label: string;
-  description: string;
-}
-
 export interface NavLink {
   label: string;
   href: string;

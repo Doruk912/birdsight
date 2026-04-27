@@ -11,13 +11,13 @@ export const CITIZEN_SCIENCE_PILLARS = [
     icon: Globe2,
     title: "A global network of observers",
     description:
-      "No research institution can station observers everywhere at once. A community of birdwatchers spread across every continent fills that gap — providing coverage at a scale no lab could afford.",
+      "No research institution can station observers everywhere at once. A community of birdwatchers spread across every continent fills that gap, providing coverage at a scale no lab could afford.",
   },
   {
     icon: TrendingUp,
     title: "Data that drives decisions",
     description:
-      "Aggregated sightings reveal long-term population trends, seasonal migration shifts, and the effects of climate change on bird ranges — informing conservation policy worldwide.",
+      "Aggregated sightings reveal long-term population trends, seasonal migration shifts, and the effects of climate change on bird ranges, informing conservation policy worldwide.",
   },
   {
     icon: ShieldCheck,

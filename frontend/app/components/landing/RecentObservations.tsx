@@ -1,7 +1,23 @@
-import { MapPin, Clock } from "lucide-react";
-import { RECENT_OBSERVATIONS } from "@/app/constants/observations";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { ObservationDetailResponse } from "@/app/types/explore";
+import { fetchAllObservations } from "@/app/lib/observationService";
+import ObservationCard from "@/app/components/observations/ObservationCard";
 
 export default function RecentObservations() {
+  const [observations, setObservations] = useState<ObservationDetailResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAllObservations(0, {})
+      .then((page) => setObservations(page.content.slice(0, 6)))
+      .catch(() => setObservations([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <section className="bg-white py-24 px-6">
       <div className="max-w-7xl mx-auto">
@@ -15,56 +31,44 @@ export default function RecentObservations() {
               Recent sightings
             </h2>
           </div>
-          <a
-            href="#"
-            className="text-sm font-medium text-emerald-600 hover:text-emerald-800 transition-colors"
+          <Link
+            href="/observations"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-800 transition-colors group"
           >
-            Browse all observations →
-          </a>
+            Browse all observations
+            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
+
+        {/* Loading state */}
+        {loading && (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 size={28} className="text-emerald-500 animate-spin" />
+          </div>
+        )}
 
         {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {RECENT_OBSERVATIONS.map((obs) => (
-            <div
-              key={obs.id}
-              className="group rounded-2xl border border-stone-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-            >
-              {/* Photo placeholder */}
-              <div
-                className={`h-44 bg-gradient-to-br ${obs.gradient} flex items-center justify-center text-6xl select-none`}
-              >
-                {obs.emoji}
-              </div>
+        {!loading && observations.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {observations.map((obs) => (
+              <ObservationCard key={obs.id} observation={obs} />
+            ))}
+          </div>
+        )}
 
-              {/* Content */}
-              <div className="p-5 flex flex-col gap-2">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-stone-900 group-hover:text-emerald-700 transition-colors leading-tight">
-                    {obs.species}
-                  </h3>
-                  {obs.badge && (
-                    <span
-                      className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${obs.badgeColor}`}
-                    >
-                      {obs.badge}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 text-xs text-stone-500">
-                  <MapPin size={12} />
-                  {obs.location}
-                </div>
-                <div className="flex items-center justify-between mt-1 text-xs text-stone-400">
-                  <span className="font-medium text-stone-600">@{obs.user}</span>
-                  <span className="flex items-center gap-1">
-                    <Clock size={11} /> {obs.timeAgo}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Empty state */}
+        {!loading && observations.length === 0 && (
+          <div className="text-center py-20 text-stone-400">
+            <p className="text-lg font-medium">No observations yet.</p>
+            <p className="text-sm mt-1">Be the first to log a sighting!</p>
+            <Link
+              href="/observations/new"
+              className="inline-flex items-center gap-2 mt-6 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-6 py-3 rounded-full transition-colors text-sm"
+            >
+              Add Observation <ArrowRight size={14} />
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
