@@ -1,4 +1,11 @@
-import { FlaskConical, Globe2, TrendingUp, ShieldCheck, Users, Microscope } from "lucide-react";
+import {
+  FlaskConical,
+  Globe2,
+  TrendingUp,
+  ShieldCheck,
+  Users,
+  Microscope,
+} from "lucide-react";
 
 export const CITIZEN_SCIENCE_PILLARS = [
   {
@@ -38,4 +45,3 @@ export const CITIZEN_SCIENCE_PILLARS = [
       "You don't need a PhD. Your eyes, your phone, and your curiosity are the instruments. The community verifies sightings together, making the dataset robust and trustworthy.",
   },
 ];
-

@@ -8,7 +8,10 @@ import TaxonSearch from "./TaxonSearch";
 import DateTimePicker from "./DateTimePicker";
 import MLSuggestions from "./MLSuggestions";
 import ImageCropperModal from "./ImageCropperModal";
-import { createObservation, addIdentification } from "@/app/lib/observationService";
+import {
+  createObservation,
+  addIdentification,
+} from "@/app/lib/observationService";
 
 interface PendingImage {
   file: File;
@@ -20,7 +23,9 @@ export default function AddObservationForm() {
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [observedAtDate, setObservedAtDate] = useState<Date | null>(null);
-  const [location, setLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
   const [description, setDescription] = useState("");
   const [taxonId, setTaxonId] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,12 +50,12 @@ export default function AddObservationForm() {
       const selected = Array.from(e.target.files);
       if (selected.length === 0) return;
 
-      const newPending = selected.map(file => ({
+      const newPending = selected.map((file) => ({
         file,
-        url: URL.createObjectURL(file)
+        url: URL.createObjectURL(file),
       }));
-      
-      setPendingImages(prev => [...prev, ...newPending]);
+
+      setPendingImages((prev) => [...prev, ...newPending]);
     }
   };
 
@@ -76,46 +81,45 @@ export default function AddObservationForm() {
 
   const handleCropComplete = (croppedBlob: Blob) => {
     const currentPending = pendingImages[0];
-    const croppedFile = new File([croppedBlob], currentPending.file.name, { type: "image/jpeg" });
+    const croppedFile = new File([croppedBlob], currentPending.file.name, {
+      type: "image/jpeg",
+    });
     const newImageUrl = URL.createObjectURL(croppedBlob);
-    
+
     if (images.length < 5) {
-      setImages(prev => [...prev, croppedFile]);
-      setPreviewUrls(prev => [...prev, newImageUrl]);
+      setImages((prev) => [...prev, croppedFile]);
+      setPreviewUrls((prev) => [...prev, newImageUrl]);
     } else {
       URL.revokeObjectURL(newImageUrl); // max 5
     }
-    
+
     // Remove from pending
     URL.revokeObjectURL(currentPending.url);
-    setPendingImages(prev => prev.slice(1));
+    setPendingImages((prev) => prev.slice(1));
   };
 
   const handleCropCancel = () => {
     const currentPending = pendingImages[0];
     URL.revokeObjectURL(currentPending.url);
-    setPendingImages(prev => prev.slice(1));
+    setPendingImages((prev) => prev.slice(1));
   };
 
   const handleCropSkip = () => {
     const currentPending = pendingImages[0];
     if (images.length < 5) {
-      setImages(prev => [...prev, currentPending.file]);
-      setPreviewUrls(prev => [...prev, currentPending.url]);
+      setImages((prev) => [...prev, currentPending.file]);
+      setPreviewUrls((prev) => [...prev, currentPending.url]);
     } else {
       URL.revokeObjectURL(currentPending.url);
     }
-    setPendingImages(prev => prev.slice(1));
+    setPendingImages((prev) => prev.slice(1));
   };
 
-  const handleMLSelect = useCallback(
-    (selectedTaxonId: string) => {
-      setTaxonId(selectedTaxonId);
-      // Force TaxonSearch to re-render with the selected suggestion
-      setTaxonSearchKey((k) => k + 1);
-    },
-    []
-  );
+  const handleMLSelect = useCallback((selectedTaxonId: string) => {
+    setTaxonId(selectedTaxonId);
+    // Force TaxonSearch to re-render with the selected suggestion
+    setTaxonSearchKey((k) => k + 1);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +130,9 @@ export default function AddObservationForm() {
       return;
     }
     if (!taxonId) {
-      setError("Identification is required. Please select a species from the suggestions or search for one.");
+      setError(
+        "Identification is required. Please select a species from the suggestions or search for one.",
+      );
       return;
     }
     if (!observedAtDate) {
@@ -134,7 +140,9 @@ export default function AddObservationForm() {
       return;
     }
     if (!location) {
-      setError("Location is required. Please click on the map to set an exact location.");
+      setError(
+        "Location is required. Please click on the map to set an exact location.",
+      );
       return;
     }
 
@@ -142,30 +150,35 @@ export default function AddObservationForm() {
 
     try {
       const formData = new FormData();
-      
+
       const reqObj = {
         description,
         observedAt: observedAtDate.toISOString(),
         latitude: location.lat,
-        longitude: location.lng
+        longitude: location.lng,
       };
-      
-      formData.append("observation", new Blob([JSON.stringify(reqObj)], { type: "application/json" }));
-      images.forEach(file => {
+
+      formData.append(
+        "observation",
+        new Blob([JSON.stringify(reqObj)], { type: "application/json" }),
+      );
+      images.forEach((file) => {
         formData.append("images", file);
       });
 
       const obsResponse = await createObservation(formData);
-      
+
       // If a taxon was selected, we add the identification right after
       if (taxonId) {
         await addIdentification(obsResponse.id, taxonId);
       }
-      
+
       router.push(`/observations/${obsResponse.id}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || "An error occurred while uploading. Please try again.");
+      setError(
+        message || "An error occurred while uploading. Please try again.",
+      );
       setIsSubmitting(false);
     }
   };
@@ -184,14 +197,17 @@ export default function AddObservationForm() {
       )}
 
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-emerald-400 to-emerald-600"></div>
-      
+
       <div className="mb-8 mt-2">
-        <h1 className="text-[2.2rem] leading-tight font-extrabold tracking-tight text-stone-800">Add Observation</h1>
-        <p className="text-stone-500 mt-2 text-base font-medium">Contribute to the BirdSight community by sharing what you saw.</p>
+        <h1 className="text-[2.2rem] leading-tight font-extrabold tracking-tight text-stone-800">
+          Add Observation
+        </h1>
+        <p className="text-stone-500 mt-2 text-base font-medium">
+          Contribute to the BirdSight community by sharing what you saw.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-10">
-
         <div className="space-y-10">
           {/* Photos Section */}
           <section>
@@ -202,17 +218,23 @@ export default function AddObservationForm() {
                 </span>
                 Photos <span className="text-red-500">*</span>
               </label>
-              <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 bg-stone-100 px-2 py-1 rounded-md">{images.length} / 5</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 bg-stone-100 px-2 py-1 rounded-md">
+                {images.length} / 5
+              </span>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               {previewUrls.map((url, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   onClick={() => setActiveMlIndex(i)}
-                  className={`relative aspect-square rounded-2xl overflow-hidden shadow-sm group cursor-pointer transition-all duration-200 border-2 ${activeMlIndex === i ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-stone-200 hover:border-violet-300'}`}
+                  className={`relative aspect-square rounded-2xl overflow-hidden shadow-sm group cursor-pointer transition-all duration-200 border-2 ${activeMlIndex === i ? "border-violet-500 ring-2 ring-violet-500/20" : "border-stone-200 hover:border-violet-300"}`}
                 >
-                  <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <img
+                    src={url}
+                    alt={`Preview ${i}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
                   <button
                     type="button"
                     onClick={(e) => {
@@ -225,18 +247,20 @@ export default function AddObservationForm() {
                   </button>
                 </div>
               ))}
-              
+
               {images.length < 5 && (
                 <label className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-stone-300 rounded-2xl bg-stone-50 hover:bg-emerald-50/50 hover:border-emerald-400 hover:text-emerald-600 transition-all cursor-pointer text-stone-500 shadow-sm group">
                   <div className="p-3 bg-white rounded-full shadow-sm group-hover:bg-emerald-100 transition-colors">
                     <ImagePlus size={22} strokeWidth={2} />
                   </div>
-                  <span className="text-[13px] font-semibold tracking-wide">Add Photo</span>
+                  <span className="text-[13px] font-semibold tracking-wide">
+                    Add Photo
+                  </span>
                   <input
                     type="file"
                     accept="image/*"
                     multiple
-                    onClick={(e) => (e.target as HTMLInputElement).value = ''}
+                    onClick={(e) => ((e.target as HTMLInputElement).value = "")}
                     onChange={handleImageChange}
                     className="hidden"
                   />
@@ -261,8 +285,12 @@ export default function AddObservationForm() {
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
                     <Sparkles className="text-stone-300" size={24} />
                   </div>
-                  <p className="text-sm font-semibold text-stone-500">AI Suggestions</p>
-                  <p className="text-xs text-stone-400 mt-1 max-w-[200px]">Add a photo to see automatic species identification</p>
+                  <p className="text-sm font-semibold text-stone-500">
+                    AI Suggestions
+                  </p>
+                  <p className="text-xs text-stone-400 mt-1 max-w-[200px]">
+                    Add a photo to see automatic species identification
+                  </p>
                 </div>
               )}
             </div>
@@ -283,16 +311,21 @@ export default function AddObservationForm() {
               </div>
 
               <div>
-                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">When did you see it? <span className="text-red-500">*</span></label>
+                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">
+                  When did you see it? <span className="text-red-500">*</span>
+                </label>
                 <DateTimePicker
                   value={observedAtDate}
                   onChange={setObservedAtDate}
                   maxDate={new Date()}
                 />
               </div>
-              
+
               <div>
-                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">Description <span className="text-stone-400 font-normal">(Optional)</span></label>
+                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">
+                  Description{" "}
+                  <span className="text-stone-400 font-normal">(Optional)</span>
+                </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -308,7 +341,9 @@ export default function AddObservationForm() {
 
           {/* Bottom Section: Location */}
           <section>
-            <LocationPicker onLocationChange={(lat, lng) => setLocation({lat, lng})} />
+            <LocationPicker
+              onLocationChange={(lat, lng) => setLocation({ lat, lng })}
+            />
           </section>
         </div>
 
@@ -327,7 +362,11 @@ export default function AddObservationForm() {
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
-                <Loader2 className="animate-spin text-emerald-100" size={20} strokeWidth={2.5} />
+                <Loader2
+                  className="animate-spin text-emerald-100"
+                  size={20}
+                  strokeWidth={2.5}
+                />
                 Uploading...
               </span>
             ) : (

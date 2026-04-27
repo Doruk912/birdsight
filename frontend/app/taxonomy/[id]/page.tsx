@@ -25,7 +25,7 @@ import "./taxonomy-detail.css";
 // Dynamic import for map (avoid SSR issues with MapLibre)
 const ObservationMap = dynamic(
   () => import("@/app/components/explore/ObservationMap"),
-  { ssr: false }
+  { ssr: false },
 );
 
 const RANK_LABELS: Record<string, string> = {
@@ -85,16 +85,20 @@ export default function TaxonDetailPage() {
     setMapLoading(true);
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
-      const res = await fetch(`${API_BASE}/api/v1/observations/map?taxonId=${id}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `${API_BASE}/api/v1/observations/map?taxonId=${id}`,
+        {
+          cache: "no-store",
+        },
+      );
       if (res.ok) {
         const data = await res.json();
         setMapObservations(
           data.map((obs: Record<string, unknown>) => ({
             id: obs.id as string,
             species: (obs.speciesCommonName as string) || "Unknown species",
-            speciesScientific: (obs.speciesScientificName as string) || undefined,
+            speciesScientific:
+              (obs.speciesScientificName as string) || undefined,
             qualityGrade: obs.qualityGrade as "NEEDS_ID" | "RESEARCH_GRADE",
             latitude: obs.latitude as number,
             longitude: obs.longitude as number,
@@ -103,7 +107,7 @@ export default function TaxonDetailPage() {
             identificationCount: (obs.identificationCount as number) ?? 0,
             username: (obs.username as string) || undefined,
             locationName: (obs.locationName as string) || undefined,
-          }))
+          })),
         );
       }
     } catch (e) {
@@ -159,7 +163,9 @@ export default function TaxonDetailPage() {
       <div className="min-h-screen pt-16 flex items-center justify-center">
         <div className="text-center max-w-md px-6">
           <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h2 className="text-lg font-semibold text-stone-800 mb-2">Taxon not found</h2>
+          <h2 className="text-lg font-semibold text-stone-800 mb-2">
+            Taxon not found
+          </h2>
           <p className="text-sm text-stone-500 mb-6">
             {error || "The taxon you're looking for doesn't exist."}
           </p>
@@ -190,8 +196,13 @@ export default function TaxonDetailPage() {
         <nav className="taxon-breadcrumb">
           {taxon.ancestors.map((a, index) => (
             <span key={a.id} className="flex items-center gap-1">
-              {index > 0 && <ChevronRight size={12} className="text-stone-300" />}
-              <Link href={`/taxonomy/${a.id}`} className="taxon-breadcrumb-link">
+              {index > 0 && (
+                <ChevronRight size={12} className="text-stone-300" />
+              )}
+              <Link
+                href={`/taxonomy/${a.id}`}
+                className="taxon-breadcrumb-link"
+              >
                 {a.commonName || a.scientificName}
               </Link>
             </span>
@@ -226,7 +237,9 @@ export default function TaxonDetailPage() {
           ) : (
             <div className="taxon-cover-wrapper flex flex-col items-center justify-center bg-stone-50 text-stone-400 border border-stone-100">
               <Camera size={48} className="mb-3 opacity-20" />
-              <span className="text-base font-medium">No cover image available</span>
+              <span className="text-base font-medium">
+                No cover image available
+              </span>
             </div>
           )}
 
@@ -234,9 +247,13 @@ export default function TaxonDetailPage() {
             {taxon.observationCount > 0 ? (
               <>
                 <div className="taxon-stats-section border-b border-stone-200 pb-4 mb-4">
-                  <span className="taxon-stats-section-title block text-sm font-medium text-stone-500 mb-2">Total Observations</span>
+                  <span className="taxon-stats-section-title block text-sm font-medium text-stone-500 mb-2">
+                    Total Observations
+                  </span>
                   <div className="flex items-center justify-between">
-                    <span className="taxon-stats-value text-3xl font-bold text-stone-800">{taxon.observationCount.toLocaleString()}</span>
+                    <span className="taxon-stats-value text-3xl font-bold text-stone-800">
+                      {taxon.observationCount.toLocaleString()}
+                    </span>
                     <Link
                       href={`/observations?taxonId=${taxon.id}`}
                       className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-semibold rounded-md hover:bg-emerald-100 transition-colors"
@@ -248,16 +265,34 @@ export default function TaxonDetailPage() {
 
                 {taxon.topObserver && (
                   <div className="taxon-stats-section border-b border-stone-200 pb-4 mb-4">
-                    <span className="taxon-stats-section-title block text-sm font-medium text-stone-500 mb-2">Top Observer</span>
-                    <Link prefetch={false} href={`/profile/${taxon.topObserver.username}`} className="taxon-top-observer flex items-center gap-3 hover:bg-stone-50 p-2 -ml-2 rounded-lg transition-colors">
+                    <span className="taxon-stats-section-title block text-sm font-medium text-stone-500 mb-2">
+                      Top Observer
+                    </span>
+                    <Link
+                      prefetch={false}
+                      href={`/profile/${taxon.topObserver.username}`}
+                      className="taxon-top-observer flex items-center gap-3 hover:bg-stone-50 p-2 -ml-2 rounded-lg transition-colors"
+                    >
                       <img
-                        src={taxon.topObserver.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(taxon.topObserver.displayName || taxon.topObserver.username)}&background=random`}
-                        alt={taxon.topObserver.displayName || taxon.topObserver.username}
+                        src={
+                          taxon.topObserver.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(taxon.topObserver.displayName || taxon.topObserver.username)}&background=random`
+                        }
+                        alt={
+                          taxon.topObserver.displayName ||
+                          taxon.topObserver.username
+                        }
                         className="taxon-observer-avatar w-10 h-10 rounded-full object-cover"
                       />
                       <div className="taxon-observer-info flex flex-col">
-                        <span className="taxon-observer-name font-medium text-stone-800">{taxon.topObserver.displayName || taxon.topObserver.username}</span>
-                        <span className="taxon-observer-count text-sm text-stone-500">{taxon.topObserver.observationCount.toLocaleString()} observations</span>
+                        <span className="taxon-observer-name font-medium text-stone-800">
+                          {taxon.topObserver.displayName ||
+                            taxon.topObserver.username}
+                        </span>
+                        <span className="taxon-observer-count text-sm text-stone-500">
+                          {taxon.topObserver.observationCount.toLocaleString()}{" "}
+                          observations
+                        </span>
                       </div>
                     </Link>
                   </div>
@@ -265,16 +300,34 @@ export default function TaxonDetailPage() {
 
                 {taxon.topIdentifier && (
                   <div className="taxon-stats-section">
-                    <span className="taxon-stats-section-title block text-sm font-medium text-stone-500 mb-2">Top Identifier</span>
-                    <Link prefetch={false} href={`/profile/${taxon.topIdentifier.username}`} className="taxon-top-observer flex items-center gap-3 hover:bg-stone-50 p-2 -ml-2 rounded-lg transition-colors">
+                    <span className="taxon-stats-section-title block text-sm font-medium text-stone-500 mb-2">
+                      Top Identifier
+                    </span>
+                    <Link
+                      prefetch={false}
+                      href={`/profile/${taxon.topIdentifier.username}`}
+                      className="taxon-top-observer flex items-center gap-3 hover:bg-stone-50 p-2 -ml-2 rounded-lg transition-colors"
+                    >
                       <img
-                        src={taxon.topIdentifier.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(taxon.topIdentifier.displayName || taxon.topIdentifier.username)}&background=random`}
-                        alt={taxon.topIdentifier.displayName || taxon.topIdentifier.username}
+                        src={
+                          taxon.topIdentifier.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(taxon.topIdentifier.displayName || taxon.topIdentifier.username)}&background=random`
+                        }
+                        alt={
+                          taxon.topIdentifier.displayName ||
+                          taxon.topIdentifier.username
+                        }
                         className="taxon-observer-avatar w-10 h-10 rounded-full object-cover"
                       />
                       <div className="taxon-observer-info flex flex-col">
-                        <span className="taxon-observer-name font-medium text-stone-800">{taxon.topIdentifier.displayName || taxon.topIdentifier.username}</span>
-                        <span className="taxon-observer-count text-sm text-stone-500">{taxon.topIdentifier.identificationCount.toLocaleString()} identifications</span>
+                        <span className="taxon-observer-name font-medium text-stone-800">
+                          {taxon.topIdentifier.displayName ||
+                            taxon.topIdentifier.username}
+                        </span>
+                        <span className="taxon-observer-count text-sm text-stone-500">
+                          {taxon.topIdentifier.identificationCount.toLocaleString()}{" "}
+                          identifications
+                        </span>
                       </div>
                     </Link>
                   </div>
@@ -282,15 +335,21 @@ export default function TaxonDetailPage() {
 
                 {!taxon.topObserver && !taxon.topIdentifier && (
                   <div className="taxon-stats-section">
-                    <span className="text-base text-stone-500">No top contributor data available.</span>
+                    <span className="text-base text-stone-500">
+                      No top contributor data available.
+                    </span>
                   </div>
                 )}
               </>
             ) : (
               <div className="taxon-stats-section flex flex-col items-center justify-center text-stone-400 py-6 h-full mt-0">
                 <Eye size={28} className="mb-2 opacity-40" />
-                <span className="text-base font-medium">No observations yet</span>
-                <span className="text-sm mt-1 text-center max-w-[200px]">Be the first to record this taxon!</span>
+                <span className="text-base font-medium">
+                  No observations yet
+                </span>
+                <span className="text-sm mt-1 text-center max-w-[200px]">
+                  Be the first to record this taxon!
+                </span>
               </div>
             )}
           </div>
@@ -334,8 +393,16 @@ export default function TaxonDetailPage() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={handleSave} disabled={saving} className="taxon-save-btn">
-                      {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="taxon-save-btn"
+                    >
+                      {saving ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Save size={14} />
+                      )}
                       Save
                     </button>
                     <button
@@ -353,7 +420,10 @@ export default function TaxonDetailPage() {
                 <>
                   {isCuratorOrAdmin && (
                     <div className="flex justify-end mb-3">
-                      <button onClick={() => setEditing(true)} className="taxon-edit-btn">
+                      <button
+                        onClick={() => setEditing(true)}
+                        className="taxon-edit-btn"
+                      >
                         <Pencil size={12} /> Edit
                       </button>
                     </div>
@@ -378,8 +448,12 @@ export default function TaxonDetailPage() {
               {/* Classification tree */}
               <div className="taxon-sidebar-card w-full max-w-2xl">
                 <div className="flex justify-between items-center mb-3 border-b border-stone-200 pb-2">
-                  <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider m-0">Classification</h3>
-                  <span className="text-sm font-bold text-stone-500 uppercase tracking-wider">Observations</span>
+                  <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider m-0">
+                    Classification
+                  </h3>
+                  <span className="text-sm font-bold text-stone-500 uppercase tracking-wider">
+                    Observations
+                  </span>
                 </div>
                 <div className="taxon-tree space-y-2">
                   {taxon.ancestors.map((ancestor, i) => (
@@ -391,20 +465,29 @@ export default function TaxonDetailPage() {
                     >
                       <div className="flex items-center gap-2">
                         <span className="taxon-tree-name flex items-center gap-1.5 flex-wrap">
-                          <span>{ancestor.commonName || ancestor.scientificName}</span>
+                          <span>
+                            {ancestor.commonName || ancestor.scientificName}
+                          </span>
                           {ancestor.commonName ? (
                             <span className="text-stone-500 text-sm font-normal">
-                              ({ancestor.rank === "SPECIES" ? ancestor.scientificName : `${RANK_LABELS[ancestor.rank] || ancestor.rank} ${ancestor.scientificName}`})
+                              (
+                              {ancestor.rank === "SPECIES"
+                                ? ancestor.scientificName
+                                : `${RANK_LABELS[ancestor.rank] || ancestor.rank} ${ancestor.scientificName}`}
+                              )
                             </span>
                           ) : (
                             <span className="text-stone-500 text-sm font-normal">
-                              ({RANK_LABELS[ancestor.rank] || ancestor.rank} {ancestor.scientificName})
+                              ({RANK_LABELS[ancestor.rank] || ancestor.rank}{" "}
+                              {ancestor.scientificName})
                             </span>
                           )}
                         </span>
                       </div>
                       <span className="text-sm text-stone-600 font-semibold">
-                        {ancestor.observationCount ? ancestor.observationCount.toLocaleString() : "0"}
+                        {ancestor.observationCount
+                          ? ancestor.observationCount.toLocaleString()
+                          : "0"}
                       </span>
                     </Link>
                   ))}
@@ -418,17 +501,24 @@ export default function TaxonDetailPage() {
                         <span>{displayName}</span>
                         {taxon.commonName ? (
                           <span className="text-stone-500 text-sm font-normal">
-                            ({taxon.rank === "SPECIES" ? taxon.scientificName : `${RANK_LABELS[taxon.rank] || taxon.rank} ${taxon.scientificName}`})
+                            (
+                            {taxon.rank === "SPECIES"
+                              ? taxon.scientificName
+                              : `${RANK_LABELS[taxon.rank] || taxon.rank} ${taxon.scientificName}`}
+                            )
                           </span>
                         ) : (
                           <span className="text-stone-500 text-sm font-normal">
-                            ({RANK_LABELS[taxon.rank] || taxon.rank} {taxon.scientificName})
+                            ({RANK_LABELS[taxon.rank] || taxon.rank}{" "}
+                            {taxon.scientificName})
                           </span>
                         )}
                       </span>
                     </div>
                     <span className="text-base text-stone-900 font-bold">
-                      {taxon.observationCount ? taxon.observationCount.toLocaleString() : "0"}
+                      {taxon.observationCount
+                        ? taxon.observationCount.toLocaleString()
+                        : "0"}
                     </span>
                   </div>
                   {/* Children in tree */}
@@ -437,24 +527,35 @@ export default function TaxonDetailPage() {
                       key={child.id}
                       href={`/taxonomy/${child.id}`}
                       className="taxon-tree-node flex items-center justify-between w-full hover:bg-stone-50 rounded px-2 py-1"
-                      style={{ paddingLeft: `${(taxon.ancestors.length + 1) * 16}px` }}
+                      style={{
+                        paddingLeft: `${(taxon.ancestors.length + 1) * 16}px`,
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         <span className="taxon-tree-name flex items-center gap-1.5 flex-wrap">
-                          <span>{child.commonName || child.scientificName}</span>
+                          <span>
+                            {child.commonName || child.scientificName}
+                          </span>
                           {child.commonName ? (
                             <span className="text-stone-500 text-sm font-normal">
-                              ({child.rank === "SPECIES" ? child.scientificName : `${RANK_LABELS[child.rank] || child.rank} ${child.scientificName}`})
+                              (
+                              {child.rank === "SPECIES"
+                                ? child.scientificName
+                                : `${RANK_LABELS[child.rank] || child.rank} ${child.scientificName}`}
+                              )
                             </span>
                           ) : (
                             <span className="text-stone-500 text-sm font-normal">
-                              ({RANK_LABELS[child.rank] || child.rank} {child.scientificName})
+                              ({RANK_LABELS[child.rank] || child.rank}{" "}
+                              {child.scientificName})
                             </span>
                           )}
                         </span>
                       </div>
                       <span className="text-sm text-stone-600 font-semibold">
-                        {child.observationCount ? child.observationCount.toLocaleString() : "0"}
+                        {child.observationCount
+                          ? child.observationCount.toLocaleString()
+                          : "0"}
                       </span>
                     </Link>
                   ))}
@@ -476,7 +577,7 @@ export default function TaxonDetailPage() {
                 <ObservationMap
                   observations={mapObservations}
                   selectedId={null}
-                  onSelectObservation={() => { }}
+                  onSelectObservation={() => {}}
                 />
               </div>
               {mapLoaded && mapObservations.length === 0 && !mapLoading && (
@@ -490,7 +591,8 @@ export default function TaxonDetailPage() {
           {/* ─── OBSERVATIONS TAB ─── */}
           {activeTab === "observations" && (
             <div className="taxon-observations-panel">
-              {taxon.recentObservations && taxon.recentObservations.length > 0 ? (
+              {taxon.recentObservations &&
+              taxon.recentObservations.length > 0 ? (
                 <>
                   <div className="taxon-obs-grid">
                     {taxon.recentObservations.map((obs, i) => (
@@ -516,7 +618,9 @@ export default function TaxonDetailPage() {
               ) : (
                 <div className="text-center py-16 text-stone-400">
                   <Camera size={32} className="mx-auto mb-3 opacity-50" />
-                  <p className="text-base">No observations yet for this taxon.</p>
+                  <p className="text-base">
+                    No observations yet for this taxon.
+                  </p>
                 </div>
               )}
             </div>

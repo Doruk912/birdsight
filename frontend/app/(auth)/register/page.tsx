@@ -41,7 +41,8 @@ export default function RegisterPage() {
     else if (fields.username.trim().length < 3)
       next.username = "Username must be at least 3 characters.";
     else if (!/^[a-zA-Z0-9_.-]+$/.test(fields.username.trim()))
-      next.username = "Only letters, numbers, underscores, dots and hyphens allowed.";
+      next.username =
+        "Only letters, numbers, underscores, dots and hyphens allowed.";
 
     if (!fields.email.trim()) next.email = "Email is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email))
@@ -51,7 +52,8 @@ export default function RegisterPage() {
     else if (fields.password.length < 8)
       next.password = "Password must be at least 8 characters.";
 
-    if (!fields.confirmPassword) next.confirmPassword = "Please confirm your password.";
+    if (!fields.confirmPassword)
+      next.confirmPassword = "Please confirm your password.";
     else if (fields.password !== fields.confirmPassword)
       next.confirmPassword = "Passwords do not match.";
 
@@ -161,18 +163,30 @@ export default function RegisterPage() {
           {isSubmitting ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
-            <>Create account <ArrowRight size={16} /></>
+            <>
+              Create account <ArrowRight size={16} />
+            </>
           )}
         </button>
 
         <p className="text-center text-xs text-stone-500">
           By creating an account you agree to our{" "}
-          <a href="#" className="text-stone-400 hover:text-white transition-colors">Terms of Service</a>
-          {" "}and{" "}
-          <a href="#" className="text-stone-400 hover:text-white transition-colors">Privacy Policy</a>.
+          <a
+            href="#"
+            className="text-stone-400 hover:text-white transition-colors"
+          >
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a
+            href="#"
+            className="text-stone-400 hover:text-white transition-colors"
+          >
+            Privacy Policy
+          </a>
+          .
         </p>
       </form>
     </AuthCard>
   );
 }
-

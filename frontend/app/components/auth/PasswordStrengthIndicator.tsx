@@ -7,7 +7,12 @@ interface PasswordStrength {
 
 function getStrength(password: string): PasswordStrength {
   if (!password) {
-    return { score: 0, label: "", color: "text-stone-500", barColor: "bg-stone-700" };
+    return {
+      score: 0,
+      label: "",
+      color: "text-stone-500",
+      barColor: "bg-stone-700",
+    };
   }
 
   let score = 0;
@@ -21,11 +26,11 @@ function getStrength(password: string): PasswordStrength {
   score = Math.min(score, 4);
 
   const levels: Omit<PasswordStrength, "score">[] = [
-    { label: "Too weak",  color: "text-rose-400",   barColor: "bg-rose-500" },
-    { label: "Weak",      color: "text-orange-400",  barColor: "bg-orange-500" },
-    { label: "Fair",      color: "text-amber-400",   barColor: "bg-amber-500" },
-    { label: "Strong",    color: "text-emerald-400", barColor: "bg-emerald-500" },
-    { label: "Very strong", color: "text-teal-400",  barColor: "bg-teal-400" },
+    { label: "Too weak", color: "text-rose-400", barColor: "bg-rose-500" },
+    { label: "Weak", color: "text-orange-400", barColor: "bg-orange-500" },
+    { label: "Fair", color: "text-amber-400", barColor: "bg-amber-500" },
+    { label: "Strong", color: "text-emerald-400", barColor: "bg-emerald-500" },
+    { label: "Very strong", color: "text-teal-400", barColor: "bg-teal-400" },
   ];
 
   return { score, ...levels[score] };
@@ -41,7 +46,9 @@ interface PasswordStrengthIndicatorProps {
  * Shows a 4-segment bar and a label below the password field.
  * Only visible once the user starts typing.
  */
-export default function PasswordStrengthIndicator({ password }: PasswordStrengthIndicatorProps) {
+export default function PasswordStrengthIndicator({
+  password,
+}: PasswordStrengthIndicatorProps) {
   if (!password) return null;
 
   const { score, label, color, barColor } = getStrength(password);
@@ -60,10 +67,11 @@ export default function PasswordStrengthIndicator({ password }: PasswordStrength
         ))}
       </div>
       {/* Label */}
-      <p className={`text-xs font-medium ${color} transition-colors duration-300`}>
+      <p
+        className={`text-xs font-medium ${color} transition-colors duration-300`}
+      >
         {label}
       </p>
     </div>
   );
 }
-

@@ -10,7 +10,7 @@ import "./map.css";
 // Dynamic import to avoid SSR issues with MapLibre
 const ObservationMap = dynamic(
   () => import("@/app/components/explore/ObservationMap"),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function ExplorePage() {
@@ -22,7 +22,7 @@ export default function ExplorePage() {
   const [filters, setFilters] = useState<ObservationFilterParams>({});
   // Pending filters = what the user is editing (not yet applied)
   const [pendingFilters, setPendingFilters] = useState<ObservationFilterParams>(
-    {}
+    {},
   );
 
   // Fetch observations whenever active filters change
@@ -36,19 +36,16 @@ export default function ExplorePage() {
       .finally(() => setLoading(false));
   }, [filters]);
 
-  const handleSelectObservation = useCallback(
-    (obs: MapObservation | null) => {
-      setSelectedId(obs?.id ?? null);
-    },
-    []
-  );
+  const handleSelectObservation = useCallback((obs: MapObservation | null) => {
+    setSelectedId(obs?.id ?? null);
+  }, []);
 
   const handleSidebarSelect = useCallback((obs: MapObservation) => {
     setSelectedId(obs.id);
     window.dispatchEvent(
       new CustomEvent("birdsight:flyto", {
         detail: { longitude: obs.longitude, latitude: obs.latitude },
-      })
+      }),
     );
   }, []);
 
@@ -71,7 +68,7 @@ export default function ExplorePage() {
         swLng: number;
         neLat: number;
         neLng: number;
-      } | null
+      } | null,
     ) => {
       if (bounds) {
         const updated = {
@@ -90,7 +87,7 @@ export default function ExplorePage() {
         setFilters(rest);
       }
     },
-    [pendingFilters]
+    [pendingFilters],
   );
 
   return (

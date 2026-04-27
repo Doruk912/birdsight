@@ -3,7 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, User, Binoculars, Settings, LogOut, Plus } from "lucide-react";
+import {
+  Menu,
+  X,
+  User,
+  Binoculars,
+  Settings,
+  LogOut,
+  Plus,
+} from "lucide-react";
 import { NAV_LINKS } from "@/app/constants/navigation";
 import { useAuth } from "@/app/hooks/useAuth";
 import UserDropdown from "@/app/components/shared/UserDropdown";
@@ -17,7 +25,10 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100">
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-semibold text-stone-800">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-semibold text-stone-800"
+        >
           <Image
             src="/logo.svg"
             alt="BirdSight"
@@ -32,7 +43,10 @@ export default function Navbar() {
         <ul className="hidden md:flex items-center gap-8 text-sm font-medium text-stone-600">
           {NAV_LINKS.map((link) => (
             <li key={link.label}>
-              <a href={link.href} className="hover:text-emerald-600 transition-colors duration-200">
+              <a
+                href={link.href}
+                className="hover:text-emerald-600 transition-colors duration-200"
+              >
                 {link.label}
               </a>
             </li>
@@ -41,8 +55,8 @@ export default function Navbar() {
 
         {/* Desktop auth */}
         <div className="hidden md:flex items-center gap-3">
-          {!isLoading && (
-            user ? (
+          {!isLoading &&
+            (user ? (
               <>
                 <Link
                   href="/observations/new"
@@ -67,8 +81,7 @@ export default function Navbar() {
                   Join free
                 </Link>
               </>
-            )
-          )}
+            ))}
         </div>
 
         {/* Mobile toggle */}
@@ -95,8 +108,8 @@ export default function Navbar() {
             </a>
           ))}
           <hr className="border-stone-100" />
-          {!isLoading && (
-            user ? (
+          {!isLoading &&
+            (user ? (
               <>
                 {/* Mobile user info */}
                 <div className="flex items-center gap-3 py-1">
@@ -110,7 +123,9 @@ export default function Navbar() {
                     <p className="text-sm font-semibold text-stone-800 truncate">
                       {user.displayName || user.username}
                     </p>
-                    <p className="text-xs text-stone-500 truncate">{user.email}</p>
+                    <p className="text-xs text-stone-500 truncate">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
 
@@ -152,7 +167,10 @@ export default function Navbar() {
                 <hr className="border-stone-100" />
 
                 <button
-                  onClick={() => { setMobileOpen(false); logout(); }}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    logout();
+                  }}
                   className="flex items-center gap-3 text-sm font-medium text-stone-700 hover:text-red-600 transition-colors text-left"
                 >
                   <LogOut size={16} strokeWidth={1.8} /> Sign out
@@ -160,7 +178,11 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-medium text-stone-700" onClick={() => setMobileOpen(false)}>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-stone-700"
+                  onClick={() => setMobileOpen(false)}
+                >
                   Sign in
                 </Link>
                 <Link
@@ -171,8 +193,7 @@ export default function Navbar() {
                   Join free
                 </Link>
               </>
-            )
-          )}
+            ))}
         </div>
       )}
     </nav>

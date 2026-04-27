@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, Map, CheckCircle2, MapPin, Sparkles, Camera } from "lucide-react";
+import {
+  ArrowRight,
+  Map,
+  CheckCircle2,
+  MapPin,
+  Sparkles,
+  Camera,
+} from "lucide-react";
 
 export default function Hero() {
   return (
@@ -31,26 +38,34 @@ export default function Hero() {
                 <Sparkles className="text-white w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-stone-400 font-medium">AI Prediction</p>
-                <p className="text-sm text-white font-bold leading-tight">White Wagtail</p>
+                <p className="text-xs text-stone-400 font-medium">
+                  AI Prediction
+                </p>
+                <p className="text-sm text-white font-bold leading-tight">
+                  White Wagtail
+                </p>
               </div>
             </div>
             <div className="w-full h-2 bg-stone-800 rounded-full overflow-hidden">
               <div className="h-full bg-emerald-500 w-[98%]" />
             </div>
-            <p className="text-xs text-emerald-400 mt-2 text-right">98% Confidence</p>
+            <p className="text-xs text-emerald-400 mt-2 text-right">
+              98% Confidence
+            </p>
           </div>
         </div>
 
         {/* Floating Card 2: Location (Bottom Left) */}
         <div className="absolute bottom-32 left-20 xl:left-12 animate-[float-reverse_5s_ease-in-out_infinite]">
           <div className="bg-stone-900/80 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl w-56 transform rotate-3">
-             <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center border border-white/5 shrink-0">
                 <MapPin className="text-rose-400 w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm text-white font-bold leading-tight">Emirgan Park, Istanbul</p>
+                <p className="text-sm text-white font-bold leading-tight">
+                  Emirgan Park, Istanbul
+                </p>
                 <p className="text-xs text-stone-400 mt-0.5">Just now</p>
               </div>
             </div>
@@ -60,41 +75,37 @@ export default function Hero() {
         {/* Floating Card 3: Observation Image (Top Right) */}
         <div className="absolute top-40 right-10 xl:-right-4 animate-[float_7s_ease-in-out_infinite]">
           <div className="bg-stone-900/80 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl w-48 transform rotate-6">
-             <div className="aspect-[4/3] bg-stone-800 rounded-xl mb-2 flex items-center justify-center overflow-hidden relative">
-                <Camera className="text-stone-600 w-8 h-8 absolute" />
-                {/* Fake image gradient to look like a photo */}
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/50 to-stone-900/50 mix-blend-overlay"></div>
-             </div>
-             <div className="px-2 pb-1 flex items-center justify-between">
-                <div className="w-20 h-2 bg-stone-800 rounded-full"></div>
-                <CheckCircle2 className="text-emerald-500 w-4 h-4" />
-             </div>
+            <div className="aspect-[4/3] bg-stone-800 rounded-xl mb-2 flex items-center justify-center overflow-hidden relative">
+              <Camera className="text-stone-600 w-8 h-8 absolute" />
+              {/* Fake image gradient to look like a photo */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/50 to-stone-900/50 mix-blend-overlay"></div>
+            </div>
+            <div className="px-2 pb-1 flex items-center justify-between">
+              <div className="w-20 h-2 bg-stone-800 rounded-full"></div>
+              <CheckCircle2 className="text-emerald-500 w-4 h-4" />
+            </div>
           </div>
         </div>
-        
+
         {/* Floating Card 4: Verified Badge (Bottom Right) */}
         <div className="absolute bottom-40 right-20 xl:right-10 animate-[float-reverse_6s_ease-in-out_infinite]">
           <div className="bg-emerald-500/10 backdrop-blur-xl border border-emerald-500/20 px-5 py-3 rounded-full shadow-2xl shadow-emerald-900/20 transform -rotate-3">
-             <div className="flex items-center gap-2">
-                <CheckCircle2 className="text-emerald-400 w-5 h-5" />
-                <p className="text-sm text-emerald-100 font-medium">Research Grade</p>
-             </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="text-emerald-400 w-5 h-5" />
+              <p className="text-sm text-emerald-100 font-medium">
+                Research Grade
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center flex flex-col items-center gap-8 pt-32 pb-16">
-
-
-
         {/* Headline */}
         <h1 className="text-5xl sm:text-6xl md:text-[72px] font-bold leading-[1.06] tracking-tight text-white">
-          Discover &amp; share{" "}
-          <br className="hidden sm:block" />
-          <span
-            className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 bg-[length:200%_auto] animate-shimmer"
-          >
+          Discover &amp; share <br className="hidden sm:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 bg-[length:200%_auto] animate-shimmer">
             every bird sighting
           </span>
         </h1>
@@ -102,8 +113,8 @@ export default function Hero() {
         {/* Sub-text */}
         <p className="max-w-xl text-lg text-stone-400 leading-relaxed">
           BirdSight connects birdwatchers across the globe. Log your
-          observations, get AI-powered species suggestions, and build a
-          verified life list.
+          observations, get AI-powered species suggestions, and build a verified
+          life list.
         </p>
 
         {/* CTA row */}
@@ -121,11 +132,7 @@ export default function Hero() {
             <Map size={16} /> View live map
           </Link>
         </div>
-
-
       </div>
-
-
     </section>
   );
 }

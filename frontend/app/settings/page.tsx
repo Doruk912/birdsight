@@ -40,7 +40,10 @@ function InputField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-xs font-semibold uppercase tracking-widest text-stone-400">
+      <label
+        htmlFor={id}
+        className="text-xs font-semibold uppercase tracking-widest text-stone-400"
+      >
         {label}
       </label>
       <div className="relative">
@@ -53,7 +56,9 @@ function InputField({
           className="w-full rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-800 placeholder-stone-300 outline-none ring-0 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 pr-10"
         />
         {rightElement && (
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3">{rightElement}</div>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            {rightElement}
+          </div>
         )}
       </div>
       {hint && <p className="text-xs text-stone-400">{hint}</p>}
@@ -76,7 +81,10 @@ function TextareaField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-xs font-semibold uppercase tracking-widest text-stone-400">
+      <label
+        htmlFor={id}
+        className="text-xs font-semibold uppercase tracking-widest text-stone-400"
+      >
         {label}
       </label>
       <textarea
@@ -149,9 +157,18 @@ export default function SettingsPage() {
   const [isSavingPassword, setIsSavingPassword] = useState(false);
 
   // feedback
-  const [profileToast, setProfileToast] = useState<{ message: string; type: ToastType } | null>(null);
-  const [passwordToast, setPasswordToast] = useState<{ message: string; type: ToastType } | null>(null);
-  const [avatarToast, setAvatarToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [profileToast, setProfileToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
+  const [passwordToast, setPasswordToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
+  const [avatarToast, setAvatarToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
@@ -196,11 +213,17 @@ export default function SettingsPage() {
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowedTypes.includes(file.type)) {
-      setAvatarToast({ message: "Please select a JPEG, PNG, WebP, or GIF image.", type: "error" });
+      setAvatarToast({
+        message: "Please select a JPEG, PNG, WebP, or GIF image.",
+        type: "error",
+      });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setAvatarToast({ message: "Image must be smaller than 5 MB.", type: "error" });
+      setAvatarToast({
+        message: "Image must be smaller than 5 MB.",
+        type: "error",
+      });
       return;
     }
 
@@ -209,9 +232,13 @@ export default function SettingsPage() {
       if (!user) return;
       const updated = await userService.uploadAvatar(file);
       updateUser({ avatarUrl: updated.avatarUrl });
-      setAvatarToast({ message: "Photo updated successfully.", type: "success" });
+      setAvatarToast({
+        message: "Photo updated successfully.",
+        type: "success",
+      });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to upload photo.";
+      const message =
+        err instanceof Error ? err.message : "Failed to upload photo.";
       setAvatarToast({ message, type: "error" });
     } finally {
       setIsUploading(false);
@@ -227,7 +254,8 @@ export default function SettingsPage() {
       setConfirmRemoveAvatar(false);
       setAvatarToast({ message: "Photo removed.", type: "success" });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to remove photo.";
+      const message =
+        err instanceof Error ? err.message : "Failed to remove photo.";
       setAvatarToast({ message, type: "error" });
     } finally {
       setIsRemovingAvatar(false);
@@ -262,15 +290,20 @@ export default function SettingsPage() {
 
       if (emailChanged) {
         setProfileToast({
-          message: "Email updated. For security, you'll be signed out in a moment — please sign in again with your new email.",
+          message:
+            "Email updated. For security, you'll be signed out in a moment — please sign in again with your new email.",
           type: "success",
         });
         setTimeout(() => logout(), 3000);
       } else {
-        setProfileToast({ message: "Profile saved successfully.", type: "success" });
+        setProfileToast({
+          message: "Profile saved successfully.",
+          type: "success",
+        });
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to save profile.";
+      const message =
+        err instanceof Error ? err.message : "Failed to save profile.";
       setProfileToast({ message, type: "error" });
     } finally {
       setIsSavingProfile(false);
@@ -281,7 +314,10 @@ export default function SettingsPage() {
 
   const handleSavePassword = async () => {
     if (!newPassword) {
-      setPasswordToast({ message: "Please enter a new password.", type: "error" });
+      setPasswordToast({
+        message: "Please enter a new password.",
+        type: "error",
+      });
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -289,7 +325,10 @@ export default function SettingsPage() {
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordToast({ message: "New password must be at least 8 characters.", type: "error" });
+      setPasswordToast({
+        message: "New password must be at least 8 characters.",
+        type: "error",
+      });
       return;
     }
     setIsSavingPassword(true);
@@ -299,12 +338,14 @@ export default function SettingsPage() {
       setNewPassword("");
       setConfirmPassword("");
       setPasswordToast({
-        message: "Password changed. You'll be signed out in a moment — please sign in again with your new password.",
+        message:
+          "Password changed. You'll be signed out in a moment — please sign in again with your new password.",
         type: "success",
       });
       setTimeout(() => logout(), 3000);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to change password.";
+      const message =
+        err instanceof Error ? err.message : "Failed to change password.";
       setPasswordToast({ message, type: "error" });
     } finally {
       setIsSavingPassword(false);
@@ -324,7 +365,11 @@ export default function SettingsPage() {
   if (!user) return null;
 
   const eyeButton = (visible: boolean, toggle: () => void) => (
-    <button type="button" onClick={toggle} className="text-stone-400 hover:text-stone-600 transition-colors">
+    <button
+      type="button"
+      onClick={toggle}
+      className="text-stone-400 hover:text-stone-600 transition-colors"
+    >
       {visible ? <EyeOff size={15} /> : <Eye size={15} />}
     </button>
   );
@@ -334,7 +379,9 @@ export default function SettingsPage() {
       <main className="max-w-2xl mx-auto px-6 py-10 flex flex-col gap-6">
         <div>
           <h1 className="text-xl font-bold text-stone-800">Account Settings</h1>
-          <p className="text-sm text-stone-400 mt-1">Manage your photo, profile details and password.</p>
+          <p className="text-sm text-stone-400 mt-1">
+            Manage your photo, profile details and password.
+          </p>
         </div>
 
         {/* ── Photo ────────────────────────────────────────────────────── */}
@@ -378,7 +425,11 @@ export default function SettingsPage() {
                 disabled={isUploading || isRemovingAvatar}
                 className="flex items-center gap-2 text-sm font-medium text-stone-700 border border-stone-200 rounded-lg px-4 py-2 hover:bg-stone-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                {isUploading ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Camera size={14} />
+                )}
                 Upload photo
               </button>
               {user.avatarUrl && !confirmRemoveAvatar && (
@@ -391,14 +442,18 @@ export default function SettingsPage() {
                   Remove photo
                 </button>
               )}
-              <p className="text-xs text-stone-400">JPEG, PNG, WebP or GIF · max 5 MB</p>
+              <p className="text-xs text-stone-400">
+                JPEG, PNG, WebP or GIF · max 5 MB
+              </p>
             </div>
           </div>
 
           {/* Confirm remove banner */}
           {confirmRemoveAvatar && (
             <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <p className="text-sm text-red-700">Remove your profile photo? This cannot be undone.</p>
+              <p className="text-sm text-red-700">
+                Remove your profile photo? This cannot be undone.
+              </p>
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setConfirmRemoveAvatar(false)}
@@ -413,7 +468,11 @@ export default function SettingsPage() {
                   disabled={isRemovingAvatar}
                   className="flex items-center gap-1.5 text-xs font-semibold text-white bg-red-500 rounded-lg px-3 py-1.5 hover:bg-red-600 transition-colors disabled:opacity-60"
                 >
-                  {isRemovingAvatar ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                  {isRemovingAvatar ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <Trash2 size={12} />
+                  )}
                   Yes, remove
                 </button>
               </div>
@@ -477,7 +536,11 @@ export default function SettingsPage() {
               disabled={isSavingProfile}
               className="flex items-center gap-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg px-5 py-2.5 hover:bg-emerald-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
             >
-              {isSavingProfile ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+              {isSavingProfile ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Check size={15} />
+              )}
               Save changes
             </button>
           </div>
@@ -489,7 +552,10 @@ export default function SettingsPage() {
 
           <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 mb-4">
             <AlertCircle size={15} className="shrink-0 mt-0.5" />
-            <span>For security, you will be signed out of all devices after changing your password and will need to sign in again.</span>
+            <span>
+              For security, you will be signed out of all devices after changing
+              your password and will need to sign in again.
+            </span>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -500,7 +566,9 @@ export default function SettingsPage() {
               value={currentPassword}
               onChange={setCurrentPassword}
               placeholder="••••••••"
-              rightElement={eyeButton(showCurrent, () => setShowCurrent((v) => !v))}
+              rightElement={eyeButton(showCurrent, () =>
+                setShowCurrent((v) => !v),
+              )}
             />
             <InputField
               label="New password"
@@ -519,13 +587,18 @@ export default function SettingsPage() {
               value={confirmPassword}
               onChange={setConfirmPassword}
               placeholder="••••••••"
-              rightElement={eyeButton(showConfirm, () => setShowConfirm((v) => !v))}
+              rightElement={eyeButton(showConfirm, () =>
+                setShowConfirm((v) => !v),
+              )}
             />
           </div>
 
           {passwordToast && (
             <div className="mt-4">
-              <Toast message={passwordToast.message} type={passwordToast.type} />
+              <Toast
+                message={passwordToast.message}
+                type={passwordToast.type}
+              />
             </div>
           )}
 
@@ -535,7 +608,11 @@ export default function SettingsPage() {
               disabled={isSavingPassword}
               className="flex items-center gap-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg px-5 py-2.5 hover:bg-emerald-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
             >
-              {isSavingPassword ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+              {isSavingPassword ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Check size={15} />
+              )}
               Update password
             </button>
           </div>

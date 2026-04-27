@@ -25,7 +25,10 @@ function UserAvatarSmall({
   username: string;
 }) {
   return (
-    <Link href={`/profile/${username}`} className="block hover:opacity-80 transition-opacity">
+    <Link
+      href={`/profile/${username}`}
+      className="block hover:opacity-80 transition-opacity"
+    >
       {avatarUrl ? (
         <img
           src={avatarUrl}
@@ -85,7 +88,7 @@ export default function ActivityFeed({
 
     return [...idItems, ...commentItems].sort(
       (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
   }, [identifications, comments]);
 
@@ -146,7 +149,9 @@ export default function ActivityFeed({
                   >
                     {id.username}
                   </Link>
-                  <span className="text-xs text-stone-400">suggested an ID</span>
+                  <span className="text-xs text-stone-400">
+                    suggested an ID
+                  </span>
                   <span className="text-[11px] text-stone-400">
                     · {timeAgo(id.createdAt)}
                   </span>
@@ -157,20 +162,27 @@ export default function ActivityFeed({
                     </span>
                   )}
 
-                  {currentUser?.id === id.userId && id.current && !isWithdrawn && onWithdrawIdentification && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (window.confirm("Are you sure you want to withdraw this identification?")) {
-                          onWithdrawIdentification(id.id);
-                        }
-                      }}
-                      className="ml-auto text-[11px] font-medium text-stone-400 hover:text-red-600 transition-colors px-2 py-1 rounded-md hover:bg-red-50"
-                    >
-                      Withdraw
-                    </button>
-                  )}
+                  {currentUser?.id === id.userId &&
+                    id.current &&
+                    !isWithdrawn &&
+                    onWithdrawIdentification && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (
+                            window.confirm(
+                              "Are you sure you want to withdraw this identification?",
+                            )
+                          ) {
+                            onWithdrawIdentification(id.id);
+                          }
+                        }}
+                        className="ml-auto text-[11px] font-medium text-stone-400 hover:text-red-600 transition-colors px-2 py-1 rounded-md hover:bg-red-50"
+                      >
+                        Withdraw
+                      </button>
+                    )}
                 </div>
 
                 {/* Taxon badge — with image + clickable link */}
@@ -209,7 +221,8 @@ export default function ActivityFeed({
                     >
                       {id.taxonRank && id.taxonRank !== "SPECIES" && (
                         <span className="not-italic mr-1">
-                          {id.taxonRank.charAt(0).toUpperCase() + id.taxonRank.slice(1).toLowerCase()}
+                          {id.taxonRank.charAt(0).toUpperCase() +
+                            id.taxonRank.slice(1).toLowerCase()}
                         </span>
                       )}
                       {id.taxonScientificName}

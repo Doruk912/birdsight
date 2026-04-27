@@ -13,7 +13,11 @@ import {
   User,
   Loader2,
 } from "lucide-react";
-import { MapObservation, ObservationFilterParams, UserSearchResult } from "@/app/types/explore";
+import {
+  MapObservation,
+  ObservationFilterParams,
+  UserSearchResult,
+} from "@/app/types/explore";
 import TaxonSearch from "@/app/components/observations/TaxonSearch";
 import { userService } from "@/app/lib/userService";
 
@@ -93,7 +97,7 @@ export default function MapSidebar({
     (partial: Partial<ObservationFilterParams>) => {
       onPendingFiltersChange({ ...pendingFilters, ...partial });
     },
-    [pendingFilters, onPendingFiltersChange]
+    [pendingFilters, onPendingFiltersChange],
   );
 
   const handleSelectUser = useCallback(
@@ -103,7 +107,7 @@ export default function MapSidebar({
       setUserQuery("");
       setUserOpen(false);
     },
-    [updatePending]
+    [updatePending],
   );
 
   const removeUserFilter = useCallback(() => {
@@ -121,7 +125,12 @@ export default function MapSidebar({
     return count;
   }, [pendingFilters]);
 
-  const hasAnyFilter = !!pendingFilters.grade || !!pendingFilters.taxonId || !!pendingFilters.userId || !!pendingFilters.dateFrom || !!pendingFilters.dateTo;
+  const hasAnyFilter =
+    !!pendingFilters.grade ||
+    !!pendingFilters.taxonId ||
+    !!pendingFilters.userId ||
+    !!pendingFilters.dateFrom ||
+    !!pendingFilters.dateTo;
 
   return (
     <>
@@ -198,7 +207,9 @@ export default function MapSidebar({
             {/* Expandable filter panel */}
             <div
               className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                filtersExpanded ? "max-h-175 opacity-100 mt-3" : "max-h-0 opacity-0"
+                filtersExpanded
+                  ? "max-h-175 opacity-100 mt-3"
+                  : "max-h-0 opacity-0"
               }`}
             >
               <div className="flex flex-col gap-4">
@@ -211,7 +222,9 @@ export default function MapSidebar({
                     {GRADES.map((g) => (
                       <button
                         key={g.key}
-                        onClick={() => updatePending({ grade: g.key || undefined })}
+                        onClick={() =>
+                          updatePending({ grade: g.key || undefined })
+                        }
                         className={`text-[11px] font-medium px-3 py-1.5 rounded-full cursor-pointer transition-all duration-200 border ${
                           (pendingFilters.grade || "") === g.key
                             ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
@@ -255,7 +268,10 @@ export default function MapSidebar({
                     </div>
                   ) : (
                     <div className="relative" ref={userRef}>
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={13} />
+                      <User
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                        size={13}
+                      />
                       <input
                         type="text"
                         placeholder="Search observer..."
@@ -264,12 +280,17 @@ export default function MapSidebar({
                           setUserQuery(e.target.value);
                           setUserOpen(true);
                         }}
-                        onFocus={() => userQuery.length >= 2 && setUserOpen(true)}
+                        onFocus={() =>
+                          userQuery.length >= 2 && setUserOpen(true)
+                        }
                         className="w-full py-2 pl-9 pr-3 bg-white border border-stone-200 rounded-xl text-xs text-stone-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-stone-400"
                       />
                       {userLoading && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <Loader2 size={14} className="animate-spin text-stone-400" />
+                          <Loader2
+                            size={14}
+                            className="animate-spin text-stone-400"
+                          />
                         </div>
                       )}
                       {userOpen && userResults.length > 0 && (
@@ -281,15 +302,23 @@ export default function MapSidebar({
                               onClick={() => handleSelectUser(u)}
                             >
                               {u.avatarUrl ? (
-                                <img src={u.avatarUrl} alt={u.username} className="w-6 h-6 rounded-full object-cover" />
+                                <img
+                                  src={u.avatarUrl}
+                                  alt={u.username}
+                                  className="w-6 h-6 rounded-full object-cover"
+                                />
                               ) : (
                                 <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center justify-center">
                                   <User size={12} className="text-stone-400" />
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <div className="text-xs font-medium text-stone-800 truncate">{u.displayName || u.username}</div>
-                                <div className="text-[10px] text-stone-400 truncate">@{u.username}</div>
+                                <div className="text-xs font-medium text-stone-800 truncate">
+                                  {u.displayName || u.username}
+                                </div>
+                                <div className="text-[10px] text-stone-400 truncate">
+                                  @{u.username}
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -314,12 +343,16 @@ export default function MapSidebar({
                         type="date"
                         value={
                           pendingFilters.dateFrom
-                            ? new Date(pendingFilters.dateFrom).toISOString().split("T")[0]
+                            ? new Date(pendingFilters.dateFrom)
+                                .toISOString()
+                                .split("T")[0]
                             : ""
                         }
                         onChange={(e) =>
                           updatePending({
-                            dateFrom: e.target.value ? new Date(e.target.value).toISOString() : undefined,
+                            dateFrom: e.target.value
+                              ? new Date(e.target.value).toISOString()
+                              : undefined,
                           })
                         }
                         className="w-full py-2 pl-8 pr-2 bg-white border border-stone-200 rounded-lg text-xs text-stone-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
@@ -334,13 +367,17 @@ export default function MapSidebar({
                         type="date"
                         value={
                           pendingFilters.dateTo
-                            ? new Date(pendingFilters.dateTo).toISOString().split("T")[0]
+                            ? new Date(pendingFilters.dateTo)
+                                .toISOString()
+                                .split("T")[0]
                             : ""
                         }
                         onChange={(e) =>
                           updatePending({
                             dateTo: e.target.value
-                              ? new Date(e.target.value + "T23:59:59.999Z").toISOString()
+                              ? new Date(
+                                  e.target.value + "T23:59:59.999Z",
+                                ).toISOString()
                               : undefined,
                           })
                         }
@@ -415,7 +452,9 @@ export default function MapSidebar({
                             <div className="flex items-center gap-1.5">
                               <h3
                                 className={`text-[13px] font-semibold truncate ${
-                                  isSelected ? "text-emerald-700" : "text-stone-800"
+                                  isSelected
+                                    ? "text-emerald-700"
+                                    : "text-stone-800"
                                 }`}
                               >
                                 {obs.species}
@@ -441,10 +480,13 @@ export default function MapSidebar({
                             {obs.observedAt && (
                               <span className="flex items-center gap-0.5">
                                 <Calendar size={9} />
-                                {new Date(obs.observedAt).toLocaleDateString(undefined, {
-                                  month: "short",
-                                  day: "numeric",
-                                })}
+                                {new Date(obs.observedAt).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                  },
+                                )}
                               </span>
                             )}
                             <span className="flex items-center gap-0.5">

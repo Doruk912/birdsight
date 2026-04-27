@@ -11,7 +11,6 @@ import {
   UserStatsResponse,
 } from "@/app/types/explore";
 
-
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 export function timeAgo(dateStr: string): string {
@@ -33,13 +32,18 @@ function buildFilterParams(filters: ObservationFilterParams): URLSearchParams {
   if (filters.grade) params.append("grade", filters.grade);
   if (filters.taxonId) params.append("taxonId", filters.taxonId);
   if (filters.userId) params.append("userId", filters.userId);
-  if (filters.notIdentifiedByUserId) params.append("notIdentifiedByUserId", filters.notIdentifiedByUserId);
+  if (filters.notIdentifiedByUserId)
+    params.append("notIdentifiedByUserId", filters.notIdentifiedByUserId);
   if (filters.dateFrom) params.append("dateFrom", filters.dateFrom);
   if (filters.dateTo) params.append("dateTo", filters.dateTo);
-  if (filters.swLat !== undefined) params.append("swLat", filters.swLat.toString());
-  if (filters.swLng !== undefined) params.append("swLng", filters.swLng.toString());
-  if (filters.neLat !== undefined) params.append("neLat", filters.neLat.toString());
-  if (filters.neLng !== undefined) params.append("neLng", filters.neLng.toString());
+  if (filters.swLat !== undefined)
+    params.append("swLat", filters.swLat.toString());
+  if (filters.swLng !== undefined)
+    params.append("swLng", filters.swLng.toString());
+  if (filters.neLat !== undefined)
+    params.append("neLat", filters.neLat.toString());
+  if (filters.neLng !== undefined)
+    params.append("neLng", filters.neLng.toString());
   return params;
 }
 
@@ -47,7 +51,7 @@ function buildFilterParams(filters: ObservationFilterParams): URLSearchParams {
  * Fetches map markers from the backend with optional filters.
  */
 export async function fetchMapObservations(
-  filters: ObservationFilterParams = {}
+  filters: ObservationFilterParams = {},
 ): Promise<MapObservation[]> {
   const params = buildFilterParams(filters);
   const queryString = params.toString();
@@ -62,15 +66,21 @@ export async function fetchMapObservations(
   const data: ObservationMapApiResponse[] = await response.json();
 
   return data.map((obs) => {
-    const rankPrefix = obs.taxonRank && obs.taxonRank !== "SPECIES"
-      ? obs.taxonRank.charAt(0).toUpperCase() + obs.taxonRank.slice(1).toLowerCase() + " "
-      : "";
-      
+    const rankPrefix =
+      obs.taxonRank && obs.taxonRank !== "SPECIES"
+        ? obs.taxonRank.charAt(0).toUpperCase() +
+          obs.taxonRank.slice(1).toLowerCase() +
+          " "
+        : "";
+
     const commonName = obs.speciesCommonName;
     const scientificName = obs.speciesScientificName;
 
-    const speciesTitle = commonName || (scientificName ? rankPrefix + scientificName : "Unknown species");
-    const speciesSubTitle = commonName && scientificName ? (rankPrefix + scientificName) : undefined;
+    const speciesTitle =
+      commonName ||
+      (scientificName ? rankPrefix + scientificName : "Unknown species");
+    const speciesSubTitle =
+      commonName && scientificName ? rankPrefix + scientificName : undefined;
 
     return {
       id: obs.id,
@@ -90,7 +100,7 @@ export async function fetchMapObservations(
 }
 
 export async function fetchObservationDetail(
-  id: string
+  id: string,
 ): Promise<ObservationDetailResponse> {
   const response = await fetch(`${API_BASE}/api/v1/observations/${id}`, {
     cache: "no-store",
@@ -103,7 +113,7 @@ export async function fetchObservationDetail(
 
 export async function fetchAllObservations(
   page: number = 0,
-  filters: ObservationFilterParams = {}
+  filters: ObservationFilterParams = {},
 ): Promise<PageResponse<ObservationDetailResponse>> {
   const params = buildFilterParams(filters);
   params.set("page", page.toString());
@@ -111,7 +121,7 @@ export async function fetchAllObservations(
 
   const response = await fetch(
     `${API_BASE}/api/v1/observations?${params.toString()}`,
-    { cache: "no-store" }
+    { cache: "no-store" },
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch all observations: ${response.statusText}`);
@@ -120,11 +130,11 @@ export async function fetchAllObservations(
 }
 
 export async function fetchIdentifications(
-  observationId: string
+  observationId: string,
 ): Promise<IdentificationResponse[]> {
   const response = await fetch(
     `${API_BASE}/api/v1/observations/${observationId}/identifications`,
-    { cache: "no-store" }
+    { cache: "no-store" },
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch identifications: ${response.statusText}`);
@@ -133,11 +143,11 @@ export async function fetchIdentifications(
 }
 
 export async function fetchComments(
-  observationId: string
+  observationId: string,
 ): Promise<CommentResponse[]> {
   const response = await fetch(
     `${API_BASE}/api/v1/observations/${observationId}/comments`,
-    { cache: "no-store" }
+    { cache: "no-store" },
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch comments: ${response.statusText}`);
@@ -148,58 +158,71 @@ export async function fetchComments(
 export async function searchTaxa(query: string): Promise<TaxonResponse[]> {
   const response = await fetch(
     `${API_BASE}/api/v1/taxa?search=${encodeURIComponent(query)}&size=10`,
-    { cache: "no-store" }
+    { cache: "no-store" },
   );
   if (!response.ok) return [];
   const data = await response.json();
   return data.content || [];
 }
 
-export async function addComment(observationId: string, body: string): Promise<CommentResponse> {
+export async function addComment(
+  observationId: string,
+  body: string,
+): Promise<CommentResponse> {
   return apiClient.post<CommentResponse>(
     `${API_BASE}/api/v1/observations/${observationId}/comments`,
-    { body }
+    { body },
   );
 }
 
 export async function addIdentification(
   observationId: string,
   taxonId: string,
-  comment?: string
+  comment?: string,
 ): Promise<IdentificationResponse> {
   return apiClient.post<IdentificationResponse>(
     `${API_BASE}/api/v1/observations/${observationId}/identifications`,
-    { taxonId, comment }
+    { taxonId, comment },
   );
 }
 
-export async function createObservation(formData: FormData): Promise<ObservationDetailResponse> {
+export async function createObservation(
+  formData: FormData,
+): Promise<ObservationDetailResponse> {
   return apiClient.postForm<ObservationDetailResponse>(
     `${API_BASE}/api/v1/observations`,
-    formData
+    formData,
   );
 }
 
-export async function updateObservation(id: string, formData: FormData): Promise<ObservationDetailResponse> {
+export async function updateObservation(
+  id: string,
+  formData: FormData,
+): Promise<ObservationDetailResponse> {
   return apiClient.putForm<ObservationDetailResponse>(
     `${API_BASE}/api/v1/observations/${id}`,
-    formData
+    formData,
   );
 }
 
 export async function withdrawIdentification(
   observationId: string,
-  identificationId: string
+  identificationId: string,
 ): Promise<void> {
   return apiClient.delete(
-    `${API_BASE}/api/v1/observations/${observationId}/identifications/${identificationId}`
+    `${API_BASE}/api/v1/observations/${observationId}/identifications/${identificationId}`,
   );
 }
 
-export async function fetchUserStats(userId: string): Promise<UserStatsResponse> {
-  const response = await fetch(`${API_BASE}/api/v1/observations/user/${userId}/stats`, {
-    cache: "no-store",
-  });
+export async function fetchUserStats(
+  userId: string,
+): Promise<UserStatsResponse> {
+  const response = await fetch(
+    `${API_BASE}/api/v1/observations/user/${userId}/stats`,
+    {
+      cache: "no-store",
+    },
+  );
   if (!response.ok) {
     throw new Error(`Failed to fetch user stats: ${response.statusText}`);
   }

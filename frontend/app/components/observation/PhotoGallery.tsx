@@ -20,14 +20,14 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
     (index: number) => {
       setActiveIndex((index + images.length) % images.length);
     },
-    [images.length]
+    [images.length],
   );
 
   const goToLightbox = useCallback(
     (index: number) => {
       setLightboxIndex((index + images.length) % images.length);
     },
-    [images.length]
+    [images.length],
   );
 
   const openLightbox = (index: number) => {
@@ -56,7 +56,9 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [lightboxOpen]);
 
   if (images.length === 0) {
@@ -84,7 +86,6 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
             }}
           />
 
-
           {/* Zoom hint */}
           <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white/90 text-xs font-medium px-2.5 py-1.5 rounded-full">
@@ -97,7 +98,10 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
           {images.length > 1 && (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); goTo(activeIndex - 1); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goTo(activeIndex - 1);
+                }}
                 className="
                   absolute left-3 top-1/2 -translate-y-1/2
                   w-10 h-10 rounded-full
@@ -112,7 +116,10 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
                 <ChevronLeft size={20} strokeWidth={2} />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); goTo(activeIndex + 1); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goTo(activeIndex + 1);
+                }}
                 className="
                   absolute right-3 top-1/2 -translate-y-1/2
                   w-10 h-10 rounded-full
@@ -209,14 +216,20 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
           {images.length > 1 && (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); goToLightbox(lightboxIndex - 1); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToLightbox(lightboxIndex - 1);
+                }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
                 aria-label="Previous"
               >
                 <ChevronLeft size={24} />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); goToLightbox(lightboxIndex + 1); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToLightbox(lightboxIndex + 1);
+                }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
                 aria-label="Next"
               >
@@ -231,14 +244,21 @@ export default function PhotoGallery({ images }: PhotoGalleryProps) {
               {images.map((img, i) => (
                 <button
                   key={img.id}
-                  onClick={(e) => { e.stopPropagation(); goToLightbox(i); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToLightbox(i);
+                  }}
                   className={`w-12 h-9 rounded-md overflow-hidden border-2 transition-all ${
                     i === lightboxIndex
                       ? "border-white scale-110"
                       : "border-white/20 opacity-50 hover:opacity-80"
                   }`}
                 >
-                  <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={img.imageUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>

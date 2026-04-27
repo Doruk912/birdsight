@@ -6,22 +6,29 @@ interface ObservationCardProps {
   observation: ObservationDetailResponse;
 }
 
-const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f5f5f4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23a8a29e'%3ENo image available%3C/text%3E%3C/svg%3E";
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f5f5f4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23a8a29e'%3ENo image available%3C/text%3E%3C/svg%3E";
 
 export default function ObservationCard({ observation }: ObservationCardProps) {
   const firstImage = observation.images?.[0]?.imageUrl || PLACEHOLDER_IMAGE;
   const taxonRank = observation.communityTaxon?.rank;
-  const rankPrefix = taxonRank && taxonRank !== "SPECIES"
-    ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
-    : "";
+  const rankPrefix =
+    taxonRank && taxonRank !== "SPECIES"
+      ? taxonRank.charAt(0).toUpperCase() +
+        taxonRank.slice(1).toLowerCase() +
+        " "
+      : "";
 
   const commonName = observation.communityTaxon?.commonName;
   const scientificName = observation.communityTaxon?.scientificName;
 
-  const h1Title = commonName || (rankPrefix + (scientificName || "Unknown species"));
-  const subTitle = commonName ? (rankPrefix + scientificName) : null;
+  const h1Title =
+    commonName || rankPrefix + (scientificName || "Unknown species");
+  const subTitle = commonName ? rankPrefix + scientificName : null;
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const handleImageError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>,
+  ) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
     e.currentTarget.onerror = null; // Prevent infinite loop if placeholder doesn't exist
   };
@@ -92,7 +99,7 @@ export default function ObservationCard({ observation }: ObservationCardProps) {
               {new Date(observation.observedAt).toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
-                year: "numeric"
+                year: "numeric",
               })}
             </span>
           </div>

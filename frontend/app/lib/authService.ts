@@ -10,13 +10,21 @@ import { AuthResponse, LoginRequest, RegisterRequest } from "@/app/types/auth";
 
 export const authService = {
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
-    const data = await apiClient.post<AuthResponse>("/api/auth/login", credentials, { skipAuth: true });
+    const data = await apiClient.post<AuthResponse>(
+      "/api/auth/login",
+      credentials,
+      { skipAuth: true },
+    );
     tokenStore.set(data.accessToken);
     return data;
   },
 
   register: async (payload: RegisterRequest): Promise<AuthResponse> => {
-    const data = await apiClient.post<AuthResponse>("/api/auth/register", payload, { skipAuth: true });
+    const data = await apiClient.post<AuthResponse>(
+      "/api/auth/register",
+      payload,
+      { skipAuth: true },
+    );
     tokenStore.set(data.accessToken);
     return data;
   },

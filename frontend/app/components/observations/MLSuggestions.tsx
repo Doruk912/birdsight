@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Loader2, AlertTriangle, ChevronDown, ChevronUp, Info } from "lucide-react";
+import {
+  Sparkles,
+  Loader2,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Info,
+} from "lucide-react";
 import { predictSpecies } from "@/app/lib/mlService";
 import { MLPrediction } from "@/app/types/explore";
 
 // Confidence thresholds
 const HIGH_CONFIDENCE = 0.75; // ≥ 75%: show only top prediction as "highly confident"
-const MED_CONFIDENCE = 0.40;  // 40–74%: show top 3 as "top prediction + also likely"
+const MED_CONFIDENCE = 0.4; // 40–74%: show top 3 as "top prediction + also likely"
 
 interface MLSuggestionsProps {
   /** The image file to classify (for new observation uploads). */
@@ -17,7 +24,11 @@ interface MLSuggestionsProps {
   /** When true, the component fires the prediction. Defaults to true for upload flows. */
   triggered?: boolean;
   /** Called when the user clicks a suggestion. */
-  onSelect: (taxonId: string, commonName: string | null, scientificName: string) => void;
+  onSelect: (
+    taxonId: string,
+    commonName: string | null,
+    scientificName: string,
+  ) => void;
   /** Optional CSS class for the container. */
   className?: string;
 }
@@ -80,7 +91,9 @@ export default function MLSuggestions({
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [triggered, imageFile, imageUrl]);
 
   // Nothing to show yet
@@ -95,11 +108,13 @@ export default function MLSuggestions({
   const displayedPredictions = isHighConf
     ? predictions.slice(0, 1)
     : isMedConf
-    ? predictions.slice(0, 3)
-    : predictions;
+      ? predictions.slice(0, 3)
+      : predictions;
 
   return (
-    <div className={`rounded-xl border border-violet-200 bg-violet-50/60 p-4 space-y-3 ${className}`}>
+    <div
+      className={`rounded-xl border border-violet-200 bg-violet-50/60 p-4 space-y-3 ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center gap-2">
         <div className="flex items-center justify-center p-1.5 bg-violet-100 rounded-lg text-violet-600 shrink-0">
@@ -192,8 +207,8 @@ export default function MLSuggestions({
 
                 <div className="relative flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    {hasValidTaxon && (
-                      pred.coverImageUrl ? (
+                    {hasValidTaxon &&
+                      (pred.coverImageUrl ? (
                         <img
                           src={pred.coverImageUrl}
                           alt={pred.commonName || pred.species}
@@ -201,10 +216,13 @@ export default function MLSuggestions({
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center shrink-0 border border-violet-200">
-                          <Sparkles size={18} strokeWidth={1.5} className="text-violet-400" />
+                          <Sparkles
+                            size={18}
+                            strokeWidth={1.5}
+                            className="text-violet-400"
+                          />
                         </div>
-                      )
-                    )}
+                      ))}
                     <div className="min-w-0">
                       {pred.commonName && (
                         <p
@@ -228,8 +246,8 @@ export default function MLSuggestions({
                           confidencePct >= 70
                             ? "bg-emerald-100 text-emerald-700"
                             : confidencePct >= 40
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-stone-100 text-stone-500"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-stone-100 text-stone-500"
                         }`}
                       >
                         {confidencePct}%
@@ -261,9 +279,7 @@ export default function MLSuggestions({
       {/* Disclaimer */}
       <div className="flex items-start gap-2 pt-2 border-t border-violet-200/60">
         <Info size={13} className="text-violet-400 shrink-0 mt-0.5" />
-        <p className="text-[11px] text-violet-500 leading-snug">
-          {DISCLAIMER}
-        </p>
+        <p className="text-[11px] text-violet-500 leading-snug">{DISCLAIMER}</p>
       </div>
     </div>
   );

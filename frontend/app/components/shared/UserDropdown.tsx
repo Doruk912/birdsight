@@ -77,7 +77,9 @@ export default function UserDropdown({ user, logout }: UserDropdownProps) {
         <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-white shadow-lg ring-1 ring-stone-200/60 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
           {/* User info header */}
           <div className="px-4 py-3 border-b border-stone-100">
-            <p className="text-sm font-semibold text-stone-800 truncate">{displayLabel}</p>
+            <p className="text-sm font-semibold text-stone-800 truncate">
+              {displayLabel}
+            </p>
             <p className="text-xs text-stone-500 truncate">{user.email}</p>
           </div>
 

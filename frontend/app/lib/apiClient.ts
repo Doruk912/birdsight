@@ -13,8 +13,12 @@ let _accessToken: string | null = null;
 
 export const tokenStore = {
   get: () => _accessToken,
-  set: (token: string | null) => { _accessToken = token; },
-  clear: () => { _accessToken = null; },
+  set: (token: string | null) => {
+    _accessToken = token;
+  },
+  clear: () => {
+    _accessToken = null;
+  },
 };
 
 type RequestOptions = Omit<RequestInit, "headers"> & {
@@ -22,7 +26,10 @@ type RequestOptions = Omit<RequestInit, "headers"> & {
   skipAuth?: boolean;
 };
 
-async function request<T>(url: string, options: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  url: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const { skipAuth = false, headers = {}, ...rest } = options;
   const token = tokenStore.get();
 
@@ -49,7 +56,9 @@ async function request<T>(url: string, options: RequestOptions = {}): Promise<T>
     const body = await response.json().catch(() => ({}));
     let message: string = body?.message ?? response.statusText;
     if (body?.validationErrors && typeof body.validationErrors === "object") {
-      const details = Object.values(body.validationErrors as Record<string, string>).join("; ");
+      const details = Object.values(
+        body.validationErrors as Record<string, string>,
+      ).join("; ");
       if (details) message = `${message}: ${details}`;
     }
     throw new ApiError(response.status, message);

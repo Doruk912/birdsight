@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Loader2, ImagePlus, X, MoveLeft, MoveRight } from "lucide-react";
+import {
+  Camera,
+  Loader2,
+  ImagePlus,
+  X,
+  MoveLeft,
+  MoveRight,
+} from "lucide-react";
 import LocationPicker from "./LocationPicker";
 import DateTimePicker from "./DateTimePicker";
 import ImageCropperModal from "./ImageCropperModal";
@@ -15,7 +22,7 @@ interface PendingImage {
 
 export interface ImageItem {
   id: string; // Unique string for React key
-  type: 'existing' | 'new';
+  type: "existing" | "new";
   url: string;
   file?: File;
 }
@@ -26,13 +33,21 @@ interface EditObservationModalProps {
   onSuccess: (updated: ObservationDetailResponse) => void;
 }
 
-export default function EditObservationModal({ observation, onClose, onSuccess }: EditObservationModalProps) {
+export default function EditObservationModal({
+  observation,
+  onClose,
+  onSuccess,
+}: EditObservationModalProps) {
   const [items, setItems] = useState<ImageItem[]>([]);
-  const [observedAtDate, setObservedAtDate] = useState<Date | null>(new Date(observation.observedAt));
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>({
-    lat: observation.latitude,
-    lng: observation.longitude,
-  });
+  const [observedAtDate, setObservedAtDate] = useState<Date | null>(
+    new Date(observation.observedAt),
+  );
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    {
+      lat: observation.latitude,
+      lng: observation.longitude,
+    },
+  );
   const [description, setDescription] = useState(observation.description || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +58,7 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
   useEffect(() => {
     const initialItems: ImageItem[] = observation.images.map((img) => ({
       id: img.id,
-      type: 'existing',
+      type: "existing",
       url: img.imageUrl,
     }));
     setItems(initialItems);
@@ -53,7 +68,7 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
     return () => {
       // Clean up object URLs for new images
       items.forEach((item) => {
-        if (item.type === 'new') {
+        if (item.type === "new") {
           URL.revokeObjectURL(item.url);
         }
       });
@@ -66,19 +81,19 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
       const selected = Array.from(e.target.files);
       if (selected.length === 0) return;
 
-      const newPending = selected.map(file => ({
+      const newPending = selected.map((file) => ({
         file,
-        url: URL.createObjectURL(file)
+        url: URL.createObjectURL(file),
       }));
-      
-      setPendingImages(prev => [...prev, ...newPending]);
+
+      setPendingImages((prev) => [...prev, ...newPending]);
     }
   };
 
   const removeItem = (index: number) => {
     const newItems = [...items];
     const removed = newItems.splice(index, 1)[0];
-    if (removed.type === 'new') {
+    if (removed.type === "new") {
       URL.revokeObjectURL(removed.url);
     }
     setItems(newItems);
@@ -104,33 +119,51 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
 
   const handleCropComplete = (croppedBlob: Blob) => {
     const currentPending = pendingImages[0];
-    const croppedFile = new File([croppedBlob], currentPending.file.name, { type: "image/jpeg" });
+    const croppedFile = new File([croppedBlob], currentPending.file.name, {
+      type: "image/jpeg",
+    });
     const newImageUrl = URL.createObjectURL(croppedBlob);
-    
+
     if (items.length < 5) {
-      setItems(prev => [...prev, { id: `new_${Date.now()}_${Math.random()}`, type: 'new', url: newImageUrl, file: croppedFile }]);
+      setItems((prev) => [
+        ...prev,
+        {
+          id: `new_${Date.now()}_${Math.random()}`,
+          type: "new",
+          url: newImageUrl,
+          file: croppedFile,
+        },
+      ]);
     } else {
       URL.revokeObjectURL(newImageUrl);
     }
-    
+
     URL.revokeObjectURL(currentPending.url);
-    setPendingImages(prev => prev.slice(1));
+    setPendingImages((prev) => prev.slice(1));
   };
 
   const handleCropCancel = () => {
     const currentPending = pendingImages[0];
     URL.revokeObjectURL(currentPending.url);
-    setPendingImages(prev => prev.slice(1));
+    setPendingImages((prev) => prev.slice(1));
   };
 
   const handleCropSkip = () => {
     const currentPending = pendingImages[0];
     if (items.length < 5) {
-      setItems(prev => [...prev, { id: `new_${Date.now()}_${Math.random()}`, type: 'new', url: currentPending.url, file: currentPending.file }]);
+      setItems((prev) => [
+        ...prev,
+        {
+          id: `new_${Date.now()}_${Math.random()}`,
+          type: "new",
+          url: currentPending.url,
+          file: currentPending.file,
+        },
+      ]);
     } else {
       URL.revokeObjectURL(currentPending.url);
     }
-    setPendingImages(prev => prev.slice(1));
+    setPendingImages((prev) => prev.slice(1));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -154,19 +187,19 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
 
     try {
       const formData = new FormData();
-      
+
       const imageOrder: string[] = [];
       const filesToUpload: File[] = [];
 
       items.forEach((item) => {
-        if (item.type === 'existing') {
+        if (item.type === "existing") {
           imageOrder.push(item.url);
-        } else if (item.type === 'new' && item.file) {
+        } else if (item.type === "new" && item.file) {
           imageOrder.push(`new_${filesToUpload.length}`);
           filesToUpload.push(item.file);
         }
       });
-      
+
       const reqObj = {
         description,
         observedAt: observedAtDate.toISOString(),
@@ -174,9 +207,12 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
         longitude: location.lng,
         imageOrder,
       };
-      
-      formData.append("observation", new Blob([JSON.stringify(reqObj)], { type: "application/json" }));
-      filesToUpload.forEach(file => {
+
+      formData.append(
+        "observation",
+        new Blob([JSON.stringify(reqObj)], { type: "application/json" }),
+      );
+      filesToUpload.forEach((file) => {
         formData.append("newImages", file);
       });
 
@@ -184,7 +220,9 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
       onSuccess(updated);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || "An error occurred while updating. Please try again.");
+      setError(
+        message || "An error occurred while updating. Please try again.",
+      );
       setIsSubmitting(false);
     }
   };
@@ -203,8 +241,13 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
         )}
 
         <div className="flex items-center justify-between p-6 border-b border-stone-100">
-          <h2 className="text-2xl font-bold text-stone-800">Edit Observation</h2>
-          <button onClick={onClose} className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors">
+          <h2 className="text-2xl font-bold text-stone-800">
+            Edit Observation
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors"
+          >
             <X size={24} />
           </button>
         </div>
@@ -218,23 +261,39 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
                 </span>
                 Photos <span className="text-red-500">*</span>
               </label>
-              <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 bg-stone-100 px-2 py-1 rounded-md">{items.length} / 5</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 bg-stone-100 px-2 py-1 rounded-md">
+                {items.length} / 5
+              </span>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               {items.map((item, i) => (
-                <div 
-                  key={item.id} 
+                <div
+                  key={item.id}
                   className="relative aspect-square rounded-2xl overflow-hidden shadow-sm group border-2 border-stone-200"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.url} alt={`Preview ${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <img
+                    src={item.url}
+                    alt={`Preview ${i}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
 
                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-stone-900/60 backdrop-blur-sm rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button type="button" onClick={() => moveLeft(i)} disabled={i === 0} className="text-white p-1 hover:bg-white/20 rounded-full disabled:opacity-30">
+                    <button
+                      type="button"
+                      onClick={() => moveLeft(i)}
+                      disabled={i === 0}
+                      className="text-white p-1 hover:bg-white/20 rounded-full disabled:opacity-30"
+                    >
                       <MoveLeft size={14} />
                     </button>
-                    <button type="button" onClick={() => moveRight(i)} disabled={i === items.length - 1} className="text-white p-1 hover:bg-white/20 rounded-full disabled:opacity-30">
+                    <button
+                      type="button"
+                      onClick={() => moveRight(i)}
+                      disabled={i === items.length - 1}
+                      className="text-white p-1 hover:bg-white/20 rounded-full disabled:opacity-30"
+                    >
                       <MoveRight size={14} />
                     </button>
                   </div>
@@ -248,18 +307,20 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
                   </button>
                 </div>
               ))}
-              
+
               {items.length < 5 && (
                 <label className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-stone-300 rounded-2xl bg-stone-50 hover:bg-emerald-50/50 hover:border-emerald-400 hover:text-emerald-600 transition-all cursor-pointer text-stone-500 shadow-sm group">
                   <div className="p-3 bg-white rounded-full shadow-sm group-hover:bg-emerald-100 transition-colors">
                     <ImagePlus size={22} strokeWidth={2} />
                   </div>
-                  <span className="text-[13px] font-semibold tracking-wide">Add Photo</span>
+                  <span className="text-[13px] font-semibold tracking-wide">
+                    Add Photo
+                  </span>
                   <input
                     type="file"
                     accept="image/*"
                     multiple
-                    onClick={(e) => (e.target as HTMLInputElement).value = ''}
+                    onClick={(e) => ((e.target as HTMLInputElement).value = "")}
                     onChange={handleImageChange}
                     className="hidden"
                   />
@@ -273,16 +334,21 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-10">
             <section className="space-y-6">
               <div>
-                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">When did you see it? <span className="text-red-500">*</span></label>
+                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">
+                  When did you see it? <span className="text-red-500">*</span>
+                </label>
                 <DateTimePicker
                   value={observedAtDate}
                   onChange={setObservedAtDate}
                   maxDate={new Date()}
                 />
               </div>
-              
+
               <div>
-                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">Description <span className="text-stone-400 font-normal">(Optional)</span></label>
+                <label className="block text-[15px] font-bold tracking-tight text-stone-800 mb-2">
+                  Description{" "}
+                  <span className="text-stone-400 font-normal">(Optional)</span>
+                </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -294,9 +360,17 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
             </section>
 
             <section>
-              <LocationPicker 
-                onLocationChange={(lat, lng) => setLocation({lat, lng})} 
-                initialLocation={location ? { lat: location.lat, lng: location.lng, name: observation.locationName || "" } : undefined} 
+              <LocationPicker
+                onLocationChange={(lat, lng) => setLocation({ lat, lng })}
+                initialLocation={
+                  location
+                    ? {
+                        lat: location.lat,
+                        lng: location.lng,
+                        name: observation.locationName || "",
+                      }
+                    : undefined
+                }
               />
             </section>
           </div>
@@ -323,7 +397,11 @@ export default function EditObservationModal({ observation, onClose, onSuccess }
               className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold py-3.5 px-8 rounded-full transition-all flex items-center justify-center min-w-[140px] shadow-[0_8px_16px_-6px_rgba(5,150,105,0.4)]"
             >
               {isSubmitting ? (
-                <Loader2 className="animate-spin text-emerald-100" size={20} strokeWidth={2.5} />
+                <Loader2
+                  className="animate-spin text-emerald-100"
+                  size={20}
+                  strokeWidth={2.5}
+                />
               ) : (
                 "Save Changes"
               )}

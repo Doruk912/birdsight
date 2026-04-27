@@ -2,7 +2,15 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Leaf, MessageCircle, Send, Loader2, Search, X, ExternalLink } from "lucide-react";
+import {
+  Leaf,
+  MessageCircle,
+  Send,
+  Loader2,
+  Search,
+  X,
+  ExternalLink,
+} from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
 import {
   searchTaxa,
@@ -22,7 +30,9 @@ interface AddActivityFormProps {
   /** Observation images for ML prediction. */
   observationImages: ObservationImageResponse[];
   onCommentAdded: (comment: CommentResponse) => void;
-  onIdentificationAdded: (identification: IdentificationResponse) => Promise<void> | void;
+  onIdentificationAdded: (
+    identification: IdentificationResponse,
+  ) => Promise<void> | void;
 }
 
 export default function AddActivityForm({
@@ -34,7 +44,9 @@ export default function AddActivityForm({
   const { user } = useAuth();
   const formatTaxonRank = (rank: TaxonResponse["rank"]) =>
     rank.charAt(0) + rank.slice(1).toLowerCase();
-  const [activeTab, setActiveTab] = useState<"suggest_id" | "comment">("suggest_id");
+  const [activeTab, setActiveTab] = useState<"suggest_id" | "comment">(
+    "suggest_id",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,13 +56,16 @@ export default function AddActivityForm({
   // ID state
   const [taxonQuery, setTaxonQuery] = useState("");
   const [taxonResults, setTaxonResults] = useState<TaxonResponse[]>([]);
-  const [selectedTaxon, setSelectedTaxon] = useState<TaxonResponse | null>(null);
+  const [selectedTaxon, setSelectedTaxon] = useState<TaxonResponse | null>(
+    null,
+  );
   const [isSearchingTaxa, setIsSearchingTaxa] = useState(false);
   const [idComment, setIdComment] = useState("");
   const taxonInputRef = useRef<HTMLInputElement>(null);
 
   // ML suggestion state — NOT triggered until search input is focused
-  const firstImageUrl = observationImages.length > 0 ? observationImages[0].imageUrl : undefined;
+  const firstImageUrl =
+    observationImages.length > 0 ? observationImages[0].imageUrl : undefined;
   const [mlTriggered, setMlTriggered] = useState(false);
   const [showMlSuggestions, setShowMlSuggestions] = useState(true);
 
@@ -78,7 +93,11 @@ export default function AddActivityForm({
   }, [taxonQuery, selectedTaxon]);
 
   const handleMLSelect = useCallback(
-    async (taxonId: string, commonName: string | null, scientificName: string) => {
+    async (
+      taxonId: string,
+      commonName: string | null,
+      scientificName: string,
+    ) => {
       const taxon: TaxonResponse = {
         id: taxonId,
         scientificName,
@@ -90,7 +109,7 @@ export default function AddActivityForm({
       setTaxonResults([]);
       setShowMlSuggestions(false);
     },
-    []
+    [],
   );
 
   if (!user) {
@@ -139,7 +158,7 @@ export default function AddActivityForm({
       const newId = await addIdentification(
         observationId,
         selectedTaxon.id,
-        idComment.trim() || undefined
+        idComment.trim() || undefined,
       );
       await onIdentificationAdded(newId);
       setSelectedTaxon(null);
@@ -231,7 +250,10 @@ export default function AddActivityForm({
                     {selectedTaxon.coverImageUrl ? (
                       <img
                         src={selectedTaxon.coverImageUrl}
-                        alt={selectedTaxon.commonName || selectedTaxon.scientificName}
+                        alt={
+                          selectedTaxon.commonName ||
+                          selectedTaxon.scientificName
+                        }
                         className="w-10 h-10 rounded-lg object-cover border border-emerald-200 shrink-0"
                       />
                     ) : (
@@ -245,12 +267,16 @@ export default function AddActivityForm({
                           {selectedTaxon.commonName}
                         </p>
                       )}
-                      <p className={`text-xs text-emerald-700 ${selectedTaxon.scientificName ? "italic" : ""}`}>
-                        {selectedTaxon.rank && selectedTaxon.rank !== "SPECIES" && (
-                          <span className="not-italic mr-1">
-                            {selectedTaxon.rank.charAt(0).toUpperCase() + selectedTaxon.rank.slice(1).toLowerCase()}
-                          </span>
-                        )}
+                      <p
+                        className={`text-xs text-emerald-700 ${selectedTaxon.scientificName ? "italic" : ""}`}
+                      >
+                        {selectedTaxon.rank &&
+                          selectedTaxon.rank !== "SPECIES" && (
+                            <span className="not-italic mr-1">
+                              {selectedTaxon.rank.charAt(0).toUpperCase() +
+                                selectedTaxon.rank.slice(1).toLowerCase()}
+                            </span>
+                          )}
                         {selectedTaxon.scientificName}
                       </p>
                     </div>
@@ -342,7 +368,7 @@ export default function AddActivityForm({
                                 </p>
                               )}
                               <p className="text-xs text-stone-500 italic truncate">
-                                {taxon.rank !== "SPECIES" 
+                                {taxon.rank !== "SPECIES"
                                   ? `${formatTaxonRank(taxon.rank)} ${taxon.scientificName}`
                                   : taxon.scientificName}
                               </p>

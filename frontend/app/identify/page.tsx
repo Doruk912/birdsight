@@ -28,7 +28,9 @@ import Link from "next/link";
 export default function IdentifyPage() {
   const { user, isLoading: authLoading } = useAuth();
 
-  const [observations, setObservations] = useState<ObservationDetailResponse[]>([]);
+  const [observations, setObservations] = useState<ObservationDetailResponse[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -38,8 +40,12 @@ export default function IdentifyPage() {
   const [unreviewedOnly, setUnreviewedOnly] = useState(true);
 
   // Pending filter state (edited before apply)
-  const [pendingFilters, setPendingFilters] = useState<ObservationFilterParams>({});
-  const [activeFilters, setActiveFilters] = useState<ObservationFilterParams>({});
+  const [pendingFilters, setPendingFilters] = useState<ObservationFilterParams>(
+    {},
+  );
+  const [activeFilters, setActiveFilters] = useState<ObservationFilterParams>(
+    {},
+  );
 
   // Observer user search
   const [userQuery, setUserQuery] = useState("");
@@ -96,7 +102,7 @@ export default function IdentifyPage() {
       }
       return effective;
     },
-    [unreviewedOnly, user?.id]
+    [unreviewedOnly, user?.id],
   );
 
   const loadObservations = useCallback(async () => {
@@ -104,7 +110,8 @@ export default function IdentifyPage() {
     setLoading(true);
     try {
       const effective = buildEffectiveFilters(activeFilters);
-      const data: PageResponse<ObservationDetailResponse> = await fetchAllObservations(page, effective);
+      const data: PageResponse<ObservationDetailResponse> =
+        await fetchAllObservations(page, effective);
       setObservations(data.content);
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);
@@ -157,38 +164,49 @@ export default function IdentifyPage() {
     setModalOpen(true);
   };
 
-  const hasFilters = !!(activeFilters.taxonId || activeFilters.userId || activeFilters.dateFrom || activeFilters.dateTo);
+  const hasFilters = !!(
+    activeFilters.taxonId ||
+    activeFilters.userId ||
+    activeFilters.dateFrom ||
+    activeFilters.dateTo
+  );
 
   return (
     <div className="min-h-screen bg-stone-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
-
         {/* Header */}
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold text-stone-900 tracking-tight">Identify</h1>
+            <h1 className="text-3xl font-bold text-stone-900 tracking-tight">
+              Identify
+            </h1>
             <p className="text-stone-500 mt-1">
-              Help the community by suggesting species for unidentified sightings.
+              Help the community by suggesting species for unidentified
+              sightings.
             </p>
           </div>
           {totalElements > 0 && (
             <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-2.5 text-sm font-semibold text-amber-700 flex items-center gap-2">
               <Binoculars size={16} />
-              {totalElements.toLocaleString()} observation{totalElements !== 1 ? "s" : ""} need{totalElements === 1 ? "s" : ""} ID
+              {totalElements.toLocaleString()} observation
+              {totalElements !== 1 ? "s" : ""} need
+              {totalElements === 1 ? "s" : ""} ID
             </div>
           )}
         </div>
 
         {/* Reviewed toggle + filters */}
         <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex flex-col gap-5">
-
           {/* Unreviewed toggle */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-stone-700">Show</span>
               <div className="flex gap-1 p-1 bg-stone-100 rounded-xl">
                 <button
-                  onClick={() => { setUnreviewedOnly(true); setPage(0); }}
+                  onClick={() => {
+                    setUnreviewedOnly(true);
+                    setPage(0);
+                  }}
                   className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
                     unreviewedOnly
                       ? "bg-white text-emerald-700 shadow-sm"
@@ -198,7 +216,10 @@ export default function IdentifyPage() {
                   Unreviewed
                 </button>
                 <button
-                  onClick={() => { setUnreviewedOnly(false); setPage(0); }}
+                  onClick={() => {
+                    setUnreviewedOnly(false);
+                    setPage(0);
+                  }}
                   className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
                     !unreviewedOnly
                       ? "bg-white text-stone-800 shadow-sm"
@@ -211,7 +232,12 @@ export default function IdentifyPage() {
             </div>
             {!user && !authLoading && (
               <p className="text-xs text-stone-400">
-                <Link href="/login" className="text-emerald-600 font-semibold hover:underline">Sign in</Link>{" "}
+                <Link
+                  href="/login"
+                  className="text-emerald-600 font-semibold hover:underline"
+                >
+                  Sign in
+                </Link>{" "}
                 to track which observations you&#39;ve already identified.
               </p>
             )}
@@ -221,9 +247,13 @@ export default function IdentifyPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Taxon */}
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-1.5">Taxon</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-1.5">
+                Taxon
+              </div>
               <TaxonSearch
-                onSelect={(taxonId) => setPendingFilters((p) => ({ ...p, taxonId }))}
+                onSelect={(taxonId) =>
+                  setPendingFilters((p) => ({ ...p, taxonId }))
+                }
                 initialTaxonId={pendingFilters.taxonId}
                 label=""
                 hideOptional
@@ -232,7 +262,9 @@ export default function IdentifyPage() {
 
             {/* Observer */}
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-1.5">Observer</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-1.5">
+                Observer
+              </div>
               {pendingFilters.userId && selectedUserName ? (
                 <div className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-sm font-medium text-emerald-700 w-full h-12">
                   <User size={14} className="shrink-0" />
@@ -246,18 +278,27 @@ export default function IdentifyPage() {
                 </div>
               ) : (
                 <div className="relative" ref={userRef}>
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={14} />
+                  <User
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                    size={14}
+                  />
                   <input
                     type="text"
                     placeholder="Search observer..."
                     value={userQuery}
-                    onChange={(e) => { setUserQuery(e.target.value); setUserOpen(true); }}
+                    onChange={(e) => {
+                      setUserQuery(e.target.value);
+                      setUserOpen(true);
+                    }}
                     onFocus={() => userQuery.length >= 2 && setUserOpen(true)}
                     className="w-full h-12 pl-9 pr-3 bg-white border border-stone-200 rounded-xl text-sm text-stone-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-stone-400"
                   />
                   {userLoading && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <Loader2 size={14} className="animate-spin text-stone-400" />
+                      <Loader2
+                        size={14}
+                        className="animate-spin text-stone-400"
+                      />
                     </div>
                   )}
                   {userOpen && userResults.length > 0 && (
@@ -269,15 +310,23 @@ export default function IdentifyPage() {
                           onClick={() => handleSelectUser(u)}
                         >
                           {u.avatarUrl ? (
-                            <img src={u.avatarUrl} alt={u.username} className="w-6 h-6 rounded-full object-cover" />
+                            <img
+                              src={u.avatarUrl}
+                              alt={u.username}
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
                           ) : (
                             <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center justify-center">
                               <User size={12} className="text-stone-400" />
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-stone-800 truncate">{u.displayName || u.username}</div>
-                            <div className="text-xs text-stone-400">@{u.username}</div>
+                            <div className="text-sm font-medium text-stone-800 truncate">
+                              {u.displayName || u.username}
+                            </div>
+                            <div className="text-xs text-stone-400">
+                              @{u.username}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -289,23 +338,59 @@ export default function IdentifyPage() {
 
             {/* Date range */}
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-1.5">Date Range</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-1.5">
+                Date Range
+              </div>
               <div className="grid grid-cols-2 gap-2 h-12">
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" size={12} />
+                  <Calendar
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                    size={12}
+                  />
                   <input
                     type="date"
-                    value={pendingFilters.dateFrom ? new Date(pendingFilters.dateFrom).toISOString().split("T")[0] : ""}
-                    onChange={(e) => setPendingFilters((p) => ({ ...p, dateFrom: e.target.value ? new Date(e.target.value).toISOString() : undefined }))}
+                    value={
+                      pendingFilters.dateFrom
+                        ? new Date(pendingFilters.dateFrom)
+                            .toISOString()
+                            .split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setPendingFilters((p) => ({
+                        ...p,
+                        dateFrom: e.target.value
+                          ? new Date(e.target.value).toISOString()
+                          : undefined,
+                      }))
+                    }
                     className="w-full h-full pl-8 pr-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                 </div>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" size={12} />
+                  <Calendar
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                    size={12}
+                  />
                   <input
                     type="date"
-                    value={pendingFilters.dateTo ? new Date(pendingFilters.dateTo).toISOString().split("T")[0] : ""}
-                    onChange={(e) => setPendingFilters((p) => ({ ...p, dateTo: e.target.value ? new Date(e.target.value + "T23:59:59.999Z").toISOString() : undefined }))}
+                    value={
+                      pendingFilters.dateTo
+                        ? new Date(pendingFilters.dateTo)
+                            .toISOString()
+                            .split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setPendingFilters((p) => ({
+                        ...p,
+                        dateTo: e.target.value
+                          ? new Date(
+                              e.target.value + "T23:59:59.999Z",
+                            ).toISOString()
+                          : undefined,
+                      }))
+                    }
                     className="w-full h-full pl-8 pr-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                 </div>
@@ -344,16 +429,21 @@ export default function IdentifyPage() {
               <CheckCircle2 className="text-emerald-400" size={28} />
             </div>
             <h3 className="text-lg font-semibold text-stone-900 mb-1">
-              {unreviewedOnly ? "You're all caught up!" : "No observations found"}
+              {unreviewedOnly
+                ? "You're all caught up!"
+                : "No observations found"}
             </h3>
             <p className="text-stone-500 max-w-sm text-sm">
               {unreviewedOnly
-                ? "You've identified everything in the current filter. Switch to \"All\" to browse again."
+                ? 'You\'ve identified everything in the current filter. Switch to "All" to browse again.'
                 : "Try adjusting your filters."}
             </p>
             {unreviewedOnly && (
               <button
-                onClick={() => { setUnreviewedOnly(false); setPage(0); }}
+                onClick={() => {
+                  setUnreviewedOnly(false);
+                  setPage(0);
+                }}
                 className="mt-5 px-5 py-2 text-sm font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors"
               >
                 Show all observations
@@ -394,7 +484,9 @@ export default function IdentifyPage() {
                   Page {page + 1} of {totalPages}
                 </span>
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  onClick={() =>
+                    setPage((p) => Math.min(totalPages - 1, p + 1))
+                  }
                   disabled={page === totalPages - 1 || loading}
                   className="p-2 rounded-xl border border-stone-200 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-stone-600"
                 >

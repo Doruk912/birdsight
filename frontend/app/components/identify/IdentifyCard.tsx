@@ -11,17 +11,23 @@ interface IdentifyCardProps {
   onClick: () => void;
 }
 
-export default function IdentifyCard({ observation, onClick }: IdentifyCardProps) {
+export default function IdentifyCard({
+  observation,
+  onClick,
+}: IdentifyCardProps) {
   const firstImage = observation.images?.[0]?.imageUrl || PLACEHOLDER_IMAGE;
 
   const taxonRank = observation.communityTaxon?.rank;
   const rankPrefix =
     taxonRank && taxonRank !== "SPECIES"
-      ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
+      ? taxonRank.charAt(0).toUpperCase() +
+        taxonRank.slice(1).toLowerCase() +
+        " "
       : "";
   const commonName = observation.communityTaxon?.commonName;
   const scientificName = observation.communityTaxon?.scientificName;
-  const h1Title = commonName || (rankPrefix + (scientificName || "Unknown species"));
+  const h1Title =
+    commonName || rankPrefix + (scientificName || "Unknown species");
 
   return (
     <button
@@ -53,7 +59,8 @@ export default function IdentifyCard({ observation, onClick }: IdentifyCardProps
             {h1Title}
           </h3>
           <p className="text-xs text-stone-400 mt-0.5">
-            {observation.identificationCount} ID{observation.identificationCount !== 1 ? "s" : ""}
+            {observation.identificationCount} ID
+            {observation.identificationCount !== 1 ? "s" : ""}
           </p>
         </div>
 
@@ -61,7 +68,9 @@ export default function IdentifyCard({ observation, onClick }: IdentifyCardProps
           {observation.locationName && (
             <div className="flex items-start gap-1.5 text-xs text-stone-500">
               <MapPin size={12} className="shrink-0 text-stone-400 mt-0.5" />
-              <span className="line-clamp-1 leading-tight">{observation.locationName}</span>
+              <span className="line-clamp-1 leading-tight">
+                {observation.locationName}
+              </span>
             </div>
           )}
         </div>

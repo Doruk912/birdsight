@@ -38,7 +38,11 @@ export default function CitizenScience() {
                 className="bg-white/5 border border-white/10 rounded-2xl p-7 flex flex-col gap-4 hover:bg-white/[0.08] transition-colors duration-200"
               >
                 <div className="w-10 h-10 rounded-xl bg-emerald-900/40 border border-emerald-800/60 flex items-center justify-center shrink-0">
-                  <Icon size={20} className="text-emerald-400" strokeWidth={1.7} />
+                  <Icon
+                    size={20}
+                    className="text-emerald-400"
+                    strokeWidth={1.7}
+                  />
                 </div>
                 <h3 className="font-semibold text-white text-base leading-snug">
                   {pillar.title}

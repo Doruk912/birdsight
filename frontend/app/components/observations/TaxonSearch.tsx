@@ -17,12 +17,12 @@ interface TaxonSearchProps {
   required?: boolean;
 }
 
-export default function TaxonSearch({ 
-  onSelect, 
-  initialTaxonId, 
-  label = "Identification", 
+export default function TaxonSearch({
+  onSelect,
+  initialTaxonId,
+  label = "Identification",
   hideOptional = false,
-  required = false 
+  required = false,
 }: TaxonSearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TaxonResponse[]>([]);
@@ -32,7 +32,10 @@ export default function TaxonSearch({
   const [initialLoading, setInitialLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const formatTaxonRank = (rank: string) => Math.max(0, rank.length) > 0 ? rank.charAt(0) + rank.slice(1).toLowerCase() : "";
+  const formatTaxonRank = (rank: string) =>
+    Math.max(0, rank.length) > 0
+      ? rank.charAt(0) + rank.slice(1).toLowerCase()
+      : "";
 
   // Load initial taxon from ID (e.g. ML suggestion pre-fill)
   useEffect(() => {
@@ -43,9 +46,12 @@ export default function TaxonSearch({
 
     (async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/v1/taxa/${initialTaxonId}`, {
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `${API_BASE}/api/v1/taxa/${initialTaxonId}`,
+          {
+            cache: "no-store",
+          },
+        );
         if (response.ok && !cancelled) {
           const taxon: TaxonResponse = await response.json();
           setSelected(taxon);
@@ -59,13 +65,18 @@ export default function TaxonSearch({
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialTaxonId]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -77,7 +88,7 @@ export default function TaxonSearch({
     const timer = setTimeout(() => {
       if (query.trim() && !selected) {
         setLoading(true);
-        searchTaxa(query).then(res => {
+        searchTaxa(query).then((res) => {
           setResults(res);
           setLoading(false);
           setIsOpen(true);
@@ -108,10 +119,13 @@ export default function TaxonSearch({
     <div className="relative" ref={wrapperRef}>
       {label && (
         <label className="block text-sm font-medium text-stone-700 mb-2">
-          {label} {required && <span className="text-red-500">*</span>} {!required && !hideOptional && <span className="text-stone-400 font-normal">(Optional)</span>}
+          {label} {required && <span className="text-red-500">*</span>}{" "}
+          {!required && !hideOptional && (
+            <span className="text-stone-400 font-normal">(Optional)</span>
+          )}
         </label>
       )}
-      
+
       {selected ? (
         <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
           <div className="flex items-center gap-3">
@@ -133,7 +147,9 @@ export default function TaxonSearch({
                   {selected.commonName}
                 </p>
               )}
-              <p className={`text-xs text-emerald-700 ${selected.scientificName ? "italic" : ""}`}>
+              <p
+                className={`text-xs text-emerald-700 ${selected.scientificName ? "italic" : ""}`}
+              >
                 {selected.rank && selected.rank !== "SPECIES" && (
                   <span className="not-italic mr-1">
                     {formatTaxonRank(selected.rank)}
@@ -164,18 +180,28 @@ export default function TaxonSearch({
         </div>
       ) : (
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
+            size={18}
+          />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => { if (results.length > 0) setIsOpen(true); }}
+            onFocus={() => {
+              if (results.length > 0) setIsOpen(true);
+            }}
             placeholder="Search for a species (e.g. Mallard) ..."
             className="w-full rounded-xl border border-stone-200 bg-white pl-11 pr-4 py-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-stone-400 text-stone-900"
             disabled={initialLoading}
           />
-          {(loading || initialLoading) && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 animate-spin" size={18} />}
-          
+          {(loading || initialLoading) && (
+            <Loader2
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 animate-spin"
+              size={18}
+            />
+          )}
+
           {isOpen && results.length > 0 && (
             <ul className="absolute z-10 w-full mt-2 bg-white border border-stone-200 rounded-2xl shadow-xl max-h-72 overflow-y-auto custom-scrollbar overflow-x-hidden">
               {results.map((taxon) => (
@@ -210,7 +236,7 @@ export default function TaxonSearch({
                         </p>
                       )}
                       <p className="text-xs text-stone-500 italic truncate">
-                        {taxon.rank !== "SPECIES" 
+                        {taxon.rank !== "SPECIES"
                           ? `${formatTaxonRank(taxon.rank)} ${taxon.scientificName}`
                           : taxon.scientificName}
                       </p>
@@ -234,11 +260,14 @@ export default function TaxonSearch({
             </ul>
           )}
 
-          {query.length >= 2 && results.length === 0 && !loading && !initialLoading && (
-            <div className="absolute z-10 w-full mt-2 bg-white border border-stone-200 rounded-xl shadow-lg p-4 text-center text-sm text-stone-500">
-              No species found for &quot;{query}&quot;
-            </div>
-          )}
+          {query.length >= 2 &&
+            results.length === 0 &&
+            !loading &&
+            !initialLoading && (
+              <div className="absolute z-10 w-full mt-2 bg-white border border-stone-200 rounded-xl shadow-lg p-4 text-center text-sm text-stone-500">
+                No species found for &quot;{query}&quot;
+              </div>
+            )}
         </div>
       )}
     </div>

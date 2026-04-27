@@ -422,7 +422,9 @@ a.taxon-tree-node:hover .taxon-tree-name {
   border: 1px solid #e7e5e4;
   border-radius: 0.5rem;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   resize: vertical;
 }
 
@@ -574,7 +576,9 @@ a.taxon-tree-node:hover .taxon-tree-name {
   background: white;
   border-radius: 0.75rem;
   border: 1px solid #f0f0f0;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .taxon-top-observer:hover {

@@ -18,11 +18,23 @@
  * JWT claims. This guarantees the data is always fresh from the database.
  */
 
-import { createContext, useCallback, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/app/lib/authService";
 import { tokenStore } from "@/app/lib/apiClient";
-import { AuthResponse, AuthState, AuthUser, LoginRequest, RegisterRequest } from "@/app/types/auth";
+import {
+  AuthResponse,
+  AuthState,
+  AuthUser,
+  LoginRequest,
+  RegisterRequest,
+} from "@/app/types/auth";
 
 /** Maps the UserResponse nested in AuthResponse to our client-side AuthUser shape. */
 function userFromResponse(response: AuthResponse): AuthUser | null {
@@ -85,17 +97,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     attemptSilentRefresh();
   }, []);
 
-  const login = useCallback(async (credentials: LoginRequest) => {
-    const data = await authService.login(credentials);
-    setState({ user: userFromResponse(data), accessToken: data.accessToken, isLoading: false });
-    router.push("/");
-  }, [router]);
+  const login = useCallback(
+    async (credentials: LoginRequest) => {
+      const data = await authService.login(credentials);
+      setState({
+        user: userFromResponse(data),
+        accessToken: data.accessToken,
+        isLoading: false,
+      });
+      router.push("/");
+    },
+    [router],
+  );
 
-  const register = useCallback(async (payload: RegisterRequest) => {
-    const data = await authService.register(payload);
-    setState({ user: userFromResponse(data), accessToken: data.accessToken, isLoading: false });
-    router.push("/");
-  }, [router]);
+  const register = useCallback(
+    async (payload: RegisterRequest) => {
+      const data = await authService.register(payload);
+      setState({
+        user: userFromResponse(data),
+        accessToken: data.accessToken,
+        isLoading: false,
+      });
+      router.push("/");
+    },
+    [router],
+  );
 
   const logout = useCallback(async () => {
     await authService.logout();
@@ -111,7 +137,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{ ...state, login, register, logout, updateUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

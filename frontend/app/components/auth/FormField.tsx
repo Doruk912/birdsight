@@ -16,10 +16,7 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
     const inputId = id ?? label.toLowerCase().replace(/\s+/g, "-");
     return (
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor={inputId}
-          className="text-sm font-medium text-stone-300"
-        >
+        <label htmlFor={inputId} className="text-sm font-medium text-stone-300">
           {label}
         </label>
         <input
@@ -34,14 +31,11 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             ${props.className ?? ""}
           `}
         />
-        {error && (
-          <p className="text-xs text-rose-400">{error}</p>
-        )}
+        {error && <p className="text-xs text-rose-400">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 FormField.displayName = "FormField";
 export default FormField;
-

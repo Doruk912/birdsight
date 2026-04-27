@@ -45,7 +45,10 @@ export const userService = {
   uploadAvatar: async (file: File): Promise<UserResponse> => {
     const formData = new FormData();
     formData.append("file", file);
-    return apiClient.postForm<UserResponse>("/api/v1/users/me/avatar", formData);
+    return apiClient.postForm<UserResponse>(
+      "/api/v1/users/me/avatar",
+      formData,
+    );
   },
 
   deleteAvatar: async (): Promise<UserResponse> => {
@@ -56,7 +59,7 @@ export const userService = {
     if (!query || query.trim().length === 0) return [];
     const response = await fetch(
       `${API_BASE}/api/v1/users/search?q=${encodeURIComponent(query.trim())}&size=10`,
-      { cache: "no-store" }
+      { cache: "no-store" },
     );
     if (!response.ok) return [];
     return response.json();

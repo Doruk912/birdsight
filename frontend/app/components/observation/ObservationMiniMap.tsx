@@ -1,7 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import MapGL, { Marker, NavigationControl, MapRef } from "react-map-gl/maplibre";
+import MapGL, {
+  Marker,
+  NavigationControl,
+  MapRef,
+} from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapPin, ExternalLink } from "lucide-react";
 
@@ -56,7 +60,11 @@ export default function ObservationMiniMap({
       {/* Location info + Google Maps link */}
       <div className="px-4 py-3 bg-stone-50/80 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm text-stone-600 min-w-0">
-          <MapPin size={14} className="text-emerald-600 shrink-0" strokeWidth={2} />
+          <MapPin
+            size={14}
+            className="text-emerald-600 shrink-0"
+            strokeWidth={2}
+          />
           {locationName ? (
             <span className="font-medium truncate">{locationName}</span>
           ) : (

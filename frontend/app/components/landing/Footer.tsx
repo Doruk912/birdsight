@@ -28,7 +28,10 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-stone-800">
           {/* Brand */}
           <div className="col-span-2 flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-2 text-white font-semibold">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-white font-semibold"
+            >
               <Image
                 src="/logo-white.svg"
                 alt="BirdSight"
@@ -67,7 +70,9 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-600">
-          <span>© {new Date().getFullYear()} BirdSight. All rights reserved.</span>
+          <span>
+            © {new Date().getFullYear()} BirdSight. All rights reserved.
+          </span>
           <span className="text-stone-700">
             Built by birdwatchers, for birdwatchers.
           </span>

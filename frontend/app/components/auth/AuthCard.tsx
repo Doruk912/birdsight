@@ -60,7 +60,9 @@ export default function AuthCard({
 
         {/* Card */}
         <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
-          <h1 className="text-2xl font-bold text-white tracking-tight">{title}</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            {title}
+          </h1>
           <p className="mt-1 text-sm text-stone-400">{subtitle}</p>
 
           <div className="mt-6">{children}</div>

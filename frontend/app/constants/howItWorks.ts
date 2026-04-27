@@ -1,4 +1,10 @@
-import { Binoculars, CloudUpload, Cpu, MessageCircle, CheckCircle } from "lucide-react";
+import {
+  Binoculars,
+  CloudUpload,
+  Cpu,
+  MessageCircle,
+  CheckCircle,
+} from "lucide-react";
 import { HowItWorksStep } from "@/app/types/landing";
 
 export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
@@ -48,4 +54,3 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
     image: "/images/how-it-works/step_5.png",
   },
 ];
-

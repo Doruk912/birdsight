@@ -14,23 +14,20 @@ import MapGL, {
 import type { MapLayerMouseEvent, GeoJSONSource } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapObservation } from "@/app/types/explore";
-import {
-  Calendar,
-  MessageCircle,
-  Pencil,
-  X,
-} from "lucide-react";
+import { Calendar, MessageCircle, Pencil, X } from "lucide-react";
 
 interface ObservationMapProps {
   observations: MapObservation[];
   selectedId: string | null;
   onSelectObservation: (obs: MapObservation | null) => void;
-  onBoundingBoxDraw?: (bounds: {
-    swLat: number;
-    swLng: number;
-    neLat: number;
-    neLng: number;
-  } | null) => void;
+  onBoundingBoxDraw?: (
+    bounds: {
+      swLat: number;
+      swLng: number;
+      neLat: number;
+      neLng: number;
+    } | null,
+  ) => void;
 }
 
 const INITIAL_VIEW = {
@@ -76,7 +73,7 @@ export default function ObservationMap({
 
   const selectedObservation =
     selectedId != null
-      ? observations.find((obs) => obs.id === selectedId) ?? null
+      ? (observations.find((obs) => obs.id === selectedId) ?? null)
       : null;
 
   // Bounding box drawing state
@@ -160,7 +157,7 @@ export default function ObservationMap({
       // Clicked empty map
       onSelectObservation(null);
     },
-    [drawingMode, onSelectObservation, observations]
+    [drawingMode, onSelectObservation, observations],
   );
 
   // Close popup
@@ -524,10 +521,13 @@ export default function ObservationMap({
                   {selectedObservation.observedAt && (
                     <span className="flex items-center gap-1.5">
                       <Calendar size={11} className="shrink-0" />
-                      {new Date(selectedObservation.observedAt).toLocaleDateString(
-                        undefined,
-                        { month: "short", day: "numeric", year: "numeric" }
-                      )}
+                      {new Date(
+                        selectedObservation.observedAt,
+                      ).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </span>
                   )}
                   <div className="flex items-center gap-3">

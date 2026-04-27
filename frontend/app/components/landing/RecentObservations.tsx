@@ -8,7 +8,9 @@ import { fetchAllObservations } from "@/app/lib/observationService";
 import ObservationCard from "@/app/components/observations/ObservationCard";
 
 export default function RecentObservations() {
-  const [observations, setObservations] = useState<ObservationDetailResponse[]>([]);
+  const [observations, setObservations] = useState<ObservationDetailResponse[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +38,10 @@ export default function RecentObservations() {
             className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-800 transition-colors group"
           >
             Browse all observations
-            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight
+              size={14}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
           </Link>
         </div>
 

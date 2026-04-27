@@ -53,11 +53,17 @@ export default function IdentifyModal({
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [photoIndex, setPhotoIndex] = useState(0);
-  const [identifications, setIdentifications] = useState<IdentificationResponse[]>([]);
+  const [identifications, setIdentifications] = useState<
+    IdentificationResponse[]
+  >([]);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(false);
-  const [activeTab, setActiveTab] = useState<"suggest_id" | "comment">("suggest_id");
-  const [selectedTaxonId, setSelectedTaxonId] = useState<string | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<"suggest_id" | "comment">(
+    "suggest_id",
+  );
+  const [selectedTaxonId, setSelectedTaxonId] = useState<string | undefined>(
+    undefined,
+  );
   const [idComment, setIdComment] = useState("");
   const [commentBody, setCommentBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -72,11 +78,14 @@ export default function IdentifyModal({
   const taxonRank = observation?.communityTaxon?.rank;
   const rankPrefix =
     taxonRank && taxonRank !== "SPECIES"
-      ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
+      ? taxonRank.charAt(0).toUpperCase() +
+        taxonRank.slice(1).toLowerCase() +
+        " "
       : "";
   const commonName = observation?.communityTaxon?.commonName;
   const scientificName = observation?.communityTaxon?.scientificName;
-  const displayTitle = commonName || rankPrefix + (scientificName ?? "Unknown species");
+  const displayTitle =
+    commonName || rankPrefix + (scientificName ?? "Unknown species");
   const displaySubtitle = commonName ? rankPrefix + scientificName : null;
 
   const loadActivity = useCallback(async (obsId: string) => {
@@ -150,7 +159,11 @@ export default function IdentifyModal({
     setSubmitting(true);
     setError(null);
     try {
-      await addIdentification(observation.id, selectedTaxonId, idComment.trim() || undefined);
+      await addIdentification(
+        observation.id,
+        selectedTaxonId,
+        idComment.trim() || undefined,
+      );
       onIdentified(observation.id);
       advanceOrClose();
     } catch (err: unknown) {
@@ -199,12 +212,13 @@ export default function IdentifyModal({
         stopPropagation prevents backdrop-close when clicking inside this row.
         max-w-7xl ensures the modal isn't too huge, leaving room for arrows.
       */}
-      <div
-        className="flex items-center justify-center gap-4 px-6 w-full max-w-8xl"
-      >
+      <div className="flex items-center justify-center gap-4 px-6 w-full max-w-8xl">
         {/* ← Previous observation (outside modal) */}
         <button
-          onClick={(e) => { e.stopPropagation(); setCurrentIndex((i) => Math.max(0, i - 1)); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrentIndex((i) => Math.max(0, i - 1));
+          }}
           disabled={currentIndex === 0}
           className="flex-shrink-0 w-14 h-14 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors disabled:opacity-20 disabled:cursor-not-allowed z-50 backdrop-blur-md"
           title="Previous observation  ←"
@@ -223,7 +237,6 @@ export default function IdentifyModal({
           style={{ height: "min(860px, 90vh)" }}
           onClick={(e) => e.stopPropagation()}
         >
-
           {/* ══════════ LEFT PANEL — photos only ══════════ */}
           {/*
             w-[48%] so the photo gets more real estate, but leaves enough for right panel.
@@ -241,9 +254,14 @@ export default function IdentifyModal({
               with object-contain, because flex-1 alone doesn't give
               the img a numeric height to calculate percentages from.
             */}
-            <div className="relative flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+            <div
+              className="relative flex-1 overflow-hidden"
+              style={{ minHeight: 0 }}
+            >
               <img
-                key={currentImage}          /* remount on src change for clean transition */
+                key={
+                  currentImage
+                } /* remount on src change for clean transition */
                 src={currentImage}
                 alt={`Observation photo ${photoIndex + 1}`}
                 className="absolute inset-0 w-full h-full object-contain"
@@ -269,10 +287,11 @@ export default function IdentifyModal({
                   <button
                     key={img.id}
                     onClick={() => setPhotoIndex(i)}
-                    className={`h-10 w-14 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${i === photoIndex
+                    className={`h-10 w-14 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${
+                      i === photoIndex
                         ? "border-emerald-500 ring-2 ring-emerald-400/30 opacity-100"
                         : "border-transparent opacity-50 hover:opacity-80 hover:border-stone-400"
-                      }`}
+                    }`}
                   >
                     <img
                       src={img.imageUrl}
@@ -291,7 +310,6 @@ export default function IdentifyModal({
 
           {/* ══════════ RIGHT PANEL — info + activity + actions ══════════ */}
           <div className="flex-1 min-w-0 flex flex-col overflow-hidden border-l border-stone-100">
-
             {/* Close button — position relative to the modal card */}
             <button
               onClick={onClose}
@@ -304,7 +322,6 @@ export default function IdentifyModal({
             {/* ─── FIXED HEADER: taxon + observer meta ─────────────────── */}
             <div className="flex-shrink-0 px-6 pt-8 pb-5 border-b border-stone-100">
               <div className="flex items-start justify-between gap-4">
-                
                 {/* Main Content Area */}
                 <div className="flex items-start gap-4 min-w-0 flex-1">
                   {/* Taxon cover image — clickable → taxon page */}
@@ -359,10 +376,11 @@ export default function IdentifyModal({
 
                       <div className="mt-2 mb-2 flex items-center gap-2 flex-wrap">
                         <span
-                          className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${isResearchGrade
+                          className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                            isResearchGrade
                               ? "bg-emerald-100 text-emerald-700"
                               : "bg-amber-100 text-amber-700"
-                            }`}
+                          }`}
                         >
                           {isResearchGrade ? (
                             <CheckCircle2 size={9} />
@@ -398,18 +416,32 @@ export default function IdentifyModal({
                       </div>
 
                       <div className="flex items-center gap-1.5">
-                        <Calendar size={13} className="text-stone-400 shrink-0" />
+                        <Calendar
+                          size={13}
+                          className="text-stone-400 shrink-0"
+                        />
                         <span>
-                          {new Date(observation.observedAt).toLocaleDateString(undefined, {
-                            month: "short", day: "numeric", year: "numeric",
-                          })} • {timeAgo(observation.createdAt)}
+                          {new Date(observation.observedAt).toLocaleDateString(
+                            undefined,
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )}{" "}
+                          • {timeAgo(observation.createdAt)}
                         </span>
                       </div>
 
                       {observation.locationName && (
                         <div className="flex items-center gap-1.5 max-w-[220px]">
-                          <MapPin size={13} className="text-stone-400 shrink-0" />
-                          <span className="truncate">{observation.locationName}</span>
+                          <MapPin
+                            size={13}
+                            className="text-stone-400 shrink-0"
+                          />
+                          <span className="truncate">
+                            {observation.locationName}
+                          </span>
                         </div>
                       )}
 
@@ -419,22 +451,22 @@ export default function IdentifyModal({
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-[11px] text-emerald-600 hover:text-emerald-700 transition-colors mt-0.5 font-medium"
                       >
-                        View full observation <ExternalLink size={11} strokeWidth={2.5} />
+                        View full observation{" "}
+                        <ExternalLink size={11} strokeWidth={2.5} />
                       </Link>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
             {/* ─── SCROLLABLE MIDDLE: unified activity ───────────── */}
             <div className="flex-1 overflow-y-auto min-h-0 pt-2">
-
               {/* Unified activity feed (IDs + comments merged chronologically) */}
               {loadingActivity ? (
                 <div className="flex items-center gap-2 text-stone-400 text-sm px-5 py-4">
-                  <Loader2 size={14} className="animate-spin" /> Loading activity…
+                  <Loader2 size={14} className="animate-spin" /> Loading
+                  activity…
                 </div>
               ) : (
                 <div>
@@ -453,7 +485,9 @@ export default function IdentifyModal({
             <div className="flex-shrink-0 border-t border-stone-100 bg-stone-50/70">
               {!user ? (
                 <div className="px-5 py-4 text-center">
-                  <p className="text-xs text-stone-500 mb-2">Sign in to identify observations.</p>
+                  <p className="text-xs text-stone-500 mb-2">
+                    Sign in to identify observations.
+                  </p>
                   <Link
                     href="/login"
                     className="inline-flex items-center justify-center h-8 px-4 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors"
@@ -473,17 +507,23 @@ export default function IdentifyModal({
                   {hasCommunityTaxon && !isOwnObservation && (
                     <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-emerald-800">Agree with community ID?</p>
-                        <p className="text-xs text-emerald-700 truncate">{displayTitle}</p>
+                        <p className="text-xs font-bold text-emerald-800">
+                          Agree with community ID?
+                        </p>
+                        <p className="text-xs text-emerald-700 truncate">
+                          {displayTitle}
+                        </p>
                       </div>
                       <button
                         onClick={handleAgree}
                         disabled={agreeSubmitting}
                         className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                       >
-                        {agreeSubmitting
-                          ? <Loader2 size={12} className="animate-spin" />
-                          : <CheckCircle2 size={12} />}
+                        {agreeSubmitting ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <CheckCircle2 size={12} />
+                        )}
                         Agree
                       </button>
                     </div>
@@ -500,20 +540,28 @@ export default function IdentifyModal({
                   <div className="border border-stone-200 rounded-xl overflow-hidden bg-white">
                     <div className="flex border-b border-stone-200">
                       <button
-                        onClick={() => { setActiveTab("suggest_id"); setError(null); }}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${activeTab === "suggest_id"
+                        onClick={() => {
+                          setActiveTab("suggest_id");
+                          setError(null);
+                        }}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${
+                          activeTab === "suggest_id"
                             ? "text-emerald-700 bg-emerald-50 border-b-2 border-emerald-500 -mb-px"
                             : "text-stone-500 hover:bg-stone-50"
-                          }`}
+                        }`}
                       >
                         <Leaf size={12} /> Suggest ID
                       </button>
                       <button
-                        onClick={() => { setActiveTab("comment"); setError(null); }}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${activeTab === "comment"
+                        onClick={() => {
+                          setActiveTab("comment");
+                          setError(null);
+                        }}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${
+                          activeTab === "comment"
                             ? "text-emerald-700 bg-emerald-50 border-b-2 border-emerald-500 -mb-px"
                             : "text-stone-500 hover:bg-stone-50"
-                          }`}
+                        }`}
                       >
                         <MessageCircle size={12} /> Comment
                       </button>
@@ -522,7 +570,11 @@ export default function IdentifyModal({
                     <div className="p-3">
                       {activeTab === "suggest_id" ? (
                         <form onSubmit={handleSuggestId} className="space-y-2">
-                          <TaxonSearch onSelect={setSelectedTaxonId} label="" hideOptional />
+                          <TaxonSearch
+                            onSelect={setSelectedTaxonId}
+                            label=""
+                            hideOptional
+                          />
                           <textarea
                             value={idComment}
                             onChange={(e) => setIdComment(e.target.value)}
@@ -537,9 +589,11 @@ export default function IdentifyModal({
                               disabled={!selectedTaxonId || submitting}
                               className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {submitting
-                                ? <Loader2 size={12} className="animate-spin" />
-                                : <Leaf size={12} />}
+                              {submitting ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <Leaf size={12} />
+                              )}
                               Submit ID
                             </button>
                           </div>
@@ -560,9 +614,11 @@ export default function IdentifyModal({
                               disabled={!commentBody.trim() || submitting}
                               className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {submitting
-                                ? <Loader2 size={12} className="animate-spin" />
-                                : <Send size={12} />}
+                              {submitting ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <Send size={12} />
+                              )}
                               Post
                             </button>
                           </div>
@@ -578,7 +634,10 @@ export default function IdentifyModal({
 
         {/* → Next observation (outside modal) */}
         <button
-          onClick={(e) => { e.stopPropagation(); setCurrentIndex((i) => Math.min(observations.length - 1, i + 1)); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrentIndex((i) => Math.min(observations.length - 1, i + 1));
+          }}
           disabled={currentIndex === observations.length - 1}
           className="flex-shrink-0 w-14 h-14 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors disabled:opacity-20 disabled:cursor-not-allowed z-50 backdrop-blur-md"
           title="Next observation  →"

@@ -10,7 +10,15 @@ import {
   UserSearchResult,
 } from "@/app/types/explore";
 import ObservationCard from "@/app/components/observations/ObservationCard";
-import { Search, Loader2, ChevronLeft, ChevronRight, User, X, Calendar } from "lucide-react";
+import {
+  Search,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  X,
+  Calendar,
+} from "lucide-react";
 import TaxonSearch from "@/app/components/observations/TaxonSearch";
 import { userService } from "@/app/lib/userService";
 
@@ -29,7 +37,9 @@ export default function ObservationsPage() {
   const queryDateFrom = searchParams.get("dateFrom")?.trim() || "";
   const queryDateTo = searchParams.get("dateTo")?.trim() || "";
 
-  const [observations, setObservations] = useState<ObservationDetailResponse[]>([]);
+  const [observations, setObservations] = useState<ObservationDetailResponse[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -38,7 +48,9 @@ export default function ObservationsPage() {
   const [filters, setFilters] = useState<ObservationFilterParams>({});
 
   // Pending filters (edited before apply)
-  const [pendingFilters, setPendingFilters] = useState<ObservationFilterParams>({});
+  const [pendingFilters, setPendingFilters] = useState<ObservationFilterParams>(
+    {},
+  );
 
   // User search state
   const [userQuery, setUserQuery] = useState("");
@@ -83,7 +95,7 @@ export default function ObservationsPage() {
     (partial: Partial<ObservationFilterParams>) => {
       setPendingFilters((prev) => ({ ...prev, ...partial }));
     },
-    []
+    [],
   );
 
   const handleSelectUser = useCallback(
@@ -93,7 +105,7 @@ export default function ObservationsPage() {
       setUserQuery("");
       setUserOpen(false);
     },
-    [updatePending]
+    [updatePending],
   );
 
   const removeUserFilter = useCallback(() => {
@@ -104,7 +116,8 @@ export default function ObservationsPage() {
   const loadObservations = useCallback(async () => {
     setLoading(true);
     try {
-      const data: PageResponse<ObservationDetailResponse> = await fetchAllObservations(page, filters);
+      const data: PageResponse<ObservationDetailResponse> =
+        await fetchAllObservations(page, filters);
       setObservations(data.content);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -136,7 +149,9 @@ export default function ObservationsPage() {
           const matchedUser = await userService.getByUsername(queryAuthor);
           if (!ignore) {
             initialFilters.userId = matchedUser.id;
-            setSelectedUserName(matchedUser.displayName || matchedUser.username);
+            setSelectedUserName(
+              matchedUser.displayName || matchedUser.username,
+            );
           }
         } catch (err) {
           console.error("Failed to hydrate author filter:", err);
@@ -157,7 +172,14 @@ export default function ObservationsPage() {
     return () => {
       ignore = true;
     };
-  }, [queryAuthor, queryTaxonId, querySearch, queryGrade, queryDateFrom, queryDateTo]);
+  }, [
+    queryAuthor,
+    queryTaxonId,
+    querySearch,
+    queryGrade,
+    queryDateFrom,
+    queryDateTo,
+  ]);
 
   const handleApplyFilters = useCallback(() => {
     setFilters({ ...pendingFilters });
@@ -183,8 +205,12 @@ export default function ObservationsPage() {
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-stone-900 tracking-tight">Observations</h1>
-          <p className="text-stone-500 mt-1">Explore all documented sightings across the community.</p>
+          <h1 className="text-3xl font-bold text-stone-900 tracking-tight">
+            Observations
+          </h1>
+          <p className="text-stone-500 mt-1">
+            Explore all documented sightings across the community.
+          </p>
         </div>
 
         {/* Filters */}
@@ -222,7 +248,10 @@ export default function ObservationsPage() {
                   </div>
                 ) : (
                   <div className="relative" ref={userRef}>
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={14} />
+                    <User
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                      size={14}
+                    />
                     <input
                       type="text"
                       placeholder="Search observer..."
@@ -236,7 +265,10 @@ export default function ObservationsPage() {
                     />
                     {userLoading && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 size={14} className="animate-spin text-stone-400" />
+                        <Loader2
+                          size={14}
+                          className="animate-spin text-stone-400"
+                        />
                       </div>
                     )}
                     {userOpen && userResults.length > 0 && (
@@ -248,15 +280,23 @@ export default function ObservationsPage() {
                             onClick={() => handleSelectUser(u)}
                           >
                             {u.avatarUrl ? (
-                              <img src={u.avatarUrl} alt={u.username} className="w-6 h-6 rounded-full object-cover" />
+                              <img
+                                src={u.avatarUrl}
+                                alt={u.username}
+                                className="w-6 h-6 rounded-full object-cover"
+                              />
                             ) : (
                               <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center justify-center">
                                 <User size={12} className="text-stone-400" />
                               </div>
                             )}
                             <div className="min-w-0">
-                              <div className="text-sm font-medium text-stone-800 truncate">{u.displayName || u.username}</div>
-                              <div className="text-xs text-stone-400 truncate">@{u.username}</div>
+                              <div className="text-sm font-medium text-stone-800 truncate">
+                                {u.displayName || u.username}
+                              </div>
+                              <div className="text-xs text-stone-400 truncate">
+                                @{u.username}
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -273,20 +313,52 @@ export default function ObservationsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 h-10.5">
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" size={12} />
+                    <Calendar
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                      size={12}
+                    />
                     <input
                       type="date"
-                      value={pendingFilters.dateFrom ? new Date(pendingFilters.dateFrom).toISOString().split("T")[0] : ""}
-                      onChange={(e) => updatePending({ dateFrom: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                      value={
+                        pendingFilters.dateFrom
+                          ? new Date(pendingFilters.dateFrom)
+                              .toISOString()
+                              .split("T")[0]
+                          : ""
+                      }
+                      onChange={(e) =>
+                        updatePending({
+                          dateFrom: e.target.value
+                            ? new Date(e.target.value).toISOString()
+                            : undefined,
+                        })
+                      }
                       className="w-full h-full pl-8 pr-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                     />
                   </div>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" size={12} />
+                    <Calendar
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                      size={12}
+                    />
                     <input
                       type="date"
-                      value={pendingFilters.dateTo ? new Date(pendingFilters.dateTo).toISOString().split("T")[0] : ""}
-                      onChange={(e) => updatePending({ dateTo: e.target.value ? new Date(e.target.value + "T23:59:59.999Z").toISOString() : undefined })}
+                      value={
+                        pendingFilters.dateTo
+                          ? new Date(pendingFilters.dateTo)
+                              .toISOString()
+                              .split("T")[0]
+                          : ""
+                      }
+                      onChange={(e) =>
+                        updatePending({
+                          dateTo: e.target.value
+                            ? new Date(
+                                e.target.value + "T23:59:59.999Z",
+                              ).toISOString()
+                            : undefined,
+                        })
+                      }
                       className="w-full h-full pl-8 pr-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                     />
                   </div>
@@ -302,7 +374,9 @@ export default function ObservationsPage() {
                   {GRADES.map((g) => (
                     <button
                       key={g.key}
-                      onClick={() => updatePending({ grade: g.key || undefined })}
+                      onClick={() =>
+                        updatePending({ grade: g.key || undefined })
+                      }
                       className={`text-xs font-medium px-3 h-full rounded-xl cursor-pointer transition-all duration-200 border flex-1 ${
                         (pendingFilters.grade || "") === g.key
                           ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
@@ -347,9 +421,12 @@ export default function ObservationsPage() {
             <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mb-4">
               <Search className="text-stone-400" size={24} />
             </div>
-            <h3 className="text-lg font-semibold text-stone-900 mb-1">No observations found</h3>
+            <h3 className="text-lg font-semibold text-stone-900 mb-1">
+              No observations found
+            </h3>
             <p className="text-stone-500 max-w-sm">
-              We couldn&#39;t find any observations matching your filters. Try adjusting your search criteria.
+              We couldn&#39;t find any observations matching your filters. Try
+              adjusting your search criteria.
             </p>
             {hasAnyFilter && (
               <button
@@ -383,7 +460,9 @@ export default function ObservationsPage() {
                   Page {page + 1} of {totalPages}
                 </span>
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  onClick={() =>
+                    setPage((p) => Math.min(totalPages - 1, p + 1))
+                  }
                   disabled={page === totalPages - 1 || loading}
                   className="p-2 rounded-xl border border-stone-200 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-stone-600"
                 >

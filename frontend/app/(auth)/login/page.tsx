@@ -12,7 +12,11 @@ export default function LoginPage() {
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ identifier?: string; password?: string; form?: string }>({});
+  const [errors, setErrors] = useState<{
+    identifier?: string;
+    password?: string;
+    form?: string;
+  }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ── Client-side validation ─────────────────────────────────────────────────
@@ -91,12 +95,12 @@ export default function LoginPage() {
           {isSubmitting ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
-            <>Sign in <ArrowRight size={16} /></>
+            <>
+              Sign in <ArrowRight size={16} />
+            </>
           )}
         </button>
       </form>
     </AuthCard>
   );
 }
-
-

@@ -9,7 +9,11 @@ interface DateTimePickerProps {
   maxDate?: Date;
 }
 
-export default function DateTimePicker({ value, onChange, maxDate }: DateTimePickerProps) {
+export default function DateTimePicker({
+  value,
+  onChange,
+  maxDate,
+}: DateTimePickerProps) {
   // We format the date suitable for an input type="datetime-local" e.g., 'YYYY-MM-DDThh:mm'
   const inputValue = useMemo(() => {
     if (!value) return "";
@@ -22,10 +26,10 @@ export default function DateTimePicker({ value, onChange, maxDate }: DateTimePic
     if (!e.target.value) return;
     const dateStr = e.target.value;
     const newDate = new Date(dateStr);
-    
+
     // Check against maxDate if necessary
     if (maxDate && newDate > maxDate) {
-       return;
+      return;
     }
     onChange(newDate);
   };
@@ -49,7 +53,10 @@ export default function DateTimePicker({ value, onChange, maxDate }: DateTimePic
   return (
     <div className="relative">
       <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-         <CalendarIcon size={18} className={value ? "text-emerald-600" : "text-stone-400"} />
+        <CalendarIcon
+          size={18}
+          className={value ? "text-emerald-600" : "text-stone-400"}
+        />
       </div>
       <button
         type="button"

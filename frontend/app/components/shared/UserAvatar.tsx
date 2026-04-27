@@ -23,7 +23,10 @@ const imageSizes: Record<AvatarSize, number> = {
   xl: 112,
 };
 
-function getInitials(displayName: string | undefined, username: string): string {
+function getInitials(
+  displayName: string | undefined,
+  username: string,
+): string {
   const name = displayName || username;
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) {

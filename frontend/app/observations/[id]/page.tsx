@@ -40,7 +40,12 @@ import "./observation.css";
 // Dynamic import for map (no SSR)
 const ObservationMiniMap = dynamic(
   () => import("@/app/components/observation/ObservationMiniMap"),
-  { ssr: false, loading: () => <div className="w-full h-60 bg-stone-100 rounded-2xl animate-pulse" /> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-60 bg-stone-100 rounded-2xl animate-pulse" />
+    ),
+  },
 );
 
 function formatDate(dateStr: string) {
@@ -76,8 +81,11 @@ export default function ObservationPage() {
   const id = params.id as string;
   const { user } = useAuth();
 
-  const [observation, setObservation] = useState<ObservationDetailResponse | null>(null);
-  const [identifications, setIdentifications] = useState<IdentificationResponse[]>([]);
+  const [observation, setObservation] =
+    useState<ObservationDetailResponse | null>(null);
+  const [identifications, setIdentifications] = useState<
+    IdentificationResponse[]
+  >([]);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -127,7 +135,8 @@ export default function ObservationPage() {
             Observation not found
           </h2>
           <p className="text-sm text-stone-500 mb-6">
-            {error || "The observation you're looking for doesn't exist or has been removed."}
+            {error ||
+              "The observation you're looking for doesn't exist or has been removed."}
           </p>
           <Link
             href="/observations"
@@ -145,23 +154,30 @@ export default function ObservationPage() {
   const commonName = observation.communityTaxon?.commonName;
   const scientificName = observation.communityTaxon?.scientificName;
   const taxonRank = observation.communityTaxon?.rank;
-  const rankPrefix = taxonRank && taxonRank !== "SPECIES"
-    ? taxonRank.charAt(0).toUpperCase() + taxonRank.slice(1).toLowerCase() + " "
-    : "";
+  const rankPrefix =
+    taxonRank && taxonRank !== "SPECIES"
+      ? taxonRank.charAt(0).toUpperCase() +
+        taxonRank.slice(1).toLowerCase() +
+        " "
+      : "";
 
-  const h1Title = commonName || (rankPrefix + (scientificName || "Unknown species"));
-  const subTitle = commonName ? (rankPrefix + scientificName) : null;
+  const h1Title =
+    commonName || rankPrefix + (scientificName || "Unknown species");
+  const subTitle = commonName ? rankPrefix + scientificName : null;
   const observedDate = formatDateTime(observation.observedAt);
   const submittedDate = formatDate(observation.createdAt);
 
   const handleCommentAdded = (newComment: CommentResponse) => {
     setComments((prev) => [...prev, newComment]);
-    setObservation((prev) => prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev);
+    setObservation((prev) =>
+      prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev,
+    );
   };
 
   const handleIdentificationAdded = async () => {
     if (!observation) return;
-    const { updatedObservation, updatedIdentifications } = await refreshObservationActivity(observation.id);
+    const { updatedObservation, updatedIdentifications } =
+      await refreshObservationActivity(observation.id);
     setObservation(updatedObservation);
     setIdentifications(updatedIdentifications);
   };
@@ -170,7 +186,8 @@ export default function ObservationPage() {
     if (!observation) return;
     try {
       await withdrawIdentification(observation.id, identificationId);
-      const { updatedObservation, updatedIdentifications } = await refreshObservationActivity(observation.id);
+      const { updatedObservation, updatedIdentifications } =
+        await refreshObservationActivity(observation.id);
       setObservation(updatedObservation);
       setIdentifications(updatedIdentifications);
     } catch (err: any) {
@@ -183,7 +200,6 @@ export default function ObservationPage() {
       {/* Main content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-
           {/* ── Left column — Photos + Activity ── */}
           <div className="lg:col-span-3 space-y-6 animate-fade-in-up">
             {/* Photo gallery */}
@@ -192,7 +208,9 @@ export default function ObservationPage() {
             {/* Activity feed */}
             <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden flex flex-col animate-fade-in-up-delay-3">
               <div className="px-5 py-4 border-b border-stone-100 flex-none">
-                <h2 className="text-sm font-semibold text-stone-800">Activity</h2>
+                <h2 className="text-sm font-semibold text-stone-800">
+                  Activity
+                </h2>
               </div>
               <div className="flex-1">
                 <ActivityFeed
@@ -244,7 +262,10 @@ export default function ObservationPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3 flex-wrap">
                       {observation.communityTaxon ? (
-                        <Link href={`/taxonomy/${observation.communityTaxon.id}`} className="hover:underline decoration-emerald-500/30">
+                        <Link
+                          href={`/taxonomy/${observation.communityTaxon.id}`}
+                          className="hover:underline decoration-emerald-500/30"
+                        >
                           <h1 className="text-xl font-bold text-stone-900 leading-tight">
                             {h1Title}
                           </h1>
@@ -258,9 +279,10 @@ export default function ObservationPage() {
                       <span
                         className={`
                           inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full
-                          ${isResearchGrade
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
+                          ${
+                            isResearchGrade
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-amber-100 text-amber-700"
                           }
                         `}
                       >
@@ -303,7 +325,10 @@ export default function ObservationPage() {
             <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-5 animate-fade-in-up-delay-2">
               <div className="flex items-center gap-3">
                 {/* User avatar */}
-                <Link href={`/profile/${observation.username}`} className="shrink-0 hover:opacity-80 transition-opacity">
+                <Link
+                  href={`/profile/${observation.username}`}
+                  className="shrink-0 hover:opacity-80 transition-opacity"
+                >
                   {observation.userAvatarUrl ? (
                     <img
                       src={observation.userAvatarUrl}
@@ -318,7 +343,10 @@ export default function ObservationPage() {
                 </Link>
 
                 <div className="min-w-0 flex-1">
-                  <Link href={`/profile/${observation.username}`} className="hover:underline">
+                  <Link
+                    href={`/profile/${observation.username}`}
+                    className="hover:underline"
+                  >
                     <p className="text-sm font-semibold text-stone-800 truncate">
                       {observation.username}
                     </p>
@@ -329,14 +357,18 @@ export default function ObservationPage() {
                     <span className="flex items-center gap-1 text-xs text-stone-400">
                       <Calendar size={11} className="shrink-0" />
                       <span>
-                        <span className="text-stone-500 font-medium">Observed</span>{" "}
+                        <span className="text-stone-500 font-medium">
+                          Observed
+                        </span>{" "}
                         {observedDate}
                       </span>
                     </span>
                     <span className="flex items-center gap-1 text-xs text-stone-400">
                       <Upload size={11} className="shrink-0" />
                       <span>
-                        <span className="text-stone-500 font-medium">Submitted</span>{" "}
+                        <span className="text-stone-500 font-medium">
+                          Submitted
+                        </span>{" "}
                         {submittedDate}
                       </span>
                     </span>
@@ -392,12 +424,17 @@ export default function ObservationPage() {
             </div>
 
             {/* Community Consensus */}
-            <CommunityConsensus observation={observation} identifications={identifications} />
+            <CommunityConsensus
+              observation={observation}
+              identifications={identifications}
+            />
 
             {/* Data Quality */}
-            <DataQualityAssessment observation={observation} identifications={identifications} />
+            <DataQualityAssessment
+              observation={observation}
+              identifications={identifications}
+            />
           </div>
-
         </div>
       </div>
 
