@@ -1,5 +1,47 @@
 \section{Conclusions}
 
-\textit{Summarize the project's findings and contributions. Answer your research questions.}
+Two related issues in biodiversity monitoring were the focus of this project:
+the challenge of gathering extensive bird observation data using conventional techniques,
+Given the absence of readily available resources that enable non-expert volunteers to 
+provide trustworthyrecords of species. In answer to these two issues, BirdSight was created.
+integrating a fully functional species recognition model with a deep learning-based
+website for citizen science.
 
-\textit{Make sure that the end of this section no less than page 20 AND no more than page 50.}
+The project's machine learning component used a dataset of 150,000 bird photos from 30 species
+that are often seen in Türkiye to train and compare five CNN architectures. To guarantee a fair 
+comparison, all models were trained under the same circumstances. The outcomes demonstrated a 
+distinct performance difference across the architectures. Given its comparatively high parameter 
+count and absence of residual or dense connections, VGG16 yielded the worst results. Considering 
+its lightweight nature, MobileNetV2 did rather well, but its classification accuracy was not as 
+good as that of the deeper models. Both ResNet50 and DenseNet121 produced results that were 
+competitive, with accuracy scores of 88\%. InceptionV3 achieved 89.1\% accuracy on the original 
+23-class dataset, outperforming all other architectures in every assessed metric.
+
+After the first comparison, a number of focused experiments were conducted in an effort to enhance 
+the InceptionV3 model. To improve generalisation and lessen overconfident predictions, label 
+smoothing was used. To make the model more resilient to the inherent diversity found in field photos
+taken by amateur birdwatchers, improved data augmentation techniques were used, such as vertical 
+flipping, random erasing, and broader colour jitter ranges. An ideal value of 11 epochs was found 
+after freeze epoch tuning was investigated. When all three changes were combined, the accuracy on 
+the 23-class dataset was 89.5\%. The final model maintained a consistent accuracy of 89.3\% with a 
+Top-3 accuracy of 95.9\% and a Top-5 accuracy of 97.8\% when the dataset was increased to 30 species 
+and 150,000 photos. These results confirm that the model can reliably identify bird species from 
+amateur photographs, which is the primary requirement for integration into a citizen science platform.
+
+Concurrent with the machine learning work was the development of the BirdSight web platform.
+Spring Boot is employed in the back-end of the platform’s three-layer architecture to handle
+PostgreSQL is employed as the database, with the PostGIS extension handling geospatial observation data. The front-end, which provides the user interface, comprises Next.js with the business logic and API requests. MinIO is the object storage solution, and the InceptionV3 model is implemented as a REST microservice in the backend. It was developed separately from the application codebase, making it easy to upgrade and maintain. This separation of duties made it easier to update and maintain the system since it separated the model service from the application logic. 
+The core functionalities of the platform --- submitting observations, receiving species
+predictions, browsing the observation feed, and exploring sightings on an interactive
+map --- were all successfully implemented.
+
+Overall, BirdSight demonstrates that combining transfer learning with a well-designed
+citizen science platform is a practical and effective approach to supporting large-scale
+bird population monitoring. The system lowers the barrier for public participation
+by automating the species identification step, which is typically the main obstacle
+for non-expert volunteers. At the same time, the geospatial data collected through
+the platform has the potential to support ecological research by providing structured,
+location-tagged observation records at a scale that traditional fieldwork methods
+cannot match.
+
+\clearpage
