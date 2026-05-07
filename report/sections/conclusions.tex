@@ -3,7 +3,7 @@
 Two related issues in biodiversity monitoring were the focus of this project:
 the challenge of gathering extensive bird observation data using conventional techniques,
 Given the absence of readily available resources that enable non-expert volunteers to 
-provide trustworthyrecords of species. In answer to these two issues, BirdSight was created.
+provide trustworthyrecords of species \cite{fraisl2022citizen,johnston2022outstanding}. In answer to these two issues, BirdSight was created.
 integrating a fully functional species recognition model with a deep learning-based
 website for citizen science.
 
@@ -15,13 +15,13 @@ count and absence of residual or dense connections, VGG16 yielded the worst resu
 its lightweight nature, MobileNetV2 did rather well, but its classification accuracy was not as 
 good as that of the deeper models. Both ResNet50 and DenseNet121 produced results that were 
 competitive, with accuracy scores of 88\%. InceptionV3 achieved 89.1\% accuracy on the original 
-23-class dataset, outperforming all other architectures in every assessed metric.
+23-class dataset, outperforming all other architectures in every assessed metric \cite{tang2025comparative,bilgin2022bird}.
 
 After the first comparison, a number of focused experiments were conducted in an effort to enhance 
 the InceptionV3 model. To improve generalisation and lessen overconfident predictions, label 
 smoothing was used. To make the model more resilient to the inherent diversity found in field photos
 taken by amateur birdwatchers, improved data augmentation techniques were used, such as vertical 
-flipping, random erasing, and broader colour jitter ranges. An ideal value of 11 epochs was found 
+flipping, random erasing, and broader colour jitter ranges \cite{johnston2022outstanding}. An ideal value of 11 epochs was found 
 after freeze epoch tuning was investigated. When all three changes were combined, the accuracy on 
 the 23-class dataset was 89.5\%. The final model maintained a consistent accuracy of 89.3\% with a 
 Top-3 accuracy of 95.9\% and a Top-5 accuracy of 97.8\% when the dataset was increased to 30 species 
@@ -37,7 +37,7 @@ map --- were all successfully implemented.
 
 Overall, BirdSight demonstrates that combining transfer learning with a well-designed
 citizen science platform is a practical and effective approach to supporting large-scale
-bird population monitoring. The system lowers the barrier for public participation
+bird population monitoring \cite{lolge2025evolution}. The system lowers the barrier for public participation
 by automating the species identification step, which is typically the main obstacle
 for non-expert volunteers. At the same time, the geospatial data collected through
 the platform has the potential to support ecological research by providing structured,
