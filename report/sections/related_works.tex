@@ -1,0 +1,82 @@
+\section{Literature Review}
+
+An extensive literature review was conducted to examine existing research related to bird
+species classification, fine-grained visual recognition, and citizen science systems.
+Previous studies on bird species identification from images were analyzed in terms of
+their machine learning architectures, dataset preparation strategies, evaluation metrics,
+and overall model performance. Particular attention was given to recent studies that
+clearly explain their model selection process, data acquisition methods, and experimental
+results.
+
+Early bird species recognition systems commonly relied on traditional machine learning
+algorithms such as Support Vector Machines (SVM) and Random Forest classifiers.
+These approaches generally used handcrafted features including color histograms,
+shape descriptors, and texture patterns. However, such methods often struggle when
+applied to real-world image datasets that contain variations in lighting conditions,
+background complexity, image quality, and bird pose \cite{kambali2024automated,
+lolge2025evolution}. Recent studies show that Convolutional Neural Networks (CNNs)
+significantly outperform traditional machine learning approaches because they can
+automatically learn hierarchical visual features directly from images
+\cite{kambali2024automated}.
+
+Bird species classification is commonly considered a Fine-Grained Visual Classification
+(FGVC) problem because different bird species may share highly similar visual
+characteristics. In FGVC tasks, models must distinguish subtle local differences such as
+feather patterns, beak structure, wing shape, and color variations. Chen et al. emphasize
+that successful FGVC systems require models capable of learning discriminative local
+features and fine visual details \cite{chen2024fetfgvc}. Modern deep learning architectures,
+particularly CNN- and Transformer-based models, provide the performance necessary for
+handling these complex classification tasks.
+
+Several studies compare the effectiveness of different CNN architectures for bird species
+classification. Bilgin et al. evaluated architectures including VGG16, ResNet50, and
+DenseNet and reported that DenseNet and ResNet achieved better classification
+performance than VGG16 due to improved feature propagation and gradient flow
+\cite{bilgin2022bird}. Similarly, Tang compared VGG, ResNet, InceptionV3, and
+MobileNet architectures and found that ResNet and Inception-based models achieved
+higher F1-scores, while MobileNet provided better computational efficiency
+\cite{tang2025comparative}. These studies indicate that deeper architectures generally
+achieve higher accuracy, whereas lightweight architectures may be more suitable for
+deployment in real-world applications with limited computational resources.
+
+Recent research increasingly emphasizes not only classification accuracy but also
+inference speed, computational cost, and deployability
+\cite{lolge2025evolution,tang2025comparative}. Lightweight architectures such as
+MobileNet are considered advantageous for mobile and web-based applications due to
+their lower hardware requirements and faster inference times. On the other hand,
+architectures such as DenseNet and ResNet often achieve superior classification
+performance at the expense of increased computational complexity
+\cite{bilgin2022bird}. These findings are particularly important for this project because
+the developed system aims to integrate machine learning inference into a practical citizen
+science platform.
+
+In addition to classification models, studies related to bird image datasets and citizen
+science systems were also examined. Public biodiversity databases and citizen science
+platforms provide large amounts of bird observation data that are valuable for training
+machine learning models. One important example is the Global Biodiversity Information
+Facility (GBIF), which offers openly accessible biodiversity records collected from
+multiple sources worldwide \cite{gbif2025}. Such platforms contribute significantly to
+large-scale ecological monitoring and dataset generation.
+
+Citizen science has transformed biodiversity monitoring by enabling decentralized data
+collection from large communities of volunteers. Fraisl et al. discuss how citizen science
+has become an important component of environmental and ecological research due to its
+ability to collect large-scale observational data \cite{fraisl2022citizen}. Similarly,
+Bonney et al. explain that citizen science projects can improve public engagement and
+scientific awareness while contributing valuable environmental data
+\cite{bonney2015citizen}. However, citizen science data may also introduce challenges
+including observer bias, class imbalance, inconsistent image quality, and incorrect
+species labels \cite{johnston2022outstanding}. Baker et al. mention that automated
+verification and validation techniques are increasingly being used to improve the quality
+and reliability of citizen science datasets \cite{baker2021verification}.
+
+The findings obtained from the literature review played an important role in guiding the
+design and implementation decisions of this project. Existing studies helped identify
+suitable deep learning architectures, appropriate evaluation metrics, and effective data
+processing strategies. Furthermore, the literature review highlighted several common
+challenges in bird species classification systems, including class imbalance, fine-grained
+species similarity, background noise, and variation in image quality. Understanding these
+challenges was important for designing a robust bird classification and citizen science
+platform.
+
+\clearpage
