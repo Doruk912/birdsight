@@ -125,7 +125,78 @@ The bird species included in the final dataset are listed in Table
 
 \subsubsection{Data Preprocessing}
 
+The collected image dataset was preprocessed to ensure that it was suitable for
+training the machine learning models. Initially, low-quality and corrupted images
+were removed from the dataset and replaced to keep class balance. The images were 
+then resized to a consistent size to match the input dimensions required by the 
+selected deep learning architectures.
+
+To increase dataset variability and improve model generalization, several data
+augmentation techniques were applied. These augmentations included random
+rotations, horizontal flipping, brightness adjustments, and other minor
+transformations. The purpose of these augmentations was to improve the robustness
+of the models against variations commonly found in real-world bird photographs,
+such as changes in lighting conditions, viewing angles, and image composition.
+
+After preprocessing was completed, the dataset was divided into training,
+validation, and testing subsets using a fixed splitting strategy. A total of
+80\% of the dataset was reserved for training, while the remaining 20\% was
+equally divided between validation and testing subsets.
+
 \subsubsection{Model Selection}
+
+During the literature review, studies related to bird species identification were
+analyzed. In accordance with the findings obtained from the literature, model
+selection in this project focused on deep learning architectures. Traditional
+machine learning algorithms such as Support Vector Machines (SVMs) and Random
+Forests generally underperform compared to deep learning models and are unable to
+achieve the desired accuracy levels for fine-grained image classification tasks
+\cite{lolge2025evolution}. Since this project focused on image-based bird species
+classification, models that perform effectively on visual data were required.
+
+This project focused on deep learning-based Convolutional Neural Network (CNN)
+architectures that are widely used for image classification tasks. CNN-based
+models are more suitable for identifying species from images because they are
+capable of extracting complex hierarchical visual features such as texture,
+shape, colour, and local patterns \cite{chen2024fetfgvc}. The following architectures
+were selected because they frequently appear in the literature and have
+demonstrated strong performance in image classification tasks.
+
+\begin{itemize}[itemsep=\baselineskip]
+\item \textbf{VGG16:} VGG16 is a deep convolutional neural network with a relatively
+simple and uniform architecture composed of stacked convolutional layers followed
+by fully connected layers. Although it contains a large number of parameters, it
+has been widely used in image classification tasks due to its strong feature
+extraction capability \cite{bilgin2022bird,tang2025comparative}.
+
+\item \textbf{ResNet:} Residual Networks (ResNet) utilize residual connections that
+allow deeper neural networks to be trained with improved gradient flow. Variants
+such as ResNet50 and ResNet152V2 have demonstrated high accuracy in bird species
+classification tasks \cite{bilgin2022bird,tang2025comparative}.
+
+\item \textbf{InceptionV3:} This architecture utilizes parallel convolutional
+filters of different sizes within the same layer, allowing it to capture
+multi-scale visual features. This design is effective for bird species
+classification because both overall shape and fine local patterns are important
+for distinguishing visually similar species \cite{tang2025comparative}.
+
+\item \textbf{MobileNetV2:} MobileNetV2 was designed for computational efficiency
+through the use of depthwise separable convolutions. Although lightweight, it
+has demonstrated competitive performance in similar image classification tasks
+\cite{lolge2025evolution,tang2025comparative}.
+
+\item \textbf{DenseNet121:} DenseNet121 connects each layer to every other layer in
+a feed-forward manner. This structure promotes feature reuse and improves
+gradient flow throughout the network. Comparative studies have shown that
+DenseNet architectures often outperform traditional CNN models
+\cite{bilgin2022bird}.
+
+\end{itemize}
+
+Each selected model was trained and evaluated using the same dataset and
+experimental conditions to ensure a fair comparison between architectures. The
+performance of each model was evaluated using multiple metrics, including
+accuracy, precision, recall, F1-score, and inference speed.
 
 \subsubsection{Model Training}
 
