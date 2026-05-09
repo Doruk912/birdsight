@@ -5,24 +5,70 @@ stages of development from start to finish will be explained including strategie
 choices, development lifecycles, and technological specifics.
 
 The main goal of this project is to promote citizen science by building a platform
-with an integrated machine learning model for birdwatchers and enthusiasts. The project
+with an integrated machine learning model for birdwatchers and enthusiasts. The project 
+is divided into two separate phases. The two phases are machine learning
+phase of the project and web platform development part. The project
 will follow a structured methodology that combines a comparative analysis of different
 machine learning models and applied software development.
-
-This section describes the methodology that was followed when developing the project. 
-The project is divided into two seperate phases. The two phases are machine learning
-phase of the project and web platform development part.
 
 Machine learning phase includes algorithm selection, data collection, model development, and evaluation.
 On the other hand, web platform development phase includes design and development of the website, integration of the machine learning model, and testing.
 
-\subsection{Machine Learning Model Comparative Analysis}
+\subsection{Machine Learning Model Development and Comparative Analysis}
 
-lorem ipsum
+The first main phase of the project is development of the machine learning models for bird species identification. This phase includes data acquisition, preprocessing, model selection, training, and evaluation.
+The details of each step are explained in the following subsections.
 
 \subsubsection{Data Acquisition}
 
-dolor sit amet
+When developing a machine learning model one of the most important requirements is
+that there needs to be a large high-quality dataset to train the models properly. In this
+project there will be multiple models, and we are expecting high performance from them.
+To get results as good as possible, large numbers of bird images taken from different angles
+are needed. Furthermore, the data must be labeled with the correct bird speciesfor us to be
+able to train a model.
+
+Because tens of thousands of bird images are needed it is not possible to create this
+data. Instead, existing data will be gathered. GBIF, which stands for Global Biodiversity
+Information Facility, will be used to construct a dataset. It is an open-access biodiversity
+platform that collects specie observation records from various sources \cite{gbif2025}. These sources
+are mostly from citizen science platforms such as INaturalist \cite{inaturalist2025} and Observation.org
+\cite{observation2025}. This once again shows the importance of citizen science. A single organization
+wouldn’t be able to keep a record of increasing number of species from every part of the
+world. Alternatively, citizens from around the world keep records of species around them
+by uploading observations. A massive dataset appears as people use these platforms, a
+dataset that is almost impossible to construct by a single organization.
+
+In this project we will be using GBIF to construct a dataset of bird images. In order to
+limit the scope of this project bird species that are most commonly observed in Turkey will
+be selected. The species are selected with reference to observation counts of species in
+Turkey \cite{ebird2025}. Initially the constructed dataset included 23 bird species commonly observed
+in Turkey. The dataset consisted of 5000 images for each species and a total of 115000 images.
+
+The metadata for the selected species will be downloaded from GBIF. Only records
+that include an image and reliable species labels will be used. The data downloaded from
+GBIF is compiled from many different sources and includes metadata such as species name,
+location of observation, datetime of observation, observer information, observation license,
+life stage of organism, and most importantly multimedia related to observation.
+
+For each selected species of bird last ten thousand observations were downloaded from
+GBIF. Then using a Python script \cite{python2025}, the images were downloaded into their respective
+folders in Google Drive \cite{googledrive2025}. A dataset containing images or birds labeled under their
+folder was constructed. Some of the species included in the dataset can be seen in Figure 1
+below.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/bird_dataset_sample.png}
+    \caption{Sample images from the bird dataset with species labels}
+    \label{fig:bird_dataset_sample}
+\end{figure}
+
+After completing the comparative analysis of different machine learning models using the constructed dataset, 
+we wanted to experiment with the best performing model. We believed that the best performing model would be able to provide even better results when trained on a larger dataset.
+Therefore, the dataset was later expanded to include a total of 30 bird species. The final dataset included 150000 images with 5000 images for each species.
+
+The following 
 
 \subsubsection{Data Preprocessing}
 
