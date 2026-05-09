@@ -1,61 +1,70 @@
 \section{Methodology}
 
-Under this section the methodology of the project will be described in detail. The
-stages of development from start to finish will be explained including strategies, design
+This section describes the methodology of the project in detail. The stages of
+development from start to finish are explained, including strategies, design
 choices, development lifecycles, and technological specifics.
 
-The main goal of this project is to promote citizen science by building a platform
-with an integrated machine learning model for birdwatchers and enthusiasts. The project 
-is divided into two separate phases. The two phases are machine learning
-phase of the project and web platform development part. The project
-will follow a structured methodology that combines a comparative analysis of different
+The main goal of this project was to promote citizen science by building a platform
+with an integrated machine learning model for birdwatchers and enthusiasts. The
+project was divided into two separate phases. These phases consisted of the machine
+learning phase of the project and the web platform development phase. The project
+followed a structured methodology that combined a comparative analysis of different
 machine learning models and applied software development.
 
-Machine learning phase includes algorithm selection, data collection, model development, and evaluation.
-On the other hand, web platform development phase includes design and development of the website, integration of the machine learning model, and testing.
+The machine learning phase included algorithm selection, data collection, model
+development, and evaluation. On the other hand, the web platform development phase
+included the design and development of the website, integration of the machine
+learning model, and testing.
 
 \subsection{Machine Learning Model Development and Comparative Analysis}
 
-The first main phase of the project is development of the machine learning models for bird species identification. This phase includes data acquisition, preprocessing, model selection, training, and evaluation.
-The details of each step are explained in the following subsections.
+The first main phase of the project was the development of machine learning models
+for bird species identification. This phase included data acquisition,
+preprocessing, model selection, training, and evaluation. The details of each step
+are explained in the following subsections.
 
 \subsubsection{Data Acquisition}
 
-When developing a machine learning model one of the most important requirements is
-that there needs to be a large high-quality dataset to train the models properly. In this
-project there will be multiple models, and we are expecting high performance from them.
-To get results as good as possible, large numbers of bird images taken from different angles
-are needed. Furthermore, the data must be labeled with the correct bird speciesfor us to be
-able to train a model.
+When developing a machine learning model, one of the most important requirements is
+the availability of a large, high-quality dataset to train the models properly. In
+this project, multiple models were evaluated, and high performance was expected from
+them. To achieve accurate results, large numbers of bird images taken from different
+angles were required. Furthermore, the data had to be labeled with the correct bird
+species for the models to be trained effectively.
 
-Because tens of thousands of bird images are needed it is not possible to create this
-data. Instead, existing data will be gathered. GBIF, which stands for Global Biodiversity
-Information Facility, will be used to construct a dataset. It is an open-access biodiversity
-platform that collects specie observation records from various sources \cite{gbif2025}. These sources
-are mostly from citizen science platforms such as INaturalist \cite{inaturalist2025} and Observation.org
-\cite{observation2025}. This once again shows the importance of citizen science. A single organization
-wouldn’t be able to keep a record of increasing number of species from every part of the
-world. Alternatively, citizens from around the world keep records of species around them
-by uploading observations. A massive dataset appears as people use these platforms, a
-dataset that is almost impossible to construct by a single organization.
+Because tens of thousands of bird images were required, it was not feasible to
+create such a dataset manually. Instead, existing data was gathered. GBIF, which
+stands for Global Biodiversity Information Facility, was used to construct the
+dataset. It is an open-access biodiversity platform that collects species
+observation records from various sources \cite{gbif2025}. These sources are mostly
+citizen science platforms such as iNaturalist \cite{inaturalist2025} and
+Observation.org \cite{observation2025}. This once again demonstrates the importance
+of citizen science. A single organization would not be able to maintain records of
+the increasing number of species from every part of the world. Alternatively,
+citizens from around the world keep records of species around them by uploading
+observations. As people use these platforms, massive datasets are created that would
+be almost impossible for a single organization to construct independently.
 
-In this project we will be using GBIF to construct a dataset of bird images. In order to
-limit the scope of this project bird species that are most commonly observed in Turkey will
-be selected. The species are selected with reference to observation counts of species in
-Turkey \cite{ebird2025}. Initially the constructed dataset included 23 bird species commonly observed
-in Turkey. The dataset consisted of 5000 images for each species and a total of 115000 images.
+In this project, GBIF was used to construct a dataset of bird images. In order to
+limit the scope of the project, bird species that are commonly observed in Turkey
+were selected. The species were selected with reference to observation counts in
+Turkey \cite{ebird2025}. Initially, the constructed dataset included 23 bird
+species commonly observed in Turkey. The dataset consisted of 5000 images for each
+species and a total of 115000 images.
 
-The metadata for the selected species will be downloaded from GBIF. Only records
-that include an image and reliable species labels will be used. The data downloaded from
-GBIF is compiled from many different sources and includes metadata such as species name,
-location of observation, datetime of observation, observer information, observation license,
-life stage of organism, and most importantly multimedia related to observation.
+The metadata for the selected species was downloaded from GBIF. Only records that
+included an image and reliable species labels were used. The data downloaded from
+GBIF was compiled from many different sources and included metadata such as species
+name, location of observation, datetime of observation, observer information,
+observation license, life stage of the organism, and most importantly, multimedia
+related to the observation.
 
-For each selected species of bird last ten thousand observations were downloaded from
-GBIF. Then using a Python script \cite{python2025}, the images were downloaded into their respective
-folders in Google Drive \cite{googledrive2025}. A dataset containing images or birds labeled under their
-folder was constructed. Some of the species included in the dataset can be seen in Figure 1
-below.
+For each selected bird species, the last ten thousand observations were downloaded
+from GBIF. Then, using a Python script \cite{python2025}, the images were downloaded
+into their respective folders in Google Drive \cite{googledrive2025}. A dataset
+containing bird images labeled according to their species folders was constructed.
+Sample images from the constructed dataset are shown in Figure
+\ref{fig:bird_dataset_sample}.
 
 \begin{figure}[H]
     \centering
@@ -64,11 +73,55 @@ below.
     \label{fig:bird_dataset_sample}
 \end{figure}
 
-After completing the comparative analysis of different machine learning models using the constructed dataset, 
-we wanted to experiment with the best performing model. We believed that the best performing model would be able to provide even better results when trained on a larger dataset.
-Therefore, the dataset was later expanded to include a total of 30 bird species. The final dataset included 150000 images with 5000 images for each species.
+After completing the comparative analysis of different machine learning models using
+the constructed dataset, further experiments were conducted using the best-performing
+model. It was believed that the best-performing model would provide even better
+results when trained on a larger dataset. Therefore, the dataset was later expanded
+to include a total of 30 bird species. The final dataset included 150000 images,
+with 5000 images for each species.
 
-The following 
+The bird species included in the final dataset are listed in Table
+\ref{tab:bird_species_list}.
+
+\begin{table}[H]
+\centering
+\caption{Bird species included in the final dataset}
+\label{tab:bird_species_list}
+\begin{tabular}{|c|l|l|}
+\hline
+\textbf{No} & \textbf{Common Name} & \textbf{Scientific Name} \\ \hline
+1  & Yellow-legged Gull & \textit{Larus michahellis} \\ \hline
+2  & Hooded Crow & \textit{Corvus cornix} \\ \hline
+3  & Laughing Dove & \textit{Spilopelia senegalensis} \\ \hline
+4  & Grey Heron & \textit{Ardea cinerea} \\ \hline
+5  & Great Cormorant & \textit{Phalacrocorax carbo} \\ \hline
+6  & Black-headed Gull & \textit{Chroicocephalus ridibundus} \\ \hline
+7  & House Sparrow & \textit{Passer domesticus} \\ \hline
+8  & Rose-ringed Parakeet & \textit{Psittacula krameri} \\ \hline
+9  & European Shag & \textit{Gulosus aristotelis} \\ \hline
+10 & Rock Pigeon & \textit{Columba livia} \\ \hline
+11 & Common Myna & \textit{Acridotheres tristis} \\ \hline
+12 & Common Starling & \textit{Sturnus vulgaris} \\ \hline
+13 & Mallard & \textit{Anas platyrhynchos} \\ \hline
+14 & Alexandrine Parakeet & \textit{Psittacula eupatria} \\ \hline
+15 & Eurasian Jackdaw & \textit{Coloeus monedula} \\ \hline
+16 & Great Tit & \textit{Parus major} \\ \hline
+17 & Common Chaffinch & \textit{Fringilla coelebs} \\ \hline
+18 & Pygmy Cormorant & \textit{Microcarbo pygmaeus} \\ \hline
+19 & Eurasian Magpie & \textit{Pica pica} \\ \hline
+20 & European Robin & \textit{Erithacus rubecula} \\ \hline
+21 & Common Buzzard & \textit{Buteo buteo} \\ \hline
+22 & Yelkouan Shearwater & \textit{Puffinus yelkouan} \\ \hline
+23 & Alpine Swift & \textit{Tachymarptis melba} \\ \hline
+24 & Eurasian Coot & \textit{Fulica atra} \\ \hline
+25 & White Stork & \textit{Ciconia ciconia} \\ \hline
+26 & White Wagtail & \textit{Motacilla alba} \\ \hline
+27 & Eurasian Sparrowhawk & \textit{Accipiter nisus} \\ \hline
+28 & Eurasian Blackbird & \textit{Turdus merula} \\ \hline
+29 & Eurasian Jay & \textit{Garrulus glandarius} \\ \hline
+30 & Eurasian Blue Tit & \textit{Cyanistes caeruleus} \\ \hline
+\end{tabular}
+\end{table}
 
 \subsubsection{Data Preprocessing}
 
