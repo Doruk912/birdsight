@@ -162,7 +162,8 @@ shape, colour, and local patterns \cite{chen2024fetfgvc}. The following architec
 were selected because they frequently appear in the literature and have
 demonstrated strong performance in image classification tasks.
 
-\begin{itemize}[itemsep=\baselineskip]
+\begin{itemize}
+
 \item \textbf{VGG16:} VGG16 is a deep convolutional neural network with a relatively
 simple and uniform architecture composed of stacked convolutional layers followed
 by fully connected layers. Although it contains a large number of parameters, it
@@ -200,11 +201,92 @@ accuracy, precision, recall, F1-score, and inference speed.
 
 \subsubsection{Model Training}
 
+All models were trained using the Python programming language
+\cite{python2025}. Python was selected because of its large ecosystem and
+extensive support for machine learning and deep learning applications.
+Specifically, the PyTorch deep learning framework was used
+for model development and training \cite{paszke2019pytorch}.
+PyTorch was selected because it provides built-in support for
+transfer learning and implementations of widely used convolutional neural
+network architectures. The implementations of VGG16, ResNet50, InceptionV3,
+MobileNetV2, and DenseNet121 provided by Torchvision were used to ensure
+consistency between experiments. The overall workflow used during model training and evaluation is illustrated in
+Figure~\ref{fig:training_pipeline}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/training_pipeline.png}
+    \caption{Overview of the model training and evaluation pipeline}
+    \label{fig:training_pipeline}
+\end{figure}
+
+Each selected architecture was initialized with pretrained ImageNet weights.
+This is a common practice in similar bird species classification studies
+\cite{bilgin2022bird,tang2025comparative,lolge2025evolution}. Transfer
+learning significantly reduces training time and improves model convergence,
+especially when working with limited computational resources. The original
+classification layers of each model were replaced with new fully connected
+layers corresponding to the number of bird species included in the dataset.
+
+Training was performed in two phases. In the first phase, the pretrained backbone layers were
+frozen and only the newly added classification layers were trained. In the second phase, all
+layers were unfrozen and the entire network was fine-tuned using differential learning rates.
+A smaller learning rate was applied to the pretrained backbone layers, while a higher learning
+rate was used for the classifier layers.
+
+Images were preprocessed using resizing and normalization techniques. 
+Random resized cropping, horizontal flipping, and color jittering were also applied to
+the training images in order to improve generalization performance of models and reduce overfitting.
+
+Supervised learning was used during model training. Input images and their
+corresponding species labels were provided to the models in batches. During
+forward propagation, the models generated predicted class probabilities for
+each input image. The cross-entropy loss function was used because the task 
+involved multi-class image classification. Model parameters were updated using 
+the backpropagation algorithm together with the Adam optimization algorithm.
+
+Training was performed for a predefined maximum number of epochs. A cosine annealing
+learning rate scheduler was used to gradually reduce the learning rate during training.
+Additionally, gradient clipping was applied to improve training stability. Validation loss and
+accuracy values were recorded after each epoch, and validation performance was continuously
+monitored to detect potential overfitting. Early stopping was employed during the fine-tuning
+phase to terminate training when validation loss stopped improving for a predefined number
+of epochs.
+
+Model checkpoints were automatically saved whenever validation accuracy improved. This
+ensured that the best-performing versions of the models were preserved for evaluation.
+
+To ensure a fair comparison between architectures, the same dataset splits
+were used for all experiments. Batch sizes were selected according to the memory requirements of each architecture.
+The models were then evaluated using consistent evaluation metrics, and all
+experimental settings and configurations were documented to ensure reproducibility.
+The main training hyperparameters used for each model are summarized in
+Table~\ref{tab:training_hyperparameters}.
+
+\begin{table}[H]
+\centering
+\caption{Training Hyperparameters Used for Each Model}
+\label{tab:training_hyperparameters}
+\begin{tabular}{lccccc}
+\hline
+Model & Batch Size & Freeze Epochs & Fine-tune Epochs & Head LR & Backbone LR \\
+\hline
+MobileNetV2 & 32 & 5 & 20 & $10^{-3}$ & $10^{-5}$ \\
+ResNet50 & 16 & 5 & 20 & $10^{-3}$ & $10^{-5}$ \\
+DenseNet121 & 16 & 5 & 20 & $10^{-3}$ & $10^{-5}$ \\
+InceptionV3 & 16 & 5 & 20 & $10^{-3}$ & $10^{-5}$ \\
+VGG16 & 8 & 10 & 20 & $10^{-3}$ & $10^{-5}$ \\
+\hline
+\end{tabular}
+\end{table}
+
 \subsubsection{Model Evaluation}
 
 \paragraph{Evaluation Metrics:}
 
 \paragraph{Evaluation Process:}
+
+\subsubsection{=== TODO fine tuning}
 
 \subsection{Web Platform Development}
 
