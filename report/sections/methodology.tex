@@ -652,7 +652,78 @@ mAP & 0.952 \\ \hline
 
 \subsection{Web Platform Development}
 
+In this section the details of the development phase for the web platform will be
+explained. The user workflow diagram in Figure~\ref{fig:user_workflow} shows how a user can 
+interact with the platform. Users will be able to upload their bird sightings to the platform 
+once they log in. The model displays its predictions of the bird in image. User chooses the 
+bird that they have observed and uploads the observation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/user_workflow.png}
+    \caption{User interaction and observation submission workflow in BirdSight}
+    \label{fig:user_workflow}
+\end{figure}
+
+The web platform was developed following a three-tier architecture, 
+consisting of a presentation layer, an application layer, and a data layer. 
+This separation improves the maintainability of the project. It also aligns 
+with best practices in modern web development \cite{cervantes2024software}. 
+
+The platform consists of three independently deployable services: a Spring Boot backend, 
+a Next.js frontend, and a FastAPI machine learning service. Helper services such as  
+the database and object storage were containerized using Docker.
+
 \subsubsection{Backend Development}
+
+The backend was developed using Java 21 with the Spring Boot 4 framework. Spring Boot 
+was selected for its widespread usage in the industry and its convention-over-configuration
+approach. Using Spring Boot simplified dependency management, service configuration, and 
+deployment \cite{walls2022spring}.
+
+The backend exposes a RESTful API using Spring Web MVC. This API serves as the only 
+communication between the frontend and all server-side functionality. The functions
+handled by backend include observation management, user authentication, taxonomy browsing, 
+and machine learning model requests. JSON was used as the data exchange format due to 
+its compatibility and lightweight nature \cite{bray2017json}.
+
+The application logic is organized into distinct packages. Separate packages handle 
+authentication, user management, observations, community identifications, comments, 
+taxonomy, machine learning, and object storage. This modular structure keeps 
+responsibilities separated and makes the codebase easier to maintain.
+
+Authentication was implemented using a dual-token strategy. When user logs in, the backend 
+issues a short-lived JWT access token returned in the response body and a long-lived 
+refresh token stored in a cookie. The access token has a lifetime of only 15 minutes. The 
+The refresh token on the other hand remains valid for 7 days.
+
+This design ensures that the access token is never persisted in the browser storage.
+This reduces the risk of cross-site scripting attacks. When an access token expires, 
+the frontend automatically uses the refresh token cookie to get a new access 
+token from backend. This happens without requiring the user to log in again. 
+Spring Security was used to configure the security filter chain and enforce 
+authorization rules across all endpoints \cite{manne2023springsecurity}.
+
+Database access was abstracted using Spring Data JPA with Hibernate \cite{tudose2021orm}. This reduced 
+boilerplate code. Database schema management was handled by Flyway. Flyway ran migrations 
+automatically on application startup. The migrations include all necessary table creation and schema updates.
+Flyway ensured that the database schema is always up to date with the application code. It also provided a version-controlled 
+way to manage database changes across different environments \cite{flyway2025}.
+
+A quality grading system for observationswas implemented in the backend. Each observation 
+is assigned one of two quality grades: \textit{Needs ID} or \textit{Research Grade}. 
+The grade is recalculated every time an identification is submitted to an observation.
+The system determines a community taxon which is defined as the lowest taxon in the taxonomy 
+tree agreed by more than two-thirds of identifications. If the community taxon is at 
+the species level and at least two users have agreed, the observation is marked as Research Grade.
+
+This grading system is implemented in order to add a quality control mechanism on top of the
+machine learning model. It encourages users to participate in the identification 
+process and helps to ensure that the data collected through the platform is of quality.
+
+Reverse geocoding was integrated to backend using the OpenStreetMap Nominatim API. This is
+implemented to automatically convert the GPS coordinates for each observation into human-readable
+location names \cite{nominatim2025}.
 
 \subsubsection{Database Design}
 
