@@ -280,6 +280,11 @@ VGG16 & 8 & 10 & 20 & $10^{-3}$ & $10^{-5}$ \\
 \end{tabular}
 \end{table}
 
+Training of the models was performed on a single NVIDIA RTX 4050 Laptop GPU with CUDA acceleration enabled.
+Images were loaded and preprocessed using the PyTorch DataLoader. The preprocessing also included resizing
+to match the input size required by each architecture. The InceptionV3 model required the images to be resized 
+to 299x299 pixels, while the other models required images to be 224x224 pixels.
+
 \subsubsection{Model Evaluation}
 
 After completing the training phase, all developed models were evaluated in
@@ -472,6 +477,179 @@ best overall performance.
 
 \subsubsection{Final Model Optimization}
 
+In the previous section, the InceptionV3 model was selected as the best-performing model.
+In order to further improve the model's performance additional experiments were conducted.
+Although the model already achieved good results, we believed that the models generalization
+ability and overall accuracy could be further improved.
+
+Three separate experiments were conducted using the same 23-class dataset to optimize the model. 
+Each experiment independently focused on a different aspect. The best-performing configurations 
+was identified and combined to achieve the best possible results. The final training script was then used 
+to train the model on the expanded 30-class dataset.
+
+\paragraph{Label Smoothing}
+
+The first experiment was applying label smoothing during training. Label smoothing is a regularization
+technique used to replace the hard class labels with smooth values. This helps to prevent overfitting 
+and improve generalization performance.
+
+In this experiment, a label smoothing factor of 0.1 was applied to the cross-entropy loss function. 
+This means that instead of the correct class having a label of 1 and all other classes have a label of 0, 
+the correct class was assigned a label of 0.9 and the remaining classes were assigned a label of 0.1 divided by the number of classes minus one.
+
+The experiment resulted in a small improvement in accuracy. The overall accuracy increased from 89.10\% to 89.49\%.
+The weighed F1-score also improved slightly. However the improvement was limited compared to the baseline.
+
+\paragraph{Enhanced Data Augmentation}
+
+The second experiment was about improving the data augmentation techniques used during training.
+The initial data augmentation already included the standard augmentations such as random resized cropping,
+horizontal flipping, and color jittering. However it was believed that applying more aggressive augmentations could further improve the model's performance.
+
+The baseline augmentation pipeline consisted of:
+
+\begin{itemize}
+    \item Random resized cropping
+    \item Random horizontal flipping
+    \item Color jittering
+\end{itemize}
+
+The enhanced augmentation pipeline additionally introduced:
+
+\begin{itemize}
+    \item Wider random resized crop scaling ranges
+    \item Random vertical flipping
+    \item Random image rotation
+    \item Random perspective distortion
+    \item Stronger brightness, contrast, saturation, and hue variation
+    \item Random grayscale conversion
+    \item Random erasing for simulated occlusion
+\end{itemize}
+
+Applying more aggressive augmentation better simulated the amateur bird photographs that the model would encounter in real-world scenarios. 
+This experiment resulted in the largest performance gain among all experiments. 
+Test accuracy increased from 89.10\% to 89.64\%, while Top-5 accuracy improved from 97.82\% to 98.03\%.
+
+Additionally, the training curves showed improved generalization performance. In the inital training curve,
+the training accuracy exceeded the validation accuracy. This indicates that the model was overfitting to the training data.
+With the enhanced augmentation, the validation and training curves were closer together and the training curve never exceeded the validation curve.
+This shows that the heavier augmentation helped reduce overfitting and improved the model's ability to generalize unseen data. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/inception_v3_training_history_initial.png}
+    \caption{Training and validation accuracy curves for the baseline augmentation pipeline}
+    \label{fig:baseline_training_history}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/inception_v3_training_history_augmentation.png}
+    \caption{Training and validation accuracy curves using the enhanced augmentation pipeline}
+    \label{fig:enhanced_aug_training_history}
+\end{figure}
+
+As shown in Figures~\ref{fig:baseline_training_history} and
+\ref{fig:enhanced_aug_training_history}, applying heavier augmentation
+resulted in a more stable convergence behavior. The training accuracy not exceeding
+the validation accuracy indicates that the model was less likely to overfit and the model
+didn't memorize the training data.
+
+\paragraph{Freeze Epoch Tuning}
+
+The third experiment focused on tuning the number of frozen backbone epochs before full network training.
+Multiple freeze epoch values were tested  in order to find the optimal number.
+
+When using transfer learning, pretrained convolutional layers contain general features learned from the ImageNet dataset. 
+Freezing these layers for several epochs allows the newly added classification layers to adapt before modifying the pretrained weights. 
+
+The optimal freeze epoch count can vary depending on the task. This experiment tested multiple freeze epoch values. 
+
+\begin{table}[H]
+\centering
+\caption{Results of freeze epoch tuning experiments}
+\label{tab:freeze_epoch_experiment}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Freeze Epochs} &
+\textbf{Best Val Accuracy} &
+\textbf{Best Epoch} &
+\textbf{Total Epochs} &
+\textbf{Training Time (min)} \\ \hline
+
+7  & 89.31\% & 21 & 21 & 261.23 \\ \hline
+9  & 89.13\% & 22 & 24 & 315.84 \\ \hline
+11 & \textbf{89.67\%} & 27 & 27 & 309.71 \\ \hline
+13 & 89.46\% & 27 & 27 & 293.27 \\ \hline
+
+\end{tabular}
+\end{table}
+
+The results of the freeze epoch tuning experiments are summarized in Table~\ref{tab:freeze_epoch_experiment}.
+Results show that number of frozen epochs has a moderate impact on the final performance. Among the tested values,
+freezing the backbone for 11 epochs before full fine-tuning achieved the highest accuracy. The validation accuracy
+increased to 89.67\% from the baseline of 89.10\%. The 11 freeze epoch configuration was selected for the final training of the model. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/freeze_epoch_comparison.png}
+    \caption{Validation accuracy comparison across different freeze epoch configurations}
+    \label{fig:freeze_epoch_comparison}
+\end{figure}
+
+Figure~\ref{fig:freeze_epoch_comparison} shows that all configurations
+produced similar convergence behavior. However, the 11-epoch
+configuration provided slightly higher validation accuracy
+during the later stages.
+
+\subsubsection{Final Model Training}
+
+After completing the experiments for model optimization, the best-performing configurations were determined.
+The final training script was written by combining the configurations. The final configurations include:
+
+\begin{itemize}
+    \item Label smoothing with a factor of 0.1
+    \item Enhanced data augmentation
+    \item 11 frozen backbone epochs before full fine-tuning
+\end{itemize}
+
+The combined script was first used to train the InceptionV3 model on the original 23-class dataset. 
+The model achieved a test accuracy of 89.5\% and a validation accuracy of 90.28\% on the 23-class dataset, which was an improvement over the baseline.
+
+The optimized training script was then used with the expanded
+30-species dataset containing 150000 bird images. Expanding the dataset
+increased the difficulty because the model had to distinguish between 
+a larger number of visually similar species.
+
+Despite the increased difficulty, the final model maintained strong
+overall performance. The final InceptionV3 model achieved an overall
+accuracy of 89.35\%, Top-3 accuracy of 95.98\%, and Top-5 accuracy of
+97.80\%. The model also achieved a weighted F1-score of 0.893 and a
+macro ROC-AUC score of 0.996.
+
+The final trained model was selected for deployment and integration into
+the developed citizen science web platform because it provided the best
+overall balance between classification accuracy and practical inference
+performance.
+
+\begin{table}[H]
+\centering
+\caption{Final optimized InceptionV3 model performance on the 30-class dataset}
+\label{tab:final_optimized_results}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Metric} & \textbf{Score} \\ \hline
+Accuracy & 89.35\% \\ \hline
+Top-3 Accuracy & 95.98\% \\ \hline
+Top-5 Accuracy & 97.80\% \\ \hline
+Weighted Precision & 0.894 \\ \hline
+Weighted Recall & 0.893 \\ \hline
+Weighted F1-Score & 0.893 \\ \hline
+ROC-AUC (Macro) & 0.996 \\ \hline
+mAP & 0.952 \\ \hline
+\end{tabular}
+\end{table}
+
 \subsection{Web Platform Development}
 
 \subsubsection{Backend Development}
@@ -482,8 +660,8 @@ best overall performance.
 
 \subsubsection{Map Integration}
 
-\subsubsection{Development Tools}
-
 \subsubsection{Machine Learning Model Integration}
+
+\subsubsection{Development Tools}
 
 \clearpage
