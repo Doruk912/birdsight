@@ -1,16 +1,143 @@
 \section{Results and Discussion}
 
-\textit{Divide this section into three subsections (the last two could also be merged into a single one):}
+This chapter presents the outcomes of the machine learning experiments, the final classifier 
+performance on the expanded dataset, and evidence that the BirdSight web platform implements 
+the intended citizen-science workflow. It then interprets these outcomes in relation to the 
+research questions stated in the Introduction and discusses limitations and threats to validity.
 
 \subsection{Experiment and Validation}
 
-\textit{Describe the type of experiment(s) you ran to validate your project according to the validation tests you reported in the introduction. An experiment can be a parameter analysis, a user study (Ethical approval is required), simulation, real-world scenarios, etc.}
+\subsubsection{Machine learning protocol}
+
+The bird species classifier was developed and evaluated using a fixed experimental protocol 
+to keep comparisons fair. Images were sourced from GBIF-mediated observation records with 
+species-level labels, restricted to a Turkey-focused species list as described in the Methodology 
+\cite{gbif2025,ebird2025}. After preprocessing and cleaning, the dataset was split into training, 
+validation, and test partitions using a fixed ratio so that the test split was never used for 
+parameter updates or model selection decisions reported as final performance.
+
+Five convolutional architectures (VGG16, ResNet50, DenseNet121, MobileNetV2, InceptionV3) were
+trained with ImageNet initialisation and the same high-level training recipe (two-phase transfer 
+learning, shared optimiser family, and consistent evaluation code). This constitutes the primary 
+controlled experiment for architecture selection. InceptionV3 was then selected and improved through 
+three targeted ablation-style experiments on the original 23-class setup: label smoothing, stronger 
+augmentation, and tuning the number of frozen backbone epochs. Finally, the best combined configuration 
+was retrained on the expanded 30-class dataset.
+
+Validation during training relied on held-out validation accuracy and loss, with early stopping in 
+the fine-tuning phase to reduce overfitting. Final reported metrics were computed on the untouched 
+test split using the same metric definitions throughout (top-1 accuracy, top-$k$ accuracy, precision
+/recall/F1 summaries, and additional ranking scores as listed in 
+Table~\ref{tab:model_evaluation_results} and Table~\ref{tab:final_optimized_results}).
+
+\subsubsection{Software validation (functional checks)}
+
+Beyond offline metrics, the integrated system was validated as a runnable end-to-end application: users 
+can authenticate, submit observations with images and coordinates, request species suggestions, browse 
+observations and taxonomy pages, and contribute identifications that update observation quality 
+metadata. These checks confirm that the architectural split (Next.js client, Spring Boot API, FastAPI 
+inference, PostgreSQL/PostGIS, and MinIO object storage) works together in a local deployment 
+configuration. This validation is functional rather than a formal user study; no human-subjects 
+claims are made beyond standard software engineering acceptance testing.
 
 \subsection{Results}
 
-\textit{Report and describe the results of your project.}
+\subsubsection{Benchmark comparison (five architectures)}
+
+Table~\ref{tab:model_evaluation_results} summarises the benchmark performance on the held-out test 
+data. InceptionV3 achieved the strongest overall top-1 accuracy and the strongest top-3 and top-5 
+behaviour among the five candidates, which is important for an interactive workflow where users pick 
+among suggested species rather than only accepting the first label. DenseNet121 and ResNet50 performed 
+similarly to each other and slightly below InceptionV3, while MobileNetV2 remained competitive given 
+its lighter design. VGG16 lagged behind, which is consistent with the comparative literature on older deep stacks versus residual and factorised architectures \cite{bilgin2022bird,tang2025comparative}.
+
+Figure~\ref{fig:model_comparison_chart} provides a compact visual comparison across models. 
+Figure~\ref{fig:inception_confusion_matrix} shows that most mass lies on the diagonal for InceptionV3, 
+while Figure~\ref{fig:top_confused_pairs} highlights a small set of frequently confused species pairs. 
+Qualitatively, many of these pairs correspond to visually similar taxa, which matches expectations for 
+fine-grained classification \cite{chen2024fetfgvc}.
+
+\subsubsection{InceptionV3 improvement experiments}
+
+The ablation sequence confirmed that the strongest single gain came from enhanced augmentation, with 
+training and validation accuracy curves becoming more aligned compared with the baseline augmentation 
+setup (Figures~\ref{fig:baseline_training_history} and~\ref{fig:enhanced_aug_training_history}). 
+Freeze-epoch tuning showed a moderate effect, with 11 frozen epochs achieving the best observed 
+validation accuracy in the sweep (Table~\ref{tab:freeze_epoch_experiment} and 
+Figure~\ref{fig:freeze_epoch_comparison}). Label smoothing produced smaller movement in top-1 accuracy 
+but supports better-calibrated probabilities, which can matter when presenting ranked suggestions to 
+non-experts.
+
+\subsubsection{Final model on the 30-class dataset}
+
+After merging the best settings, the final InceptionV3 model was trained on 30 species and 150{,}000 
+images. Table~\ref{tab:final_optimized_results} reports the resulting test performance. Despite the 
+increased number of classes, the model retained strong top-1 accuracy and high top-3 accuracy, 
+indicating that the ranked suggestion interface remains useful when exact top-1 classification is 
+difficult.
+
+\subsubsection{Platform and user-interface outcomes}
+
+The implemented client covers the intended citizen-science journey. The landing experience introduces 
+the workflow and citizen-science context (Figures~\ref{fig:hero_section}--\ref{fig:citizen_science}), 
+while Figure~\ref{fig:user_workflow} summarises the end-to-end observation submission path.
+
+The observation feed supports browsing at scale with filtering and pagination 
+(Figure~\ref{fig:observation_feed}). The map view supports geographic exploration with clustering 
+behaviour at wider zoom levels (Figure~\ref{fig:map_page}). The taxonomy browser exposes hierarchical 
+navigation and taxon-scoped information (Figure~\ref{fig:taxonomy_page}).
+
+Observation detail pages combine media, metadata, community identifications, and discussion 
+(Figure~\ref{fig:observation_page}). The submission flow supports multiple images and shows model 
+suggestions through a dedicated pop-up (Figures~\ref{fig:observation_submission} 
+and~\ref{fig:ml_suggestions}). Together, these screenshots provide qualitative evidence that the 
+platform connects model assistance with community validation rather than replacing human judgement 
+entirely \cite{baker2021verification,fraisl2022citizen}.
 
 \subsection{Discussion}
-\textit{Discuss your findings in relation to the contributions of your project and your research questions.}
 
+\subsubsection{Answering the research questions}
 
+\textbf{RQ1} asked how a learning-based classifier integrated into a citizen-science platform can 
+support large-scale monitoring. The results support a practical answer: automated top-$k$ suggestions 
+lower the friction for labelling noisy amateur images, while the observation feed, map, and 
+identification workflow collect structured, georeferenced records at scale \cite{fraisl2022citizen}. 
+The quality-grade mechanism further operationalises a lightweight community consensus layer on top 
+of model uncertainty, which aligns with discussions on data quality in volunteer-generated biodiversity 
+datasets \cite{johnston2022outstanding}.
+
+\textbf{RQ2} asked whether publicly available bird imagery is suitable for training deep models 
+in this setting. The GBIF-mediated pipeline produced a large labelled corpus, and the final model 
+achieved strong held-out performance, supporting suitability after preprocessing, splitting, and 
+careful training \cite{gbif2025}. However, suitability is not ``noise-free labels'': citizen-science 
+imagery varies in pose, distance, blur, and background clutter, and some species pairs remain 
+partially confusable even when metrics are strong (Figure~\ref{fig:top_confused_pairs}). This is 
+consistent with fine-grained recognition challenges emphasised in the literature \cite{chen2024fetfgvc}.
+
+\subsubsection{Relation to prior work and design choices}
+
+The benchmark ranking aligns with comparative CNN studies that frequently favour strong modern 
+architectures over VGG-style stacks for challenging visual classification \cite{bilgin2022bird,
+tang2025comparative,lolge2025evolution}. Separating inference into a dedicated FastAPI service matches 
+common deployment guidance for keeping model lifecycles independent from core application services 
+\cite{karanam2026microservice}.
+
+\subsubsection{Limitations and threats to validity}
+
+The scope is intentionally bounded: 30 species common in Turkey, not a global avifauna model. 
+Performance metrics are computed on a specific train/val/test split; although the split is stratified 
+and seeded for reproducibility, geographic or temporal leakage in aggregated public datasets can 
+never be ruled out completely without additional auditing. External reverse geocoding depends on 
+third-party availability and fair-use constraints \cite{nominatim2025}. Finally, the reported UI 
+validation is functional rather than a controlled usability experiment with statistical participant 
+outcomes.
+
+\subsubsection{Concluding remarks}
+
+Overall, the quantitative results demonstrate that a comparatively strong bird classifier can be 
+trained from large-scale public imagery and integrated into a modular web stack. The qualitative 
+screenshots demonstrate that the platform channels model output into a workflow where volunteers 
+can still discuss, correct, and confirm identifications, which is central to trustworthy citizen 
+science at scale \cite{baker2021verification}.
+
+\clearpage
