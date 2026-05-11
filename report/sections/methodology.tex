@@ -34,7 +34,7 @@ species for the models to be trained effectively.
 
 Because tens of thousands of bird images were required, it was not feasible to
 create such a dataset manually. Instead, existing data was gathered. GBIF, which
-stands for Global Biodiversity Information Facility, was used to construct the
+stands for Global Biodiversity Information Facility was used to construct the
 dataset. It is an open-access biodiversity platform that collects species
 observation records from various sources \cite{gbif2025}. These sources are mostly
 citizen science platforms such as iNaturalist \cite{inaturalist2025} and
@@ -236,7 +236,7 @@ rate was used for the classifier layers.
 
 Images were preprocessed using resizing and normalization techniques. 
 Random resized cropping, horizontal flipping, and color jittering were also applied to
-the training images in order to improve generalization performance of models and reduce overfitting.
+the training images in order to improve the generalization performance of models and reduce overfitting.
 
 Supervised learning was used during model training. Input images and their
 corresponding species labels were provided to the models in batches. During
@@ -303,7 +303,7 @@ recall, and F1-score.
 
 Accuracy measures the percentage of correctly classified images among all
 predictions. It provides an overall indication of model performance.
-However accuracy alone does not fully represent the model's quality,
+However, accuracy alone does not fully represent the model's quality,
 especially in a fine-grained image classification task where most classes are visually similar.
 
 Precision measures the proportion of correct positive predictions among all
@@ -437,7 +437,7 @@ is presented in Figure~\ref{fig:model_comparison_chart}.
     \label{fig:model_comparison_chart}
 \end{figure}
 
-Looking at the confusion matrices the most misclassifications can be seen between
+Looking at the confusion matrices, the most misclassifications can be seen between
 visually similar bird species. For instance, related gull species or visually similar passerine
 birds. This indicates that the models could learn meaningful visual features but
 still faced challenges when distinguishing subtle differences.
@@ -478,13 +478,13 @@ best overall performance.
 \subsubsection{Final Model Optimization}
 
 In the previous section, the InceptionV3 model was selected as the best-performing model.
-In order to further improve the model's performance additional experiments were conducted.
-Although the model already achieved good results, we believed that the models generalization
+In order to further improve the model's performance, additional experiments were conducted.
+Although the model already achieved good results, we believed that the model's generalization
 ability and overall accuracy could be further improved.
 
 Three separate experiments were conducted using the same 23-class dataset to optimize the model. 
 Each experiment independently focused on a different aspect. The best-performing configurations 
-was identified and combined to achieve the best possible results. The final training script was then used 
+were identified and combined to achieve the best possible results. The final training script was then used 
 to train the model on the expanded 30-class dataset.
 
 \paragraph{Label Smoothing}
@@ -498,13 +498,13 @@ This means that instead of the correct class having a label of 1 and all other c
 the correct class was assigned a label of 0.9 and the remaining classes were assigned a label of 0.1 divided by the number of classes minus one.
 
 The experiment resulted in a small improvement in accuracy. The overall accuracy increased from 89.10\% to 89.49\%.
-The weighed F1-score also improved slightly. However the improvement was limited compared to the baseline.
+The weighted F1-score also improved slightly. However, the improvement was limited compared to the baseline.
 
 \paragraph{Enhanced Data Augmentation}
 
 The second experiment was about improving the data augmentation techniques used during training.
 The initial data augmentation already included the standard augmentations such as random resized cropping,
-horizontal flipping, and color jittering. However it was believed that applying more aggressive augmentations could further improve the model's performance.
+horizontal flipping, and color jittering. However, it was believed that applying more aggressive augmentations could further improve the model's performance.
 
 The baseline augmentation pipeline consisted of:
 
@@ -586,7 +586,7 @@ The optimal freeze epoch count can vary depending on the task. This experiment t
 \end{table}
 
 The results of the freeze epoch tuning experiments are summarized in Table~\ref{tab:freeze_epoch_experiment}.
-Results show that number of frozen epochs has a moderate impact on the final performance. Among the tested values,
+Results show that the number of frozen epochs has a moderate impact on the final performance. Among the tested values,
 freezing the backbone for 11 epochs before full fine-tuning achieved the highest accuracy. The validation accuracy
 increased to 89.67\% from the baseline of 89.10\%. The 11 freeze epoch configuration was selected for the final training of the model. 
 
@@ -652,10 +652,10 @@ mAP & 0.952 \\ \hline
 
 \subsection{Web Platform Development}
 
-In this section the details of the development phase for the web platform will be
+In this section, the details of the development phase for the web platform will be
 explained. The user workflow diagram in Figure~\ref{fig:user_workflow} shows how a user can 
 interact with the platform. Users will be able to upload their bird sightings to the platform 
-once they log in. The model displays its predictions of the bird in image. User chooses the 
+once they log in. The model displays its predictions of the bird in the image. The user chooses the 
 bird that they have observed and uploads the observation.
 
 \begin{figure}[H]
@@ -692,15 +692,15 @@ authentication, user management, observations, community identifications, commen
 taxonomy, machine learning, and object storage. This modular structure keeps 
 responsibilities separated and makes the codebase easier to maintain.
 
-Authentication was implemented using a dual-token strategy. When user logs in, the backend 
+Authentication was implemented using a dual-token strategy. When the user logs in, the backend 
 issues a short-lived JWT access token returned in the response body and a long-lived 
-refresh token stored in a cookie. The access token has a lifetime of only 15 minutes. The 
+refresh token stored in a cookie. The access token has a lifetime of only 15 minutes.
 The refresh token on the other hand remains valid for 7 days.
 
 This design ensures that the access token is never persisted in the browser storage.
 This reduces the risk of cross-site scripting attacks. When an access token expires, 
 the frontend automatically uses the refresh token cookie to get a new access 
-token from backend. This happens without requiring the user to log in again. 
+token from the backend. This happens without requiring the user to log in again. 
 Spring Security was used to configure the security filter chain and enforce 
 authorization rules across all endpoints \cite{manne2023springsecurity}.
 
@@ -710,7 +710,7 @@ automatically on application startup. The migrations include all necessary table
 Flyway ensured that the database schema is always up to date with the application code. It also provided a version-controlled 
 way to manage database changes across different environments \cite{flyway2025}.
 
-A quality grading system for observationswas implemented in the backend. Each observation 
+A quality grading system for observations was implemented in the backend. Each observation 
 is assigned one of two quality grades: \textit{Needs ID} or \textit{Research Grade}. 
 The grade is recalculated every time an identification is submitted to an observation.
 The system determines a community taxon which is defined as the lowest taxon in the taxonomy 
@@ -719,15 +719,15 @@ the species level and at least two users have agreed, the observation is marked 
 
 This grading system is implemented in order to add a quality control mechanism on top of the
 machine learning model. It encourages users to participate in the identification 
-process and helps to ensure that the data collected through the platform is of quality.
+process and helps to ensure that the data collected through the platform is of high quality.
 
-Reverse geocoding was integrated to backend using the OpenStreetMap Nominatim API. This is
+Reverse geocoding was integrated into the backend using the OpenStreetMap Nominatim API. This is
 implemented to automatically convert the GPS coordinates for each observation into human-readable
 location names \cite{nominatim2025}.
 
 \subsubsection{Database Design}
 
-PostgreSQL was chosen as the database for this platoform because of its adoption in the industry and its
+PostgreSQL was chosen as the database for this platform because of its adoption in the industry and its
 open-source nature \cite{postgresql2025}. On top of PostgreSQL, PostGIS was used for geospatial data support. 
 This allowed storing and querying observations based on their geographic location \cite{postgis2025}.
 
@@ -839,12 +839,12 @@ The information tab contains the Wikipedia page of that taxon embedded. The taxo
 \end{figure}
 
 The next page is the identify page. This page is aimed for the users with more experience. 
-This page allows users to quickly identify observations made by other users. There is features so that 
+This page allows users to quickly identify observations made by other users. There are features so that 
 users can quickly glance at the details of each observation. There is also a filtering functionality similar to the observations page.
 
 The main page in the platform is the observation page. This page shows the details of a single observation. The page includes the image of the observation, the location, date, and time of the sighting.
-User can enter a taxon as identification for their observation. Other users are also able to add identifications.
-If there is a consensus on a specie level ID that observation is marked as Research Grade. The observation page is shown in Figure~\ref{fig:observation_page}.
+The user can enter a taxon as identification for their observation. Other users are also able to add identifications.
+If there is a consensus on a species-level ID that observation is marked as Research Grade. The observation page is shown in Figure~\ref{fig:observation_page}.
 
 \begin{figure}[H]
     \centering
@@ -853,8 +853,8 @@ If there is a consensus on a specie level ID that observation is marked as Resea
     \label{fig:observation_page}
 \end{figure}
 
-In this page users can add identificataion or comments. People can discuss about the observation and help each other to identify the bird. This is a core concept of citizen science.
-Additionally the machine learning suggestions pop up appear in this page when users suggests on ID. The same pop up also appears on the observation submission page.
+In this page users can add identification or comments. People can discuss about the observation and help each other to identify the bird. This is a core concept of citizen science.
+Additionally, the machine learning suggestions pop-up appear in this page when users suggests on ID. The same pop up also appears on the observation submission page.
 
 The observation submission page allows users to submit their bird sightings. Users can upload up to 5 images, enter the location and date of the sighting, and optionally suggest an ID for their observation. 
 After uploading the observation, users can see the suggestions from the machine learning model. If user uploads multiple images for the same observation, they can cycle thorugh the predictions for each image.
@@ -872,12 +872,12 @@ The settings page allows users to update their profile information and change th
 
 \subsubsection{Map Integration}
 
-Visualizing the observation on a map is an important feature of the platofrm. It allows users to explore the distribution of sightings. The map was implemented using MapLibre GL 5 together with the react-map-gl library \cite{maplibre2025, reactmapgl2025}.
+Visualizing the observation on a map is an important feature of the platform. It allows users to explore the distribution of sightings. The map was implemented using MapLibre GL 5 together with the react-map-gl library \cite{maplibre2025, reactmapgl2025}.
 For the visuals on the map, the platform uses Carto's Voyager tile style. This relies on crowd-sourced geographical data from OpenStreetMap \cite{openstreetmap2025}.
 
-The map dynamically adjusts rendering based on the zoom level. When zoomed in, the map shows individual markers for observations however when zoomed out, the markers are clusterd. This clustering is implemented to improve performance and user experience.
-Interacting with these markers triggers popups displaying observation cards. These cards include details like the species name and a thumbnail image.
-There is also a sidebar that displays a filterable list of all observation. Additionally, user can draw a bounding box on the map to filter observations within that area.
+The map dynamically adjusts rendering based on the zoom level. When zoomed in, the map shows individual markers for observations however when zoomed out, the markers are clustered. This clustering is implemented to improve performance and user experience.
+Interacting with these markers triggers pop-ups displaying observation cards. These cards include details like the species name and a thumbnail image.
+There is also a sidebar that displays a filterable list of all observations. Additionally, the user can draw a bounding box on the map to filter observations within that area.
 
 The backend provides a dedicated API endpoint that returns only the coordinates and basic information to improve performance.
 
@@ -895,29 +895,29 @@ Only the Spring Boot backend communicates with the machine learning service. The
 When a user uploads an observation or suggests an ID, the backend sends the image to the machine learning service and retrieves the predictions.
 This is done to abstract away the machine learning functionality and to ensure that the frontend only interacts with a single backend API.
 
-When the user is uploading an observation or adding an identification, the machine learning suggestion pop up appears.
-This popup shows the predictions from the model. How many prediction results are shown depends on the confidence scores. 
-If the model is highly confident only the top prediction is shown. If the confidence scores are lower top 3 or all 5 predictions are shown.
+When the user is uploading an observation or adding an identification, the machine learning suggestion pop-up appears.
+This pop-up shows the predictions from the model. How many prediction results are shown depends on the confidence scores. 
+If the model is highly confident only the top prediction is shown. If the confidence scores are lower the top 3 or all 5 predictions are shown.
 
-By default the confidence score percentages are hidden to avoid overwhelming users with technical details. However there is a toggle  that allows users to view details.
+By default, the confidence score percentages are hidden to avoid overwhelming users with technical details. However there is a toggle  that allows users to view details.
 
 The machine learning predictions popup is shown in Figure~\ref{fig:ml_suggestions}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{images/ml_suggestions.png}
-    \caption{Machine learning suggestions pop up}
+    \caption{Machine learning suggestions pop-up}
     \label{fig:ml_suggestions}
 \end{figure}
 
 
 \subsubsection{Development Tools}
 
-During development JetBrains IDEs were used for backend, frontend, and machine learning development.
+During development, JetBrains IDEs were used for backend, frontend, and machine learning development.
 IntelliJ IDEA was used for the Spring Boot backend, WebStorm was used for the Next.js frontend, and PyCharm was used for the FastAPI machine learning service \cite{intellij2025, webstorm2025, pycharm2025}.
 On top of these DataGrip was used for database management and query execution. These IDEs provided a great developer experience \cite{datagrip2025}.
 
-Version control was handled using Git with GitHub. Seperate directories were used for the backend, frontend, machine learning service, and training utilities \cite{git2025, github2025}.
+Version control was handled using Git with GitHub. Separate directories were used for the backend, frontend, machine learning service, and training utilities \cite{git2025, github2025}.
 
 Docker was used for containerization of services like PostgreSQL and MinIO. This ensured that the development environment was consistent across different machines and simplified the setup process \cite{docker2025}.
 
