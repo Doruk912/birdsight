@@ -727,12 +727,198 @@ location names \cite{nominatim2025}.
 
 \subsubsection{Database Design}
 
+PostgreSQL was chosen as the database for this platoform because of its adoption in the industry and its
+open-source nature \cite{postgresql2025}. On top of PostgreSQL, PostGIS was used for geospatial data support. 
+This allowed storing and querying observations based on their geographic location \cite{postgis2025}.
+
+The database schema includes tables for users, observations, taxonomy, identifications, comments, and images.
+Foreign keys preserve the integrity of data. Indexes are also used for improved performance.
+
+The taxonomy table is unique as it stores the hierarchical structure of bird taxonomy. 
+Each taxon has a parent-child relationship with other taxa. This allows efficient querying of related species.
+The table stores all bird taxa from family level all the way down to species level. The taxonomy data was sourced
+from IOC World Bird List \cite{ioc2025}. The table contains about 14000 rows representing all bird taxa.
+The schema for the taxonomy table is shown in Table~\ref{tab:taxa_schema}.
+
+\begin{table}[H]
+\centering
+\caption{Taxa Table Schema}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Column Name} & \textbf{Data Type} & \textbf{Constraints} \\ \hline
+id & UUID & Primary Key, Not Null \\ \hline
+rank & VARCHAR(20) & Not Null \\ \hline
+scientific\_name & VARCHAR(255) & Unique, Not Null \\ \hline
+common\_name & VARCHAR(255) & -- \\ \hline
+parent\_id & UUID & Foreign Key references taxa(id) \\ \hline
+created\_at & TIMESTAMP & Not Null \\ \hline
+updated\_at & TIMESTAMP & Not Null \\ \hline
+\end{tabular}
+\label{tab:taxa_schema}
+\end{table}
+
+Database changes are applied with Flyway. Flyway runs SQL migration files when the backend starts. 
+Each file is like a version step, so the schema is repeatable on another computer or later in time \cite{flyway2025}.
+
+All images that the users upload are stored in MinIO object storage. This includes the images that the users upload as observations or their avatars. 
+The database only stores links to the images. MiniO is an S3-compatible open-source storage solution \cite{minio2025}. 
+The backend handles image uploads, deletions, and retrievals.
+
 \subsubsection{Frontend Development}
+
+The frontend was developed using Next.js with React and TypeScript. Next.js is a React-based framework for building server-rendered web applications \cite{nextjs2025, react2025}.
+Next.js was selected for its built-in support for server-side rendering and API routes. Next.js also provides a great developer experience with features like hot reloading.
+TypeScript was used to add static typing which improves code quality and maintainability \cite{typescript2025}.
+
+The service layer in the frontend is organized into separate modules for each domain. This includes authentication, observations, taxonomy, machine learning, and user management. 
+All API calls pass through a shared apiClient wrapper that automatically injects the access token as a Bearer header. If a request returns a 401 response, the client silently calls the refresh endpoint and stores the new access token.
+All API calls are routed through a Next.js rewrite proxy, so the frontend never exposes the backend host or port directly to the browser.
+
+The application uses Next.js App Router for routing. The main pages include the home page, observations page, map page, taxonomy browser, user profile page etc.
+The hero section on the main page is shown in Figure~\ref{fig:hero_section}. The design of the frontend was developed to besimple and user-friendly.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/hero_section.png}
+    \caption{Hero section of the frontend application}
+    \label{fig:hero_section}
+\end{figure}
+
+The figures below show the rest of the main page. The landing page include a section where the general user workflow is explained in a simple way. 
+Figure~\ref{fig:how_it_works} shows the section where the user workflow is visualized. Below that in Figure \ref{fig:citizen_science} there is a section where the 
+citizen science as a concept is explained. The main page aims to explain the main features of the platform.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{images/how_it_works.png}
+    \caption{Workflow section of the frontend application}
+    \label{fig:how_it_works}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/citizen_science.png}
+    \caption{Citizen science section of the frontend application}
+    \label{fig:citizen_science}
+\end{figure}
+
+Below these sections, there is a section where the latest observations from the platform are shown. Following that there is a small call to action where users are encouraged to sign up and after that there is the footer.
+
+The first page on the navbar is the observations page. This page shows a feed of all observations submitted by users. There are cards for each observation that show general information about that observation.
+The page also has a filtering functionality that allows users to filter observations based on date, location, taxon etc. 
+The page has pagination to handle large number of observations. The observation feed is shown in Figure~\ref{fig:observation_feed}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/observation_feed.png}
+    \caption{Observation feed page showing user-submitted observations}
+    \label{fig:observation_feed}
+\end{figure}
+
+The next page is the map page. This page shows a map visualization of all observations submitted by users. Each observation is represented with a marker if zoomed in but the markers are clustered when zoomed out. 
+The map allows users to explore the geographic distribution of bird sightings. The details of the map integration will be explained in the next section.
+The map page is shown in Figure~\ref{fig:map_page}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/map_page.png}
+    \caption{Map page showing the geographic distribution of bird sightings}
+    \label{fig:map_page}
+\end{figure}
+
+The next page is the taxonomy browser. This page allows users to explore the hierarchical structure of bird taxonomy.
+This page includes the information about all bird taxa including the total observations of that taxon in the platform.
+There is also a navtab component which includes tabs for information, taxonomy tree, map, and observations. The taxonomy page is shown in Figure~\ref{fig:taxonomy_page}.
+The information tab contains the Wikipedia page of that taxon embedded. The taxonomy tree tab shows the parent and children of that taxon. The map tab shows the geographic distribution of observations for that taxon. The observations tab shows the feed of all observations of that taxon.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/taxonomy_page.png}
+    \caption{Taxonomy browser page allowing users to explore bird taxonomy}
+    \label{fig:taxonomy_page}
+\end{figure}
+
+The next page is the identify page. This page is aimed for the users with more experience. 
+This page allows users to quickly identify observations made by other users. There is features so that 
+users can quickly glance at the details of each observation. There is also a filtering functionality similar to the observations page.
+
+The main page in the platform is the observation page. This page shows the details of a single observation. The page includes the image of the observation, the location, date, and time of the sighting.
+User can enter a taxon as identification for their observation. Other users are also able to add identifications.
+If there is a consensus on a specie level ID that observation is marked as Research Grade. The observation page is shown in Figure~\ref{fig:observation_page}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/observation_page.png}
+    \caption{Observation page showing the details of a single observation}
+    \label{fig:observation_page}
+\end{figure}
+
+In this page users can add identificataion or comments. People can discuss about the observation and help each other to identify the bird. This is a core concept of citizen science.
+Additionally the machine learning suggestions pop up appear in this page when users suggests on ID. The same pop up also appears on the observation submission page.
+
+The observation submission page allows users to submit their bird sightings. Users can upload up to 5 images, enter the location and date of the sighting, and optionally suggest an ID for their observation. 
+After uploading the observation, users can see the suggestions from the machine learning model. If user uploads multiple images for the same observation, they can cycle thorugh the predictions for each image.
+The figure below shows the observation submission page. The machine learning suggestions pop up is shown in Figure~\ref{fig:observation_submission}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/observation_submission.png}
+    \caption{Observation submission page with machine learning suggestions pop up}
+    \label{fig:observation_submission}
+\end{figure}
+
+To finalize this section, apart from the mentioned pages, there is also the user profile page, settings page and the login and registration pages. The user profile page shows the user's information and their submitted observations. 
+The settings page allows users to update their profile information and change their password. The login and registration pages allow users to create an account and log in to the platform.
 
 \subsubsection{Map Integration}
 
+Visualizing the observation on a map is an important feature of the platofrm. It allows users to explore the distribution of sightings. The map was implemented using MapLibre GL 5 together with the react-map-gl library \cite{maplibre2025, reactmapgl2025}.
+For the visuals on the map, the platform uses Carto's Voyager tile style. This relies on crowd-sourced geographical data from OpenStreetMap \cite{openstreetmap2025}.
+
+The map dynamically adjusts rendering based on the zoom level. When zoomed in, the map shows individual markers for observations however when zoomed out, the markers are clusterd. This clustering is implemented to improve performance and user experience.
+Interacting with these markers triggers popups displaying observation cards. These cards include details like the species name and a thumbnail image.
+There is also a sidebar that displays a filterable list of all observation. Additionally, user can draw a bounding box on the map to filter observations within that area.
+
+The backend provides a dedicated API endpoint that returns only the coordinates and basic information to improve performance.
+
 \subsubsection{Machine Learning Model Integration}
 
+The trained InceptionV3 model was deployed as a separate microservice using Python and FastAPI \cite{fastapi2025}. This service exposes an API endpoint that expects an image and returns the predicted bird species along with confidence scores.
+Separating the machine learning model into its own service allows for better scalability and maintainability. The model can be updated or retrained independently without affecting the rest of the application.
+This is a recommended practice for integrating machine learning models into web applications \cite{karanam2026microservice}.
+
+The service exposes a single POST endpoint at /predict. This endpoint accepts an image file and then performs the same preprocessing steps as during training. 
+The image is resized to 299x299 pixels, normalized, and then passed through the InceptionV3 model to get predictions.
+The service returns a JSON response containing the top 5 predicted species along with their confidence scores.
+
+Only the Spring Boot backend communicates with the machine learning service. The frontend never interacts with the machine learning service directly. 
+When a user uploads an observation or suggests an ID, the backend sends the image to the machine learning service and retrieves the predictions.
+This is done to abstract away the machine learning functionality and to ensure that the frontend only interacts with a single backend API.
+
+When the user is uploading an observation or adding an identification, the machine learning suggestion pop up appears.
+This popup shows the predictions from the model. How many prediction results are shown depends on the confidence scores. 
+If the model is highly confident only the top prediction is shown. If the confidence scores are lower top 3 or all 5 predictions are shown.
+
+By default the confidence score percentages are hidden to avoid overwhelming users with technical details. However there is a toggle  that allows users to view details.
+
+The machine learning predictions popup is shown in Figure~\ref{fig:ml_suggestions}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/ml_suggestions.png}
+    \caption{Machine learning suggestions pop up}
+    \label{fig:ml_suggestions}
+\end{figure}
+
+
 \subsubsection{Development Tools}
+
+During development JetBrains IDEs were used for backend, frontend, and machine learning development.
+IntelliJ IDEA was used for the Spring Boot backend, WebStorm was used for the Next.js frontend, and PyCharm was used for the FastAPI machine learning service \cite{intellij2025, webstorm2025, pycharm2025}.
+On top of these DataGrip was used for database management and query execution. These IDEs provided a great developer experience \cite{datagrip2025}.
+
+Version control was handled using Git with GitHub. Seperate directories were used for the backend, frontend, machine learning service, and training utilities \cite{git2025, github2025}.
+
+Docker was used for containerization of services like PostgreSQL and MinIO. This ensured that the development environment was consistent across different machines and simplified the setup process \cite{docker2025}.
 
 \clearpage
