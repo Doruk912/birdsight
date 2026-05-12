@@ -1,5 +1,36 @@
 \section{Future Work}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
+There are several ways to further develop and enhance the BirdSight platform. This section explains potential directions for future work.
+This includes expanding the dataset, improving the machine learning model, deploying the platform publicly, and adding new features.
+
+\subsection{Dataset Expansion}
+
+The current model covers 30 bird species commonly observed in Turkey. A natural extension would be to expand the dataset even further to include 
+a larger number of species. The included species could include species from other regions. This would enable the platform to be useful to a wider range of birdwatchers. 
+
+In addition to increasing the number of species, compiling more images per species could further improve models robustness. However, scaling the dataset would significantly
+ increase training time and computational power needed. With this expanded scale training on a single consumer GPU becomes impractical. A cloud-based training solution such as 
+ Google Cloud or AWS would be needed.
+
+\subsection{Community-Driven Dataset and Continuous Model Improvement}
+
+As the platform grows, it will accumulate a large collection of bird photographs submitted by the community. Observations that reach Research Grade represent reliable labeled data. They have been agreed by multiple users rather than solely on the machine learning model's suggestion.
+This creates an opportunity for a positive feedback loop. As more observations are collected, they can be added back into the training dataset to continously improve the model. Over time, the model would benefit from an increasingly diverse set of images. 
+Implementing a pipeline like this would require automation for data validation and model versioning.
+
+\subsection{Public Deployment}
+
+The platform was developed in a local environment. Making the platform publicly accessible would require registering a domain name and a way to host the application. The way the project was developed using separate services and containers makes it easier to deploy on the cloud.
+A production deployment would also require additional considerations. These include HTTPS configuration with a valid SSL certificate, secret management, database backups, and service health monitoring. The machine learning inference service in particular may require more resources to handle prediction requests at scale.
+
+\subsection{Mobile Application}
+
+The current platform is a responsive web application accessible from all browsers. However, developing a dedicated mobile application for iOS and Android would improve the user experience. The primary target audience of the platform is birdwatchers on the field. A native mobile application could directly use the device camera and use GPS to automatically tag observations. 
+This would reduce the friction in the observation submission process for most users.
+
+\subsection{Audio-Based Identification}
+
+Bird species identification in the field can also be done using sound rather than sight. Integrating an audio-based identification model would complement the existing image-based approach. 
+This would make the platform useful in a broader range.
 
 \clearpage
