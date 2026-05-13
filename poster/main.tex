@@ -121,40 +121,57 @@
 \begin{tikzpicture}[remember picture, overlay,
                     shift={(current page.north west)}]
 
-  % Main green band
+  % ── Background: main green band ──────────────────────────
   \fill[brand] (0,0) rectangle (\paperwidth, -\hdrH);
 
-  % Subtle darker bottom edge
+  % ── Frosted meta bar at bottom of header ─────────────────
+  % Grounds the names/advisor line and adds layering depth
+  \fill[branddark, opacity=0.35]
+    (0, {-6.3cm}) rectangle (\paperwidth, {-\hdrH});
+
+  % ── Bottom edge accent ───────────────────────────────────
   \fill[branddark] (0,-\hdrH) rectangle (\paperwidth, {-\hdrH-0.18cm});
 
-  % ── University logo — left ───────────────────────────────
-  \node[anchor=west] at (0.5cm, {-\hdrH/2}) {%
-    \includegraphics[height=7.5cm]{images/university_logo.png}};
+  % ── University logo — left, large ────────────────────────
+  \node[anchor=west] at (0.25cm, {-3.2cm}) {%
+    \includegraphics[height=6.5cm]{images/university_logo.png}};
 
-  % ── Title block — centre ─────────────────────────────────
-  \node[anchor=center, text width=35cm, align=center]
-    at ({0.5*\paperwidth}, {-\hdrH/2}) {%
-      % INSERT optional project logo above title:
-      % \includegraphics[height=2cm]{birdsight_wordmark.png}\\[6pt]
-      {\fontsize{76}{84}\selectfont\bfseries\color{white} BirdSight}\\[8pt]
-      {\fontsize{24}{28}\selectfont\color{white}
+  % ── University name + department — right of logo ─────────
+  \node[anchor=west, text width=13cm] at (6.5cm, {-2.5cm}) {%
+    {\fontsize{22}{26}\selectfont\bfseries\color{white}
+      Kadir Has University}};
+
+  \node[anchor=west, text width=13cm] at (6.5cm, {-3.5cm}) {%
+    {\fontsize{15}{18}\selectfont\color{white!80!brand}
+      Department of Computer Engineering}};
+
+  % ── Project title — centre ───────────────────────────────
+  \node[anchor=north, text width=26cm, align=center]
+    at ({0.5*\paperwidth}, {-0.5cm}) {%
+      {\fontsize{82}{88}\selectfont\bfseries\color{white}
+        BirdSight}};
+
+  % ── Tagline ──────────────────────────────────────────────
+  \node[anchor=north, text width=26cm, align=center]
+    at ({0.5*\paperwidth}, {-4.0cm}) {%
+      {\fontsize{20}{25}\selectfont\color{white}
         A Machine Learning-Based Bird Species Recognition\\[2pt]
-        and Citizen Science Observation Platform}\\[14pt]
-      {\fontsize{20}{26}\selectfont\color{white}
-        \textbf{Doruk Ege Aksu} \enspace\textcolor{white!60!brand}{|}\enspace
-        \textbf{Ayhan \"Oner}\\[3pt]
-        Supervisor: Asst.\ Prof.\ \.{I}lktan Ar
-        \enspace\textcolor{white!60!brand}{|}\enspace
-        Kadir Has University
-        \enspace\textcolor{white!60!brand}{|}\enspace
-        FENS 402
-        \enspace\textcolor{white!60!brand}{|}\enspace
-        May 2026}
-  };
+        and Citizen Science Observation Platform}};
+
+  % ── Meta bar (names + advisor) ───────────────────────────
+  \node[anchor=center, text width=44cm, align=center]
+    at ({0.5*\paperwidth}, {-7.5cm}) {%
+      {\fontsize{19}{24}\selectfont\color{white}
+        \textbf{Doruk Ege Aksu}\enspace
+        \textcolor{white!60!brand}{·}\enspace
+        \textbf{Ayhan \"Oner}%
+        \qquad
+        {\color{white!60!brand}\textbf{Advisor:}}\enspace
+        Asst.\ Prof.\ \.{I}lktan Ar}};
 
   % ── Project logo — right ─────────────────────────────────
-  \node[anchor=east] at ({\paperwidth-1cm}, {-\hdrH/2}) {%
-    \includegraphics[height=6cm]{images/birdsight_logo.png}};
+  \node[anchor=east] at ({\paperwidth-0.8cm}, {-3.0cm}) {%
+    \includegraphics[height=5.8cm]{images/birdsight_logo.png}};
 
 \end{tikzpicture}
 
