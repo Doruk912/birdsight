@@ -380,17 +380,15 @@
 % ── Tech stack logo slots ─────────────────────────────────
 \def\logoy{0.93}
 
-\foreach \logo/\h [count=\i] in {%
-    pytorch_logo.png/1,
-    spring_logo.png/1,
-    nextjs_logo.png/0.75,
-    fastapi_logo.png/0.85,
-    postgresql_logo.png/1,
-    minio_logo.png/0.75,
-    docker_logo.png/1
-    }{%
-  \pgfmathsetmacro{\xpos}{6 + (\i-1)*6.2}
-
+\foreach \logo/\h/\xpos [count=\i] in {%
+    pytorch_logo.png/1/6.25,
+    spring_logo.png/1/12,
+    nextjs_logo.png/0.75/17.5,
+    fastapi_logo.png/0.85/23.5,
+    postgresql_logo.png/1/30.75,
+    minio_logo.png/0.75/37.75,
+    docker_logo.png/1/43.75%
+}{%
   \node at (\xpos cm, \logoy cm)
     {\includegraphics[height=\h cm]{images/\logo}};
 }
