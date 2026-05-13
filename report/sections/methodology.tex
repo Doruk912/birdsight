@@ -125,18 +125,33 @@ The bird species included in the final dataset are listed in Table
 
 \subsubsection{Data Preprocessing}
 
-The collected image dataset was preprocessed to ensure that it was suitable for
-training the machine learning models. Initially, low-quality and corrupted images
-were removed from the dataset and replaced to keep class balance. The images were 
-then resized to a consistent size to match the input dimensions required by the 
-selected deep learning architectures.
+The collected image dataset was preprocessed so that training could rely on clean, 
+uniformly sized files. Low-quality and corrupted images were removed and, where 
+needed, replaced to preserve class balance. As a first normalisation step, surviving 
+images were resized to \textbf{$512\times 512$} pixels and exported as high-quality 
+JPEG files. This fixed resolution stabilises on-disk storage, simplifies batching 
+in Python, and makes the training pipeline reproducible before any architecture-specific 
+tensor transforms are applied.
 
-To increase dataset variability and improve model generalization, several data
-augmentation techniques were applied. These augmentations included random
-rotations, horizontal flipping, brightness adjustments, and other minor
-transformations. The purpose of these augmentations was to improve the robustness
-of the models against variations commonly found in real-world bird photographs,
-such as changes in lighting conditions, viewing angles, and image composition.
+For training and evaluation, \texttt{torchvision} transforms map each stored image 
+to the spatial size expected by the ImageNet-pretrained weights shipped with each 
+architecture. \textbf{InceptionV3} uses the reference Inception recipe: resize so 
+that the \emph{shorter} side equals \textbf{$342$} pixels, then centre-crop to 
+\textbf{$299\times 299$}. This matches the input geometry assumed by the pretrained 
+InceptionV3 implementation and keeps training, validation, test, and deployment 
+inference aligned. The other four models (\textbf{VGG16}, \textbf{ResNet50}, 
+\textbf{DenseNet121}, \textbf{MobileNetV2}) follow the common torchvision convention 
+for ImageNet transfer: resize the shorter side to \textbf{$256$} pixels, then 
+centre-crop to \textbf{$224\times 224$}. The final tensor is therefore $224\times 
+224$, not $256\times 256$; the $256$ value is an intermediate resize that preserves 
+aspect ratio before the square crop. Using these standard geometries reduces train/serve 
+mismatch and follows the same assumptions made by millions of prior transfer-learning 
+experiments \cite{paszke2019pytorch}.
+
+During training, additional stochastic augmentations (random resized crop to the 
+target size, flips, colour jitter, etc.) increase robustness to viewpoint and lighting; 
+validation and test use only the deterministic pipelines above so metrics are comparable 
+across models.
 
 After preprocessing was completed, the dataset was divided into training,
 validation, and testing subsets using a fixed splitting strategy. A total of
@@ -170,10 +185,10 @@ by fully connected layers. Although it contains a large number of parameters, it
 has been widely used in image classification tasks due to its strong feature
 extraction capability \cite{bilgin2022bird,tang2025comparative}.
 
-\item \textbf{ResNet:} Residual Networks (ResNet) utilize residual connections that
-allow deeper neural networks to be trained with improved gradient flow. Variants
-such as ResNet50 and ResNet152V2 have demonstrated high accuracy in bird species
-classification tasks \cite{bilgin2022bird,tang2025comparative}.
+\item \textbf{ResNet50:} Residual Networks (ResNet) utilize residual connections that
+allow deeper neural networks to be trained with improved gradient flow. In this
+project, \textbf{ResNet50} was used as the representative ResNet depth because it is
+widely reported in bird-species benchmarks \cite{bilgin2022bird,tang2025comparative}.
 
 \item \textbf{InceptionV3:} This architecture utilizes parallel convolutional
 filters of different sizes within the same layer, allowing it to capture
@@ -210,7 +225,8 @@ PyTorch was selected because it provides built-in support for
 transfer learning and implementations of widely used convolutional neural
 network architectures. The implementations of VGG16, ResNet50, InceptionV3,
 MobileNetV2, and DenseNet121 provided by Torchvision were used to ensure
-consistency between experiments. The overall workflow used during model training and evaluation is illustrated in
+consistency between experiments. The overall workflow used during model training and 
+evaluation is illustrated in
 Figure~\ref{fig:training_pipeline}.
 
 \begin{figure}[H]
@@ -231,8 +247,13 @@ layers corresponding to the number of bird species included in the dataset.
 Training was performed in two phases. In the first phase, the pretrained backbone layers were
 frozen and only the newly added classification layers were trained. In the second phase, all
 layers were unfrozen and the entire network was fine-tuned using differential learning rates.
-A smaller learning rate was applied to the pretrained backbone layers, while a higher learning
-rate was used for the classifier layers.
+\textbf{Numerical schedule (Adam optimiser).} Phase~1 (frozen backbone) optimised only the 
+new head with a learning rate of \textbf{$10^{-3}$} and weight decay \textbf{$10^{-4}$} (except 
+VGG16, where weight decay was set to \textbf{$5\times 10^{-4}$} in code to stabilise the larger 
+fully-connected stack). Phase~2 (unfrozen backbone) used two parameter groups: \textbf{$10^{-5}$} 
+for convolutional backbone layers and \textbf{$10^{-4}$} for the classifier head. Intuitively, 
+the backbone already encodes general visual features from ImageNet, so it should move more slowly 
+than the randomly initialised head \cite{paszke2019pytorch}.
 
 Images were preprocessed using resizing and normalization techniques. 
 Random resized cropping, horizontal flipping, and color jittering were also applied to
@@ -245,19 +266,31 @@ each input image. The cross-entropy loss function was used because the task
 involved multi-class image classification. Model parameters were updated using 
 the backpropagation algorithm together with the Adam optimization algorithm.
 
-Training was performed for a predefined maximum number of epochs. A cosine annealing
-learning rate scheduler was used to gradually reduce the learning rate during training.
-Additionally, gradient clipping was applied to improve training stability. Validation loss and
-accuracy values were recorded after each epoch, and validation performance was continuously
-monitored to detect potential overfitting. Early stopping was employed during the fine-tuning
-phase to terminate training when validation loss stopped improving for a predefined number
-of epochs.
+Training was scheduled for a \textbf{predefined maximum number of epochs per phase}, as implemented 
+in the training scripts. \textbf{Phase~1 (frozen backbone):} MobileNetV2, ResNet50, DenseNet121, and 
+InceptionV3 each trained for \textbf{5} epochs with the backbone frozen; \textbf{VGG16} trained for 
+\textbf{10} frozen epochs because its deeper fully-connected head benefited from a longer warm-up 
+before unfreezing. \textbf{Phase~2 (full fine-tuning):} every architecture used up to \textbf{20} 
+fine-tuning epochs as an upper budget. A cosine annealing learning-rate scheduler was applied 
+within each phase. Gradient clipping (global norm \textbf{1.0}) was used for stability. Early 
+stopping was applied \emph{only} in phase~2 with patience \textbf{7} epochs and minimum 
+improvement \textbf{$10^{-3}$} on validation loss, so runs could finish before the 20-epoch 
+cap if validation stopped improving.
+
+After each epoch, validation loss and accuracy were computed on the held-out validation split. 
+For a mini-batch of $N$ samples with one-hot targets $y_i$ and predicted class probabilities 
+$\hat{p}_i$, the monitored classification objective was the standard cross-entropy 
+$\mathcal{L}=-\frac{1}{N}\sum_{i=1}^{N}\sum_{c=1}^{C}y_{i,c}\log \hat{p}_{i,c}$ (with 
+label smoothing added later only in the InceptionV3 optimisation experiments). Validation 
+accuracy was the fraction of examples whose argmax prediction matched the ground-truth species 
+label.
 
 Model checkpoints were automatically saved whenever validation accuracy improved. This
 ensured that the best-performing versions of the models were preserved for evaluation.
 
 To ensure a fair comparison between architectures, the same dataset splits
-were used for all experiments. Batch sizes were selected according to the memory requirements of each architecture.
+were used for all experiments. Batch sizes were selected according to the memory requirements 
+of each architecture.
 The models were then evaluated using consistent evaluation metrics, and all
 experimental settings and configurations were documented to ensure reproducibility.
 The main training hyperparameters used for each model are summarized in
@@ -280,10 +313,13 @@ VGG16 & 8 & 10 & 20 & $10^{-3}$ & $10^{-5}$ \\
 \end{tabular}
 \end{table}
 
-Training of the models was performed on a single NVIDIA RTX 4050 Laptop GPU with CUDA acceleration enabled.
-Images were loaded and preprocessed using the PyTorch DataLoader. The preprocessing also included resizing
-to match the input size required by each architecture. The InceptionV3 model required the images to be resized 
-to 299x299 pixels, while the other models required images to be 224x224 pixels.
+Training of the models was performed on a single NVIDIA RTX 4050 Laptop GPU with CUDA 
+acceleration enabled.
+Images were loaded and batched using the PyTorch \texttt{DataLoader} with shuffling on 
+the training split \cite{paszke2019pytorch}. On-the-fly transforms then produced the 
+architecture-specific tensors described above: \textbf{$299\times 299$} for InceptionV3 
+and \textbf{$224\times 224$} for the other four models (via the $342\!\rightarrow\!299$ 
+and $256\!\rightarrow\!224$ pipelines, respectively).
 
 \subsubsection{Model Evaluation}
 

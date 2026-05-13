@@ -7,6 +7,12 @@ research questions stated in the Introduction and discusses limitations and thre
 
 \subsection{Experiment and Validation}
 
+This part documents \emph{what was validated} and \emph{how}, before the detailed numerical and 
+interface outcomes are presented in the \textit{Results} part of this chapter. The validation has 
+two parts: (i) a controlled machine-learning protocol with fixed data splits and shared evaluation 
+code, and (ii) a practical software check that the integrated services run together as a working 
+system. The following subsubsections address each part in turn.
+
 \subsubsection{Machine learning protocol}
 
 The bird species classifier was developed and evaluated using a fixed experimental protocol 
@@ -42,6 +48,12 @@ claims are made beyond standard software engineering acceptance testing.
 
 \subsection{Results}
 
+This part summarises the measurable outcomes of the project. It first reports the comparative benchmark 
+among five CNN architectures, then the targeted improvements applied to InceptionV3, the final performance 
+after expanding to 30 species, and finally qualitative evidence from the implemented web interface (with 
+references to the figures and tables already presented in the Methodology). The intent is to separate 
+\emph{what was observed} from the interpretation given later in the \textit{Discussion} part of this chapter.
+
 \subsubsection{Benchmark comparison (five architectures)}
 
 Table~\ref{tab:model_evaluation_results} summarises the benchmark performance on the held-out test 
@@ -49,7 +61,8 @@ data. InceptionV3 achieved the strongest overall top-1 accuracy and the stronges
 behaviour among the five candidates, which is important for an interactive workflow where users pick 
 among suggested species rather than only accepting the first label. DenseNet121 and ResNet50 performed 
 similarly to each other and slightly below InceptionV3, while MobileNetV2 remained competitive given 
-its lighter design. VGG16 lagged behind, which is consistent with the comparative literature on older deep stacks versus residual and factorised architectures \cite{bilgin2022bird,tang2025comparative}.
+its lighter design. VGG16 lagged behind, which is consistent with the comparative literature on older 
+deep stacks versus residual and factorised architectures \cite{bilgin2022bird,tang2025comparative}.
 
 Figure~\ref{fig:model_comparison_chart} provides a compact visual comparison across models. 
 Figure~\ref{fig:inception_confusion_matrix} shows that most mass lies on the diagonal for InceptionV3, 
@@ -95,6 +108,12 @@ platform connects model assistance with community validation rather than replaci
 entirely \cite{baker2021verification,fraisl2022citizen}.
 
 \subsection{Discussion}
+
+This part moves from reporting results to explaining their meaning. It connects the empirical findings 
+to the research questions posed in the Introduction, relates the design choices to prior work, and 
+states limitations openly (including engineering and dataset threats to validity). A short closing 
+paragraph summarises the takeaway message. The discussion is kept separate from the \textit{Results} 
+part so that facts and interpretations are not mixed in a way that confuses readers.
 
 \subsubsection{Answering the research questions}
 
