@@ -128,8 +128,8 @@
   \fill[branddark] (0,-\hdrH) rectangle (\paperwidth, {-\hdrH-0.18cm});
 
   % ── University logo — left ───────────────────────────────
-  \node[anchor=west] at (1.5cm, {-\hdrH/2}) {%
-    \includegraphics[height=5.5cm]{images/university_logo.png}};
+  \node[anchor=west] at (0.5cm, {-\hdrH/2}) {%
+    \includegraphics[height=7.5cm]{images/university_logo.png}};
 
   % ── Title block — centre ─────────────────────────────────
   \node[anchor=center, text width=35cm, align=center]
@@ -153,8 +153,8 @@
   };
 
   % ── Project logo — right ─────────────────────────────────
-  \node[anchor=east] at ({\paperwidth-1.5cm}, {-\hdrH/2}) {%
-    \includegraphics[height=5cm]{images/birdsight_logo.png}};
+  \node[anchor=east] at ({\paperwidth-1cm}, {-\hdrH/2}) {%
+    \includegraphics[height=6cm]{images/birdsight_logo.png}};
 
 \end{tikzpicture}
 
@@ -377,40 +377,23 @@
   % Green top edge of footer
   \fill[brand] (0,{\ftrH-0.18cm}) rectangle (\paperwidth, \ftrH);
 
-% ── Tech stack logos ──────────────────────────────────────
-\def\logoy{0.97}
+% ── Tech stack logo slots ─────────────────────────────────
+\def\logoy{0.93}
 
-\node at (6cm,  \logoy cm)
-  {\includegraphics[height=1.1cm]{images/pytorch_logo.png}};
+\foreach \logo/\h [count=\i] in {%
+    pytorch_logo.png/1,
+    spring_logo.png/1,
+    nextjs_logo.png/0.75,
+    fastapi_logo.png/0.85,
+    postgresql_logo.png/1,
+    minio_logo.png/0.75,
+    docker_logo.png/1
+    }{%
+  \pgfmathsetmacro{\xpos}{6 + (\i-1)*6.2}
 
-\node at (11.8cm, \logoy cm)
-  {\includegraphics[height=1.2cm]{images/spring_logo.png}};
-
-\node at (17.5cm, \logoy cm)
-  {\includegraphics[height=0.85cm]{images/nextjs_logo.png}};
-
-\node at (24.0cm, \logoy cm)
-  {\includegraphics[height=2.25cm]{images/fastapi_logo.png}};
-
-\node at (31.8cm, \logoy cm)
-  {\includegraphics[height=4.5cm]{images/postgresql_logo.png}};
-
-\node at (39.5cm, \logoy cm)
-  {\includegraphics[height=0.7cm]{images/minio_logo.png}};
-
-\node at (45cm, \logoy cm)
-  {\includegraphics[height=1.1cm]{images/docker_logo.png}};
-
-  % ── QR code slot ─────────────────────────────────────────
-  % INSERT: \node[anchor=east] at ({\paperwidth-1.5cm},{\ftrH/2})
-  %   {\includegraphics[height=1.6cm]{qr_github.png}};
-  \node[anchor=east] at ({\paperwidth-1.5cm}, {\ftrH/2}) {%
-    \begin{tikzpicture}
-      \fill[white, opacity=0.1] (0,0) rectangle (1.6cm,1.6cm);
-      \node[font=\tiny\bfseries, text=subtext, align=center]
-        at (0.8cm,0.8cm) {QR\\INSERT};
-    \end{tikzpicture}
-  };
+  \node at (\xpos cm, \logoy cm)
+    {\includegraphics[height=\h cm]{images/\logo}};
+}
 
 \end{tikzpicture}
 
