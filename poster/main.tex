@@ -1,0 +1,418 @@
+% ============================================================
+%  BirdSight – Graduation Project Poster  (v3)
+%  B2 size: 500 mm × 707 mm  portrait
+%
+%  KEY DESIGN DECISIONS:
+%   - Header and footer are pure TikZ drawn at absolute coords
+%     so they bleed edge-to-edge regardless of beamer margins.
+%   - Body uses minipage inside a single centered column,
+%     split manually with two minipages side by side.
+%   - Cards have a left green accent bar instead of a title box,
+%     giving a cleaner, more modern look.
+%   - Colours: white background, #00BC7D green accents, dark text.
+%
+%  COMPILE:  pdflatex birdsight_poster_v3.tex   (run twice)
+%
+%  SEARCH "INSERT" FOR EVERY PLACEHOLDER.
+% ============================================================
+
+\documentclass[final]{beamer}
+
+\usepackage[
+  orientation=portrait,
+  size=custom,
+  width=50,
+  height=70.7,
+  scale=1.0
+]{beamerposter}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{calc}
+\usetikzlibrary{positioning}
+\tcbuselibrary{skins,breakable}
+
+% ── Colours ─────────────────────────────────────────────────
+\definecolor{brand}{HTML}{00D594}
+\definecolor{branddark}{HTML}{009966}
+\definecolor{brandlight}{HTML}{EAF9F3}
+\definecolor{pagebg}{HTML}{FFFFFF}
+\definecolor{cardbg}{HTML}{F7F8F8}
+\definecolor{darktext}{HTML}{1C1C1E}
+\definecolor{subtext}{HTML}{6E6E73}
+\definecolor{rule}{HTML}{E0E0E0}
+
+% ── Beamer reset ────────────────────────────────────────────
+\usetheme{default}
+\setbeamercolor{background canvas}{bg=pagebg}
+\setbeamertemplate{navigation symbols}{}
+% Remove beamer's internal frame padding entirely
+\setbeamersize{text margin left=0pt, text margin right=0pt}
+
+% ── Card style – minimal left-bar accent ────────────────────
+\tcbset{
+  card/.style={
+    enhanced, 
+    boxrule=0pt, frame hidden,
+    borderline west={3pt}{0pt}{brand},
+    arc=0pt, outer arc=0pt,
+    colback=cardbg,
+    left=10pt, right=10pt, top=8pt, bottom=8pt,
+  },
+  % stat highlight pill
+  statbox/.style={
+    enhanced,
+    boxrule=0pt, frame hidden,
+    arc=6pt,
+    colback=brandlight,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+    halign=center,
+  },
+}
+
+% ── Section label above a card ───────────────────────────────
+\newcommand{\cardlabel}[1]{%
+  {\fontsize{16}{20}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
+  \vspace{5pt}\par
+}
+
+% ── Thin rule ────────────────────────────────────────────────
+\newcommand{\hrulecustom}{%
+  \textcolor{rule}{\rule{\linewidth}{0.5pt}}\par
+}
+
+% ── Placeholder (dashed box) ─────────────────────────────────
+%  \pholder{width}{height}{text}
+\newcommand{\pholder}[3]{%
+  \begin{tikzpicture}
+    \fill[cardbg] (0,0) rectangle (#1,#2);
+    \draw[brand!40, dashed] (0,0) rectangle (#1,#2);
+    \node[font=\small\bfseries, text=subtext, align=center]
+      at ({#1/2},{#2/2}) {#3};
+  \end{tikzpicture}%
+}
+
+% ── Layout constants ─────────────────────────────────────────
+\newlength{\hdrH}    \setlength{\hdrH}{8.5cm}
+\newlength{\ftrH}    \setlength{\ftrH}{2.2cm}
+\newlength{\bodyW}   \setlength{\bodyW}{47cm}   % total body width
+\newlength{\colW}    \setlength{\colW}{22.8cm}  % each column
+\newlength{\colGap}  \setlength{\colGap}{1.4cm} % gap between columns
+\newlength{\bodyX}   \setlength{\bodyX}{1.5cm}  % left margin of body
+\newlength{\vgap}    \setlength{\vgap}{0.55cm}
+
+% ============================================================
+\begin{document}
+\begin{frame}[t]{}
+
+% ============================================================
+%  HEADER — full-bleed TikZ, anchored to top-left of page
+% ============================================================
+\begin{tikzpicture}[remember picture, overlay,
+                    shift={(current page.north west)}]
+
+  % Main green band
+  \fill[brand] (0,0) rectangle (\paperwidth, -\hdrH);
+
+  % Subtle darker bottom edge
+  \fill[branddark] (0,-\hdrH) rectangle (\paperwidth, {-\hdrH-0.18cm});
+
+  % ── University logo — left ───────────────────────────────
+  \node[anchor=west] at (1.5cm, {-\hdrH/2}) {%
+    \includegraphics[height=5.5cm]{images/university_logo.png}};
+
+  % ── Title block — centre ─────────────────────────────────
+  \node[anchor=center, text width=35cm, align=center]
+    at ({0.5*\paperwidth}, {-\hdrH/2}) {%
+      % INSERT optional project logo above title:
+      % \includegraphics[height=2cm]{birdsight_wordmark.png}\\[6pt]
+      {\fontsize{76}{84}\selectfont\bfseries\color{white} BirdSight}\\[8pt]
+      {\fontsize{24}{28}\selectfont\color{white}
+        A Machine Learning-Based Bird Species Recognition\\[2pt]
+        and Citizen Science Observation Platform}\\[14pt]
+      {\fontsize{20}{26}\selectfont\color{white}
+        \textbf{Doruk Ege Aksu} \enspace\textcolor{white!60!brand}{|}\enspace
+        \textbf{Ayhan \"Oner}\\[3pt]
+        Supervisor: Asst.\ Prof.\ \.{I}lktan Ar
+        \enspace\textcolor{white!60!brand}{|}\enspace
+        Kadir Has University
+        \enspace\textcolor{white!60!brand}{|}\enspace
+        FENS 402
+        \enspace\textcolor{white!60!brand}{|}\enspace
+        May 2026}
+  };
+
+  % ── Project logo — right ─────────────────────────────────
+  \node[anchor=east] at ({\paperwidth-1.5cm}, {-\hdrH/2}) {%
+    \includegraphics[height=5cm]{images/birdsight_logo.png}};
+
+\end{tikzpicture}
+
+% Push body below header
+\vspace{\hdrH}
+\vspace{0.55cm}
+
+% ============================================================
+%  BODY — two minipages side by side
+% ============================================================
+\hspace{\bodyX}%
+\begin{minipage}[t]{\colW}
+
+  % ── CARD: Introduction ─────────────────────────────────
+  \cardlabel{Introduction}
+  \begin{tcolorbox}[card]
+    Birds are critical \textbf{bioindicators} of ecosystem health.
+    Traditional monitoring is slow and expert-dependent.
+    \textbf{Citizen science + automated ML identification} bridges this gap.
+  \end{tcolorbox}
+
+  \vspace{\vgap}
+
+  % ── CARD: Dataset ──────────────────────────────────────
+  \cardlabel{Dataset}
+  \begin{tcolorbox}[card]
+    \begin{minipage}[t]{0.46\linewidth}
+      {\small
+      \textbf{Source:} GBIF via iNaturalist\\[4pt]
+      \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=0pt,
+                      label=\textcolor{brand}{\textbullet}]
+        \item 30 species — Turkey
+        \item 5,000 images / species
+        \item \textbf{150,000} images total
+        \item 80 / 10 / 10 split
+      \end{itemize}}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.50\linewidth}
+      % INSERT: \includegraphics[width=\linewidth]{dataset_samples.png}
+      \pholder{\linewidth}{4.2cm}{Sample Images\\(Fig.\ 3.1)}
+    \end{minipage}
+  \end{tcolorbox}
+
+  \vspace{\vgap}
+
+  % ── CARD: Architecture Comparison ──────────────────────
+  \cardlabel{Architecture Comparison}
+  \begin{tcolorbox}[card]
+    % INSERT: \includegraphics[width=\linewidth]{arch_comparison.png}
+    \pholder{\linewidth}{7.5cm}{Metric Comparison Chart\\(Fig.\ 3.3)}
+
+    \vspace{8pt}
+
+    {\small
+    \begin{tabular}{@{}lcccc@{}}
+      \toprule
+      \textbf{Model} & \textbf{Acc.} & \textbf{F1} & \textbf{Top-3} & \textbf{AUC}\\
+      \midrule
+      VGG16        & 73.3\% & 0.733 & 88.8\% & 0.980\\
+      MobileNetV2  & 81.7\% & 0.817 & 93.1\% & 0.991\\
+      ResNet50     & 87.8\% & 0.878 & 95.4\% & 0.994\\
+      DenseNet121  & 87.8\% & 0.879 & 95.6\% & 0.995\\
+      \rowcolor{brandlight}
+      \textbf{InceptionV3} & \textbf{89.1\%} & \textbf{0.891}
+                           & \textbf{96.1\%} & \textbf{0.995}\\
+      \bottomrule
+    \end{tabular}}
+  \end{tcolorbox}
+
+  \vspace{\vgap}
+
+  % ── CARD: System Architecture ──────────────────────────
+  \cardlabel{System Architecture}
+  \begin{tcolorbox}[card]
+    % INSERT: \includegraphics[width=\linewidth]{system_arch.png}
+    \pholder{\linewidth}{6cm}{System Architecture Diagram\\[4pt]
+      Next.js $\to$ Spring Boot API $\to$ FastAPI ML Service\\[4pt]
+      PostgreSQL + PostGIS \quad MinIO Object Storage}
+
+    \vspace{8pt}
+
+    \begin{minipage}[t]{0.48\linewidth}
+      {\small\textbf{Backend — Spring Boot}
+      \begin{itemize}[leftmargin=1em, itemsep=1pt, topsep=3pt,
+                      label=\textcolor{brand}{\textbullet}]
+        \item JWT dual-token auth
+        \item PostGIS geospatial queries
+        \item Research Grade scoring
+      \end{itemize}}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.48\linewidth}
+      {\small\textbf{ML Service — FastAPI}
+      \begin{itemize}[leftmargin=1em, itemsep=1pt, topsep=3pt,
+                      label=\textcolor{brand}{\textbullet}]
+        \item InceptionV3, 299$\times$299
+        \item Returns Top-5 + confidence
+        \item Independent microservice
+      \end{itemize}}
+    \end{minipage}
+  \end{tcolorbox}
+
+\end{minipage}%
+\hspace{\colGap}%
+\begin{minipage}[t]{\colW}
+
+  % ── CARD: Platform Screenshots ─────────────────────────
+  \cardlabel{Platform}
+  \begin{tcolorbox}[card]
+    \begin{minipage}[t]{0.475\linewidth}
+      % INSERT: \includegraphics[width=\linewidth]{screen_feed.png}
+      \pholder{\linewidth}{5cm}{Observation Feed\\(Fig.\ 3.13)}
+      \vspace{2pt}
+      {\normalsize\color{subtext}\centering Filterable feed + pagination\par}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.475\linewidth}
+      % INSERT: \includegraphics[width=\linewidth]{screen_map.png}
+      \pholder{\linewidth}{5cm}{Map Page\\(Fig.\ 3.14)}
+      \vspace{2pt}
+      {\normalsize\color{subtext}\centering Clustered sighting map\par}
+    \end{minipage}
+
+    \vspace{6pt}
+
+    \begin{minipage}[t]{0.475\linewidth}
+      % INSERT: \includegraphics[width=\linewidth]{screen_ml.png}
+      \pholder{\linewidth}{5cm}{ML Suggestions\\(Fig.\ 3.18)}
+      \vspace{2pt}
+      {\normalsize\color{subtext}\centering Top-k species predictions\par}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.475\linewidth}
+      % INSERT: \includegraphics[width=\linewidth]{screen_taxonomy.png}
+      \pholder{\linewidth}{5cm}{Taxonomy Browser\\(Fig.\ 3.15)}
+      \vspace{2pt}
+      {\normalsize\color{subtext}\centering 14k taxa + Wikipedia embed\par}
+    \end{minipage}
+  \end{tcolorbox}
+
+  \vspace{\vgap}
+
+  % ── CARD: Final Model Results ──────────────────────────
+  \cardlabel{Final Model — 30 Species · 150k Images}
+  \begin{tcolorbox}[card]
+    \begin{minipage}[t]{0.52\linewidth}
+      % INSERT: \includegraphics[width=\linewidth]{training_curves.png}
+      \pholder{\linewidth}{5cm}{Training Curves\\(Fig.\ 3.6 / 3.7)}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.44\linewidth}
+      \vspace{0.3cm}
+      {\small
+      \begin{tabular}{@{}lc@{}}
+        \toprule
+        \textbf{Metric} & \textbf{Score}\\
+        \midrule
+        Accuracy        & 89.35\%\\
+        Top-3 Accuracy  & 95.98\%\\
+        Top-5 Accuracy  & 97.80\%\\
+        Weighted F1     & 0.893\\
+        ROC-AUC         & 0.996\\
+        mAP             & 0.952\\
+        \bottomrule
+      \end{tabular}}
+    \end{minipage}
+  \end{tcolorbox}
+
+  \vspace{\vgap}
+
+  % ── CARD: Conclusions ──────────────────────────────────
+  \cardlabel{Conclusions \& Future Work}
+  \begin{tcolorbox}[card]
+    \begin{minipage}[t]{0.48\linewidth}
+      {\small\textbf{Conclusions}
+      \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=3pt,
+                      label=\textcolor{brand}{\textbullet}]
+        \item InceptionV3 best across all metrics
+        \item Augmentation biggest accuracy gain
+        \item 95.98\% Top-3 suits suggestion UI
+        \item Research Grade enables quality data
+      \end{itemize}}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.48\linewidth}
+      {\small\textbf{Future Work}
+      \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=3pt,
+                      label=\textcolor{brand}{\textbullet}]
+        \item Expand species globally
+        \item Continuous model retraining
+        \item Public cloud deployment
+        \item Native mobile app
+        \item Audio identification
+      \end{itemize}}
+    \end{minipage}
+  \end{tcolorbox}
+
+  \vspace{\vgap}
+
+  % ── CARD: References ───────────────────────────────────
+  \cardlabel{References}
+  \begin{tcolorbox}[card]
+    {\small\color{subtext}
+    [1] Szegedy, C., et al. (2016). Rethinking the Inception Architecture for Computer Vision. \textit{CVPR}.\\[2pt]
+    [2] GBIF.org (2025). GBIF Occurrence Download.\\[2pt]
+    [3] iNaturalist (2025). Community-driven biodiversity observations.}
+  \end{tcolorbox}
+
+\end{minipage}
+
+% ============================================================
+%  FOOTER — full-bleed TikZ anchored to bottom-left of page
+% ============================================================
+\begin{tikzpicture}[remember picture, overlay,
+                    shift={(current page.south west)}]
+
+  % Footer band
+  \fill[darktext] (0,0) rectangle (\paperwidth, \ftrH);
+  % Green top edge of footer
+  \fill[brand] (0,{\ftrH-0.18cm}) rectangle (\paperwidth, \ftrH);
+
+% ── Tech stack logos ──────────────────────────────────────
+\def\logoy{0.97}
+
+\node at (6cm,  \logoy cm)
+  {\includegraphics[height=1.1cm]{images/pytorch_logo.png}};
+
+\node at (11.8cm, \logoy cm)
+  {\includegraphics[height=1.2cm]{images/spring_logo.png}};
+
+\node at (17.5cm, \logoy cm)
+  {\includegraphics[height=0.85cm]{images/nextjs_logo.png}};
+
+\node at (24.0cm, \logoy cm)
+  {\includegraphics[height=2.25cm]{images/fastapi_logo.png}};
+
+\node at (31.8cm, \logoy cm)
+  {\includegraphics[height=4.5cm]{images/postgresql_logo.png}};
+
+\node at (39.5cm, \logoy cm)
+  {\includegraphics[height=0.7cm]{images/minio_logo.png}};
+
+\node at (45cm, \logoy cm)
+  {\includegraphics[height=1.1cm]{images/docker_logo.png}};
+
+  % ── QR code slot ─────────────────────────────────────────
+  % INSERT: \node[anchor=east] at ({\paperwidth-1.5cm},{\ftrH/2})
+  %   {\includegraphics[height=1.6cm]{qr_github.png}};
+  \node[anchor=east] at ({\paperwidth-1.5cm}, {\ftrH/2}) {%
+    \begin{tikzpicture}
+      \fill[white, opacity=0.1] (0,0) rectangle (1.6cm,1.6cm);
+      \node[font=\tiny\bfseries, text=subtext, align=center]
+        at (0.8cm,0.8cm) {QR\\INSERT};
+    \end{tikzpicture}
+  };
+
+\end{tikzpicture}
+
+\end{frame}
+\end{document}
