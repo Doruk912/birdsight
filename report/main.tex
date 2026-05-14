@@ -149,12 +149,15 @@
 ]{biblatex}
 \addbibresource{references.bib} % Create a references.bib file for your sources
 
+\usepackage{microtype}
 \usepackage[hidelinks]{hyperref} % For \autoref and \phantomsection (load last)
 
 % ==========================================
 % DOCUMENT ENVIRONMENT
 % ==========================================
 \begin{document}
+
+\emergencystretch=2em
 
 % Default paragraph spacing for the main document
 \setlength{\parskip}{\baselineskip}

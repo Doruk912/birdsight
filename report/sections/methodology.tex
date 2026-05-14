@@ -214,7 +214,7 @@ for model development and training \cite{paszke2019pytorch}.
 PyTorch was selected because it provides built-in support for
 transfer learning and implementations of widely used convolutional neural
 network architectures. The implementations of VGG16, ResNet50, InceptionV3,
-MobileNetV2, and DenseNet121 provided by Torchvision were used to ensure
+MobileNetV2, and DenseNet121 provided by Torchvision \cite{torchvision2025} were used to ensure
 consistency between experiments. The overall workflow used during model training and 
 evaluation is illustrated in
 Figure~\ref{fig:training_pipeline}.
@@ -243,7 +243,7 @@ $10^{-4}$, except for VGG16, where weight reduction of $5\times 10^{-4}$ in code
 to stabilise the larger fully-connected stack. Phase~2, which is the unfrozen backbone, used two 
 sets of parameters: $10^{-5}$ for convolutional backbone layers and $10^{-4}$ for 
 the classifier header. The backbone should move slower than the randomly initialized 
-header because it already encodes general visual features from ImageNet\cite{paszke2019pytorch}.
+header because it already encodes general visual features from ImageNet \cite{imagenet2025}.
 
 Images were preprocessed using resizing and normalization techniques. 
 Random resized cropping, horizontal flipping, and color jittering were also applied to
@@ -302,7 +302,7 @@ VGG16 & 8 & 10 & 20 & $10^{-3}$ & $10^{-5}$ \\
 \end{table}
 
 Training of the models was performed on a single NVIDIA RTX 4050 Laptop GPU with CUDA 
-acceleration enabled.
+acceleration enabled \cite{nvidiacuda2025}.
 Images were loaded and batched using the PyTorch DataLoader with shuffling on 
 the training split \cite{paszke2019pytorch}. On-the-fly transforms then produced the 
 architecture-specific tensors described above: \textbf{$299\times 299$} for InceptionV3 
@@ -438,14 +438,16 @@ VGG16 &
 }
 \end{table}
 
-The results from the evaluation clearly show that InceptionV3 achieved the best
-overall performance among all trained models. It achieved the highest accuracy, 
-precision, recall, and F1-score. It also achieved the highest Top-3 Accuracy and Top-5 Accuracy scores.
-The results indicate that the model was better at distinguishing visually similar bird species compared to
-the other evaluated architectures.
+The evaluation results clearly show that InceptionV3 was the best overall performer
+among all trained models. It achieved the highest accuracy, 
+precision, recall, and F1-score.
+It also led on Top\text{-}3 and Top\text{-}5 accuracy.
+InceptionV3 distinguished visually similar bird species better than the other architectures.
 
-DenseNet121 and ResNet50 also performed well and produced very similar results. 
-DenseNet121 slightly outperformed ResNet50 in overall accuracy and Top-3 accuracy.
+DenseNet121 and ResNet50 also performed well.
+Their scores were very similar.
+DenseNet121 was slightly higher than ResNet50 in overall accuracy.
+It also led on Top\text{-}3 accuracy.
 
 MobileNetV2 achieved a lower classification accuracy compared to the other larger
 architectures; however, its performance was relatively competitive considering its
@@ -497,8 +499,10 @@ shows the pairs that are misclassified most frequently.
 These figures show that the model really learns visual features even when the dataset 
 consists of amateur bird photopraphs. Because the images are sourced from citizen science platforms, 
 they include a wide variety of image quality, angles, lighting conditions, and backgrounds.
-Some of the images are blurry, taken from a distance, or have complex backgrounds. They can even be tricky to identify even for human experts.
-Despite this variety in images, the model was able to learn meaningful features that allowed it to achieve good results.
+Some of the images are blurry, taken from a distance, or have complex backgrounds. They can even be 
+tricky to identify even for human experts.
+Despite this variety in images, the model was able to learn meaningful features that allowed it to 
+achieve good results.
 
 Based on the evaluation results, InceptionV3 was selected as the final model
 for deployment and integration into the web platform because it achieved the
@@ -513,7 +517,8 @@ ability and overall accuracy could be further improved.
 
 Three separate experiments were conducted using the same 23-class dataset to optimize the model. 
 Each experiment independently focused on a different aspect. The best-performing configurations 
-were identified and combined to achieve the best possible results. The final training script was then used 
+were identified and combined to achieve the best possible results. The final training script was 
+then used 
 to train the model on the expanded 30-class dataset.
 
 \paragraph{Label Smoothing}
@@ -523,17 +528,23 @@ technique used to replace the hard class labels with smooth values. This helps t
 and improve generalization performance.
 
 In this experiment, a label smoothing factor of 0.1 was applied to the cross-entropy loss function. 
-This means that instead of the correct class having a label of 1 and all other classes have a label of 0, 
-the correct class was assigned a label of 0.9 and the remaining classes were assigned a label of 0.1 divided by the number of classes minus one.
+This means that instead of the correct class having a label of 1 and all other classes have a label 
+of 0, 
+the correct class was assigned a label of 0.9 and the remaining classes were assigned a label of 0.1 
+divided by the number of classes minus one.
 
-The experiment resulted in a small improvement in accuracy. The overall accuracy increased from 89.10\% to 89.49\%.
-The weighted F1-score also improved slightly. However, the improvement was limited compared to the baseline.
+The experiment resulted in a small improvement in accuracy. The overall accuracy increased from 89.10\% 
+to 89.49\%.
+The weighted F1-score also improved slightly. However, the improvement was limited compared to the 
+baseline.
 
 \paragraph{Enhanced Data Augmentation}
 
 The second experiment was about improving the data augmentation techniques used during training.
-The initial data augmentation already included the standard augmentations such as random resized cropping,
-horizontal flipping, and color jittering. However, it was believed that applying more aggressive augmentations could further improve the model's performance.
+The initial data augmentation already included the standard augmentations such as random resized 
+cropping,
+horizontal flipping, and color jittering. However, it was believed that applying more aggressive 
+augmentations could further improve the model's performance.
 
 The baseline augmentation pipeline consisted of:
 
@@ -589,7 +600,7 @@ didn't memorize the training data.
 The third experiment focused on tuning the number of frozen backbone epochs before full network training.
 Multiple freeze epoch values were tested  in order to find the optimal number.
 
-When using transfer learning, pretrained convolutional layers contain general features learned from the ImageNet dataset. 
+When using transfer learning, pretrained convolutional layers contain general features learned from the ImageNet dataset \cite{imagenet2025}. 
 Freezing these layers for several epochs allows the newly added classification layers to adapt before modifying the pretrained weights. 
 
 The optimal freeze epoch count can vary depending on the task. This experiment tested multiple freeze epoch values. 
@@ -699,18 +710,18 @@ consisting of a presentation layer, an application layer, and a data layer.
 This separation improves the maintainability of the project. It also aligns 
 with best practices in modern web development \cite{cervantes2024software}. 
 
-The platform consists of three independently deployable services: a Spring Boot backend, 
-a Next.js frontend, and a FastAPI machine learning service. Helper services such as  
-the database and object storage were containerized using Docker.
+The platform consists of three independently deployable services: a Spring Boot backend \cite{springboot2025}, 
+a Next.js frontend \cite{nextjs2025}, and a FastAPI machine learning service \cite{fastapi2025}. Helper services such as  
+the database and object storage were containerized using Docker \cite{docker2025}.
 
 \subsubsection{Backend Development}
 
-The backend was developed using Java 21 with the Spring Boot 4 framework. Spring Boot 
+The backend was developed using Java 21 \cite{oraclejava2025} with the Spring Boot 4 framework. Spring Boot 
 was selected for its widespread usage in the industry and its convention-over-configuration
 approach. Using Spring Boot simplified dependency management, service configuration, and 
-deployment \cite{walls2022spring}.
+deployment \cite{springboot2025}.
 
-The backend exposes a RESTful API using Spring Web MVC. This API serves as the only 
+The backend exposes a RESTful API using Spring Web MVC \cite{walls2022spring}. This API serves as the only 
 communication between the frontend and all server-side functionality. The functions
 handled by backend include observation management, user authentication, taxonomy browsing, 
 and machine learning model requests. JSON was used as the data exchange format due to 
@@ -721,7 +732,7 @@ authentication, user management, observations, community identifications, commen
 taxonomy, machine learning, and object storage. This modular structure keeps 
 responsibilities separated and makes the codebase easier to maintain.
 
-Authentication was implemented using a dual-token strategy. When the user logs in, the backend 
+Authentication was implemented using a dual-token strategy \cite{rfc7519jwt}. When the user logs in, the backend 
 issues a short-lived JWT access token returned in the response body and a long-lived 
 refresh token stored in a cookie. The access token has a lifetime of only 15 minutes.
 The refresh token on the other hand remains valid for 7 days.
@@ -734,10 +745,10 @@ Spring Security was used to configure the security filter chain and enforce
 authorization rules across all endpoints \cite{manne2023springsecurity}.
 
 Database access was abstracted using Spring Data JPA with Hibernate \cite{tudose2021orm}. This reduced 
-boilerplate code. Database schema management was handled by Flyway. Flyway ran migrations 
+boilerplate code. Database schema management was handled by Flyway \cite{flyway2025}. Flyway ran migrations 
 automatically on application startup. The migrations include all necessary table creation and schema updates.
 Flyway ensured that the database schema is always up to date with the application code. It also provided a version-controlled 
-way to manage database changes across different environments \cite{flyway2025}.
+way to manage database changes across different environments.
 
 A quality grading system for observations was implemented in the backend. Each observation 
 is assigned one of two quality grades: \textit{Needs ID} or \textit{Research Grade}. 
@@ -789,8 +800,8 @@ updated\_at & TIMESTAMP & Not Null \\ \hline
 Database changes are applied with Flyway. Flyway runs SQL migration files when the backend starts. 
 Each file is like a version step, so the schema is repeatable on another computer or later in time \cite{flyway2025}.
 
-All images that the users upload are stored in MinIO object storage. This includes the images that the users upload as observations or their avatars. 
-The database only stores links to the images. MiniO is an S3-compatible open-source storage solution \cite{minio2025}. 
+All images that the users upload are stored in MinIO object storage \cite{minio2025}. This includes the images that the users upload as observations or their avatars. 
+The database only stores links to the images. MinIO is an S3-compatible open-source storage solution. 
 The backend handles image uploads, deletions, and retrievals.
 
 \subsubsection{Frontend Development}
@@ -902,7 +913,7 @@ The settings page allows users to update their profile information and change th
 \subsubsection{Map Integration}
 
 Visualizing the observation on a map is an important feature of the platform. It allows users to explore the distribution of sightings. The map was implemented using MapLibre GL 5 together with the react-map-gl library \cite{maplibre2025, reactmapgl2025}.
-For the visuals on the map, the platform uses Carto's Voyager tile style. This relies on crowd-sourced geographical data from OpenStreetMap \cite{openstreetmap2025}.
+For the visuals on the map, the platform uses Carto's Voyager tile style \cite{carto2025}. This relies on crowd-sourced geographical data from OpenStreetMap \cite{openstreetmap2025}.
 
 The map dynamically adjusts rendering based on the zoom level. When zoomed in, the map shows individual markers for observations however when zoomed out, the markers are clustered. This clustering is implemented to improve performance and user experience.
 Interacting with these markers triggers pop-ups displaying observation cards. These cards include details like the species name and a thumbnail image.
@@ -912,15 +923,15 @@ The backend provides a dedicated API endpoint that returns only the coordinates 
 
 \subsubsection{Machine Learning Model Integration}
 
-The trained InceptionV3 model was deployed as a separate microservice using Python and FastAPI \cite{fastapi2025}. This service exposes an API endpoint that expects an image and returns the predicted bird species along with confidence scores.
+The trained InceptionV3 model was deployed as a separate microservice using Python \cite{python2025} and FastAPI \cite{fastapi2025}. This service exposes an API endpoint that expects an image and returns the predicted bird species along with confidence scores.
 Separating the machine learning model into its own service allows for better scalability and maintainability. The model can be updated or retrained independently without affecting the rest of the application.
 This is a recommended practice for integrating machine learning models into web applications \cite{karanam2026microservice}.
 
 The service exposes a single POST endpoint at /predict. This endpoint accepts an image file and then performs the same preprocessing steps as during training. 
 The image is resized to 299x299 pixels, normalized, and then passed through the InceptionV3 model to get predictions.
-The service returns a JSON response containing the top 5 predicted species along with their confidence scores.
+The service returns a JSON response \cite{bray2017json} containing the top 5 predicted species along with their confidence scores.
 
-Only the Spring Boot backend communicates with the machine learning service. The frontend never interacts with the machine learning service directly. 
+Only the Spring Boot backend \cite{springboot2025} communicates with the machine learning service. The frontend never interacts with the machine learning service directly. 
 When a user uploads an observation or suggests an ID, the backend sends the image to the machine learning service and retrieves the predictions.
 This is done to abstract away the machine learning functionality and to ensure that the frontend only interacts with a single backend API.
 
