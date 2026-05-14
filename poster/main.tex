@@ -82,8 +82,8 @@
 
 % ── Section label above a card ───────────────────────────────
 \newcommand{\cardlabel}[1]{%
-  {\fontsize{24}{28}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
-  \vspace{5pt}\par
+  {\fontsize{22}{26}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
+  \vspace{4pt}\par
 }
 
 % ── Thin rule ────────────────────────────────────────────────
@@ -109,7 +109,7 @@
 \newlength{\colW}    \setlength{\colW}{22.8cm}  % each column
 \newlength{\colGap}  \setlength{\colGap}{1.4cm} % gap between columns
 \newlength{\bodyX}   \setlength{\bodyX}{1.5cm}  % left margin of body
-\newlength{\vgap}    \setlength{\vgap}{0.55cm}
+\newlength{\vgap}    \setlength{\vgap}{0.40cm}
 
 % ============================================================
 \begin{document}
@@ -286,7 +286,7 @@
   \vspace{\vgap}
 
   % ── CARD: Final Model Results ──────────────────────────────
-  \cardlabel{Final Model — 30 Species · 150k Images}
+  \cardlabel{Final Model - IneptionV3}
   \begin{tcolorbox}[card]
 
     % ── Top zone: intro + bullet list (left) | metrics table (right) ──
@@ -306,7 +306,7 @@
     \hspace{0.02\linewidth}%
     \begin{minipage}[t]{0.44\linewidth}
       \vspace{-5pt}
-      {\small\centering
+      {\footnotesize\centering
       \begin{tabular}{@{}lr@{}}
         \toprule
         \textbf{Metric} & \textbf{Score}\\
@@ -318,8 +318,8 @@
         ROC-AUC         & 0.996\\
         \bottomrule
       \end{tabular}\par}
-      \vspace{3pt}
-      {\small\color{subtext}\centering\textbf{Table 2:} Final model on 30-class test set.\par}
+      \vspace{8pt}
+      {\footnotesize\color{subtext}\centering\textbf{Table 2:} Final model, 30-class test set.\par}
     \end{minipage}
 
     \vspace{4pt}
@@ -330,16 +330,14 @@
       \centering
       \includegraphics[width=0.75\linewidth]{images/inception_v3_training_history_initial.png}\\[3pt]
       {\small\color{subtext}%
-        \textbf{Fig.\,3a:} Baseline — training accuracy\\
-        overshoots validation (overfitting).\par}
+        \textbf{Fig.\,3a:} Baseline training curve.\par}
     \end{minipage}%
     \hspace{0.02\linewidth}%
     \begin{minipage}[t]{0.49\linewidth}
       \centering
       \includegraphics[width=0.75\linewidth]{images/inception_v3_training_history_augmentation.png}\\[3pt]
       {\small\color{subtext}%
-        \textbf{Fig.\,3b:} Enhanced augmentation —\\
-        curves converge, overfitting resolved.\par}
+        \textbf{Fig.\,3b:} Final training curve.\par}
     \end{minipage}
 
   \end{tcolorbox}
