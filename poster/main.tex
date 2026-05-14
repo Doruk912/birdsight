@@ -286,22 +286,12 @@
   \vspace{\vgap}
 
   % ── CARD: Final Model Results ──────────────────────────────
-  \cardlabel{Final Model - IneptionV3}
+  \cardlabel{Final Model - InceptionV3}
   \begin{tcolorbox}[card]
 
     % ── Top zone: intro + bullet list (left) | metrics table (right) ──
     \begin{minipage}[t]{0.54\linewidth}
-      {\small To improve InceptionV3 further, three independent
-      experiments were run on the 23-class dataset:
-      \begin{itemize}[leftmargin=1.2em, itemsep=1pt, topsep=3pt,
-                      label=\textcolor{brand}{\textbullet}]
-        \item Label smoothing ($\varepsilon$\,=\,0.1)
-        \item Enhanced data augmentation
-        \item Freeze-epoch tuning (optimal: 11 epochs)
-      \end{itemize}
-      \vspace{3pt}
-      Best configs combined; retrained on expanded 30-species,
-      150\,k-image dataset:}
+      {\small To improve InceptionV3 further, three experiments were conducted. These inlcude Label smoothing ($\varepsilon$\,=\,0.1), enhanced data augmentation, and freeze-epoch tuning (optimal: 11 epochs). Then the best configurations were combined and retrained on an expanded 30-species, 150k-image dataset.}
     \end{minipage}%
     \hspace{0.02\linewidth}%
     \begin{minipage}[t]{0.44\linewidth}
