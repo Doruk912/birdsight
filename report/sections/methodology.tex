@@ -125,28 +125,18 @@ The bird species included in the final dataset are listed in Table
 
 \subsubsection{Data Preprocessing}
 
-The collected image dataset was preprocessed so that training could rely on clean, 
-uniformly sized files. Low-quality and corrupted images were removed and, where 
-needed, replaced to preserve class balance. As a first normalisation step, surviving 
-images were resized to \textbf{$512\times 512$} pixels and exported as high-quality 
-JPEG files. This fixed resolution stabilises on-disk storage, simplifies batching 
-in Python, and makes the training pipeline reproducible before any architecture-specific 
-tensor transforms are applied.
+The collected image dataset was preprocessed to ensure that it was suitable for
+training the machine learning models. Initially, low-quality and corrupted images
+were removed from the dataset and replaced to keep class balance. The images were 
+then resized to a consistent size to match the input dimensions required by the 
+selected deep learning architectures.
 
-For training and evaluation, \texttt{torchvision} transforms map each stored image 
-to the spatial size expected by the ImageNet-pretrained weights shipped with each 
-architecture. \textbf{InceptionV3} uses the reference Inception recipe: resize so 
-that the \emph{shorter} side equals \textbf{$342$} pixels, then centre-crop to 
-\textbf{$299\times 299$}. This matches the input geometry assumed by the pretrained 
-InceptionV3 implementation and keeps training, validation, test, and deployment 
-inference aligned. The other four models (\textbf{VGG16}, \textbf{ResNet50}, 
-\textbf{DenseNet121}, \textbf{MobileNetV2}) follow the common torchvision convention 
-for ImageNet transfer: resize the shorter side to \textbf{$256$} pixels, then 
-centre-crop to \textbf{$224\times 224$}. The final tensor is therefore $224\times 
-224$, not $256\times 256$; the $256$ value is an intermediate resize that preserves 
-aspect ratio before the square crop. Using these standard geometries reduces train/serve 
-mismatch and follows the same assumptions made by millions of prior transfer-learning 
-experiments \cite{paszke2019pytorch}.
+To increase dataset variability and improve model generalization, several data
+augmentation techniques were applied. These augmentations included random
+rotations, horizontal flipping, brightness adjustments, and other minor
+transformations. The purpose of these augmentations was to improve the robustness
+of the models against variations commonly found in real-world bird photographs,
+such as changes in lighting conditions, viewing angles, and image composition.
 
 During training, additional stochastic augmentations (random resized crop to the 
 target size, flips, colour jitter, etc.) increase robustness to viewpoint and lighting; 
@@ -244,16 +234,16 @@ especially when working with limited computational resources. The original
 classification layers of each model were replaced with new fully connected
 layers corresponding to the number of bird species included in the dataset.
 
-Training was performed in two phases. In the first phase, the pretrained backbone layers were
-frozen and only the newly added classification layers were trained. In the second phase, all
-layers were unfrozen and the entire network was fine-tuned using differential learning rates.
-\textbf{Numerical schedule (Adam optimiser).} Phase~1 (frozen backbone) optimised only the 
-new head with a learning rate of \textbf{$10^{-3}$} and weight decay \textbf{$10^{-4}$} (except 
-VGG16, where weight decay was set to \textbf{$5\times 10^{-4}$} in code to stabilise the larger 
-fully-connected stack). Phase~2 (unfrozen backbone) used two parameter groups: \textbf{$10^{-5}$} 
-for convolutional backbone layers and \textbf{$10^{-4}$} for the classifier head. Intuitively, 
-the backbone already encodes general visual features from ImageNet, so it should move more slowly 
-than the randomly initialised head \cite{paszke2019pytorch}.
+Training was performed in two phases. In the first phase, the pretrained backbone 
+layers were frozen and only the newly added classification layers were trained. 
+In the second phase, all layers were unfrozen and the entire network was fine-tuned 
+using differential learning rates. Phase~1, which is the frozen backbone, optimised only 
+the new classification head with a learning rate of $10^{-3}$ and weight reduction of
+$10^{-4}$, except for VGG16, where weight reduction of $5\times 10^{-4}$ in code 
+to stabilise the larger fully-connected stack. Phase~2, which is the unfrozen backbone, used two 
+sets of parameters: $10^{-5}$ for convolutional backbone layers and $10^{-4}$ for 
+the classifier header. The backbone should move slower than the randomly initialized 
+header because it already encodes general visual features from ImageNet\cite{paszke2019pytorch}.
 
 Images were preprocessed using resizing and normalization techniques. 
 Random resized cropping, horizontal flipping, and color jittering were also applied to
@@ -266,24 +256,22 @@ each input image. The cross-entropy loss function was used because the task
 involved multi-class image classification. Model parameters were updated using 
 the backpropagation algorithm together with the Adam optimization algorithm.
 
-Training was scheduled for a \textbf{predefined maximum number of epochs per phase}, as implemented 
-in the training scripts. \textbf{Phase~1 (frozen backbone):} MobileNetV2, ResNet50, DenseNet121, and 
-InceptionV3 each trained for \textbf{5} epochs with the backbone frozen; \textbf{VGG16} trained for 
-\textbf{10} frozen epochs because its deeper fully-connected head benefited from a longer warm-up 
-before unfreezing. \textbf{Phase~2 (full fine-tuning):} every architecture used up to \textbf{20} 
-fine-tuning epochs as an upper budget. A cosine annealing learning-rate scheduler was applied 
-within each phase. Gradient clipping (global norm \textbf{1.0}) was used for stability. Early 
-stopping was applied \emph{only} in phase~2 with patience \textbf{7} epochs and minimum 
-improvement \textbf{$10^{-3}$} on validation loss, so runs could finish before the 20-epoch 
-cap if validation stopped improving.
+Training followed a fixed schedule in the code for each model. In Phase~1, the 
+convolutional backbone stayed frozen while only the new bird-species classifier was 
+trained. MobileNetV2, ResNet50, DenseNet121, and InceptionV3 used 5 frozen epochs; 
+VGG16 used 10 frozen epochs so its larger classifier had more time to settle before 
+the backbone was unfrozen. In Phase~2, all weights were updated, with at most 20 
+fine-tuning epochs as a hard upper limit. Inside each phase the learning rate followed 
+a cosine decay curve, and gradient norms were clipped at 1.0 for stability. Early 
+stopping applied only in Phase~2: if validation loss did not improve by at least 
+0.001 for 7 epochs in a row, training stopped even if 20 epochs had not been reached.
 
-After each epoch, validation loss and accuracy were computed on the held-out validation split. 
-For a mini-batch of $N$ samples with one-hot targets $y_i$ and predicted class probabilities 
-$\hat{p}_i$, the monitored classification objective was the standard cross-entropy 
-$\mathcal{L}=-\frac{1}{N}\sum_{i=1}^{N}\sum_{c=1}^{C}y_{i,c}\log \hat{p}_{i,c}$ (with 
-label smoothing added later only in the InceptionV3 optimisation experiments). Validation 
-accuracy was the fraction of examples whose argmax prediction matched the ground-truth species 
-label.
+After every epoch the script measured loss and accuracy on the validation split that 
+was not used for training. The training loss is the usual multi-class cross-entropy 
+between the model's softmax probabilities and the true species label; InceptionV3 
+experiments that add label smoothing are described later in this chapter. Validation 
+accuracy is simply the fraction of validation images whose predicted species matches 
+the label.
 
 Model checkpoints were automatically saved whenever validation accuracy improved. This
 ensured that the best-performing versions of the models were preserved for evaluation.
@@ -315,11 +303,16 @@ VGG16 & 8 & 10 & 20 & $10^{-3}$ & $10^{-5}$ \\
 
 Training of the models was performed on a single NVIDIA RTX 4050 Laptop GPU with CUDA 
 acceleration enabled.
-Images were loaded and batched using the PyTorch \texttt{DataLoader} with shuffling on 
+Images were loaded and batched using the PyTorch DataLoader with shuffling on 
 the training split \cite{paszke2019pytorch}. On-the-fly transforms then produced the 
 architecture-specific tensors described above: \textbf{$299\times 299$} for InceptionV3 
-and \textbf{$224\times 224$} for the other four models (via the $342\!\rightarrow\!299$ 
-and $256\!\rightarrow\!224$ pipelines, respectively).
+and \textbf{$224\times 224$} for the other 4 models.
+ 
+InceptionV3 was designed around a $299\times 299$ field of view, whereas the VGG, ResNet, 
+DenseNet, and MobileNet implementations used here follow the common $224\times 224$ 
+ImageNet recipe. Keeping the same resize-and-crop convention during training, evaluation, 
+and (for InceptionV3) deployment inference avoids a train--serve mismatch and aligns filter 
+statistics with the pretrained weights \cite{paszke2019pytorch}.
 
 \subsubsection{Model Evaluation}
 
