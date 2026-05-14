@@ -23,7 +23,7 @@
   size=custom,
   width=50,
   height=70.7,
-  scale=1.0
+  scale=0.75
 ]{beamerposter}
 
 \usepackage[utf8]{inputenc}
@@ -82,7 +82,7 @@
 
 % ── Section label above a card ───────────────────────────────
 \newcommand{\cardlabel}[1]{%
-  {\fontsize{20}{20}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
+  {\fontsize{28}{32}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
   \vspace{5pt}\par
 }
 
@@ -177,7 +177,7 @@
 
 % Push body below header
 \vspace{\hdrH}
-\vspace{-1.0cm} % Pull up the top sections (Introduction and Platform)
+\vspace{-0.5cm}
 
 
 % ============================================================
@@ -207,14 +207,14 @@
 
   % ── Top: full-width image ────────────────────────────────
   \noindent\makebox[\linewidth][c]{%
-    \includegraphics[width=0.85\linewidth]{images/bird_dataset_sample.png}}
+    \includegraphics[width=0.75\linewidth]{images/bird_dataset_sample.png}}
   \vspace{6pt}
   {\small\color{subtext}\centering
     \textbf{Fig.\ 1:} Sample images from the bird dataset with species labels.\par}
 
-  \vspace{-24pt}
+  \vspace{-20pt}
   \hrulecustom
-  \vspace{8pt}
+  \vspace{6pt}
 
   % ── Bottom: Compact Summary ──────────────────────────────
   {\small
@@ -238,13 +238,14 @@
   \vspace{8pt}
 
   % ── Full-width bar chart ─────────────────────────────────
-  \includegraphics[width=\linewidth]{images/model_comparison_chart.png}
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.85\linewidth]{images/model_comparison_chart.png}}
   \vspace{6pt}
   {\small\color{subtext}\centering
     \textbf{Fig.\ 2:} Evaluation metrics across all five
     architectures on the test set.\par}
 
-  \vspace{-24pt}
+  \vspace{-20pt}
   \hrulecustom
   \vspace{12pt}
 
@@ -277,7 +278,7 @@
 
   \vspace{12pt}
   {\small\color{subtext}\centering
-    \textbf{Table 1:} Detailed performance comparison of the five CNN architectures.}
+    \textbf{Table 1:} Detailed performance comparison of the five CNN architectures.\par}
 
 
 \end{tcolorbox}
@@ -290,14 +291,14 @@
   \cardlabel{System Architecture}
   \begin{tcolorbox}[card]
     \noindent\makebox[\linewidth][c]{%
-      \includegraphics[width=0.95\linewidth]{images/architecture_diagram.png}}
+      \includegraphics[width=0.85\linewidth]{images/architecture_diagram.png}}
     \vspace{6pt}
     {\small\color{subtext}\centering
       \textbf{Fig.\ 3:} High-level system architecture diagram.\par}
 
-    \vspace{-24pt}
+    \vspace{-20pt}
     \hrulecustom
-    \vspace{8pt}
+    \vspace{6pt}
 
     \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=2pt, label=\textcolor{brand}{\textbullet}]
       \item Three independently deployable microservices
