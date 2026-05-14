@@ -189,6 +189,7 @@
   % ── CARD: Introduction ─────────────────────────────────
   \cardlabel{Introduction}
   \begin{tcolorbox}[card]
+    \typeout{INTRO_FONT: \the\font}
     \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=2pt,
                     label=\textcolor{brand}{\textbullet}]
       \item Birds are bioindicators of ecosystem health. Changes in their population may signal environmental issues.
@@ -288,32 +289,24 @@
   % ── CARD: System Architecture ──────────────────────────
   \cardlabel{System Architecture}
   \begin{tcolorbox}[card]
-    % INSERT: \includegraphics[width=\linewidth]{system_arch.png}
-    \pholder{\linewidth}{6cm}{System Architecture Diagram\\[4pt]
-      Next.js $\to$ Spring Boot API $\to$ FastAPI ML Service\\[4pt]
-      PostgreSQL + PostGIS \quad MinIO Object Storage}
+    \noindent\makebox[\linewidth][c]{%
+      \includegraphics[width=0.95\linewidth]{images/architecture_diagram.png}}
+    \vspace{6pt}
+    {\small\color{subtext}\centering
+      \textbf{Fig.\ 3:} High-level system architecture diagram.\par}
 
+    \vspace{-24pt}
+    \hrulecustom
     \vspace{8pt}
 
-    \begin{minipage}[t]{0.48\linewidth}
-      {\small\textbf{Backend — Spring Boot}
-      \begin{itemize}[leftmargin=1em, itemsep=1pt, topsep=3pt,
-                      label=\textcolor{brand}{\textbullet}]
-        \item JWT dual-token auth
-        \item PostGIS geospatial queries
-        \item Research Grade scoring
-      \end{itemize}}
-    \end{minipage}%
-    \hfill
-    \begin{minipage}[t]{0.48\linewidth}
-      {\small\textbf{ML Service — FastAPI}
-      \begin{itemize}[leftmargin=1em, itemsep=1pt, topsep=3pt,
-                      label=\textcolor{brand}{\textbullet}]
-        \item InceptionV3, 299$\times$299
-        \item Returns Top-5 + confidence
-        \item Independent microservice
-      \end{itemize}}
-    \end{minipage}
+    \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=2pt, label=\textcolor{brand}{\textbullet}]
+      \item Three independently deployable microservices
+      \item JWT dual-token auth (15min access / 7-day refresh)
+      \item PostGIS for geospatial observation queries
+      \item Research Grade scoring: community consensus at species level
+      \item ML service: receives image → returns Top-5 predictions with confidence
+    \end{itemize}
+
   \end{tcolorbox}
 
   \vspace{\vgap}
