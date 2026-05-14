@@ -132,15 +132,18 @@ then resized to a consistent size to match the input dimensions required by the
 selected deep learning architectures.
 
 To increase dataset variability and improve model generalization, several data
-augmentation techniques were applied. These augmentations included random
-rotations, horizontal flipping, brightness adjustments, and other minor
-transformations. The purpose of these augmentations was to improve the robustness
-of the models against variations commonly found in real-world bird photographs,
-such as changes in lighting conditions, viewing angles, and image composition.
+augmentation techniques were applied \cite{shorten2019survey}.
+In image classification, augmentation generates additional training views by applying
+label-preserving geometric and photometric transforms to existing images.
+This expands the diversity of examples the optimizer sees without changing class labels or
+collecting new photographs, which helps reduce overfitting when the number of raw images per class is finite.
+The offline pipeline used in this project included random rotations, horizontal flipping, brightness
+adjustments, and other minor transformations so that models become less sensitive to lighting, viewpoint,
+and framing differences typical of amateur bird photographs.
 
 During training, additional stochastic augmentations (random resized crop to the 
-target size, flips, colour jitter, etc.) increase robustness to viewpoint and lighting; 
-validation and test use only the deterministic pipelines above so metrics are comparable 
+target size, flips, colour jitter, etc.) were applied on-line to further improve robustness to viewpoint and lighting.
+Validation and test splits used only the deterministic preprocessing described above so that metrics remain comparable 
 across models.
 
 After preprocessing was completed, the dataset was divided into training,
