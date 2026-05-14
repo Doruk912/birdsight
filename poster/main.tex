@@ -350,11 +350,13 @@
     \vspace{6pt}
 
     \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=2pt, label=\textcolor{brand}{\textbullet}]
-      \item Three independently deployable microservices
-      \item JWT dual-token auth (15min access / 7-day refresh)
-      \item PostGIS for geospatial observation queries
-      \item Research Grade scoring: community consensus at species level
-      \item ML service: receives image → returns Top-5 predictions with confidence
+    \item Three independently deployable services: Spring Boot · Next.js · FastAPI
+    \item JWT dual-token auth (15 min access / 7-day refresh)
+    \item PostGIS for geospatial observation storage \& queries
+    \item MapLibre GL map with clustered markers and bounding-box filter
+    \item MinIO S3-compatible object storage for observation images
+    \item Research Grade scoring: community consensus at species level
+    \item ML service returns Top-5 predictions with confidence scores
     \end{itemize}
 
   \end{tcolorbox}
@@ -364,35 +366,38 @@
   % ── CARD: Platform Screenshots ─────────────────────────
   \cardlabel{Platform}
   \begin{tcolorbox}[card]
-    \begin{minipage}[t]{0.475\linewidth}
-      % INSERT: \includegraphics[width=\linewidth]{screen_feed.png}
-      \pholder{\linewidth}{5cm}{Observation Feed\\(Fig.\ 3.13)}
-      \vspace{2pt}
-      {\normalsize\color{subtext}\centering Filterable feed + pagination\par}
-    \end{minipage}%
-    \hfill
-    \begin{minipage}[t]{0.475\linewidth}
-      % INSERT: \includegraphics[width=\linewidth]{screen_map.png}
-      \pholder{\linewidth}{5cm}{Map Page\\(Fig.\ 3.14)}
-      \vspace{2pt}
-      {\normalsize\color{subtext}\centering Clustered sighting map\par}
-    \end{minipage}
+
+    % ── Row 1: Map — full width ───────────────────────────
+    \noindent\makebox[\linewidth][c]{%
+      \includegraphics[width=\linewidth]{images/map_page.png}}
+    \vspace{3pt}
+    {\small\color{subtext}\centering
+      \textbf{Fig.\ 4:} Interactive map with clustered markers and filterable observation sidebar.\par}
 
     \vspace{6pt}
 
-    \begin{minipage}[t]{0.475\linewidth}
-      % INSERT: \includegraphics[width=\linewidth]{screen_ml.png}
-      \pholder{\linewidth}{5cm}{ML Suggestions\\(Fig.\ 3.18)}
-      \vspace{2pt}
-      {\normalsize\color{subtext}\centering Top-k species predictions\par}
+    % ── Row 2: three equal columns ────────────────────────
+    \begin{minipage}[t]{0.315\linewidth}
+      \centering
+      \includegraphics[width=\linewidth]{images/observation_feed.png}
+      \vspace{3pt}
+      {\small\color{subtext}\textbf{Fig.\ 5:} Filterable observation feed with Research Grade badges.\par}
     \end{minipage}%
     \hfill
-    \begin{minipage}[t]{0.475\linewidth}
-      % INSERT: \includegraphics[width=\linewidth]{screen_taxonomy.png}
-      \pholder{\linewidth}{5cm}{Taxonomy Browser\\(Fig.\ 3.15)}
-      \vspace{2pt}
-      {\normalsize\color{subtext}\centering 14k taxa + Wikipedia embed\par}
+    \begin{minipage}[t]{0.315\linewidth}
+      \centering
+      \includegraphics[width=\linewidth]{images/taxonomy_page.png}
+      \vspace{3pt}
+      {\small\color{subtext}\textbf{Fig.\ 6:} Taxonomy browser — 14k taxa (IOC v15.1) with Wikipedia embed.\par}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.315\linewidth}
+      \centering
+      \includegraphics[width=\linewidth]{images/ml_suggestions.png}
+      \vspace{3pt}
+      {\small\color{subtext}\textbf{Fig.\ 7:} AI species suggestions with adaptive confidence display.\par}
     \end{minipage}
+
   \end{tcolorbox}
 
   \vspace{\vgap}
