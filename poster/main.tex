@@ -39,6 +39,7 @@
 \usepackage{enumitem}
 \usepackage{amsmath}
 \usepackage{calc}
+\usepackage{url}
 \usetikzlibrary{positioning}
 \tcbuselibrary{skins,breakable}
 
@@ -218,7 +219,7 @@
 
   % ── Bottom: Compact Summary ──────────────────────────────
   {\small
-  \textbf{Dataset Scale:} 23 most common species in Turkey with 5000 images each, totaling 115,000 images. Sourced from GBIF [1]. Split 80/10/10 for training, validation, and testing.\par
+  \textbf{Dataset Scale:} 23 most common species in Turkey with 5000 images each, totaling 115,000 images. Sourced from GBIF$^{[1]}$. Split 80/10/10 for training, validation, and testing.\par
   \vspace{3pt}
   \textbf{Pipeline \& Augmentation:} Images were cleaned, standardized, and augmented extensively during training (cropping, flipping, color jitter, occlusion) to enhance generalization.}
 
@@ -233,7 +234,7 @@
   % ── Intro sentence ───────────────────────────────────────
   {\small Five CNN architectures were trained under identical
   conditions using ImageNet pre-trained weights and two-phase
-  transfer learning.}
+  transfer learning$^{[2,3,4]}$.}
 
   \vspace{8pt}
 
@@ -291,7 +292,7 @@
 
     % ── Top zone: intro + bullet list (left) | metrics table (right) ──
     \begin{minipage}[t]{0.54\linewidth}
-      {\small To improve InceptionV3 further, three experiments were conducted. These inlcude Label smoothing ($\varepsilon$\,=\,0.1), enhanced data augmentation, and freeze-epoch tuning (optimal: 11 epochs). Then the best configurations were combined and retrained on an expanded 30-species, 150k-image dataset.}
+      {\small To improve InceptionV3$^{[2]}$ further, three experiments were conducted. These include label smoothing ($\varepsilon$\,=\,0.1), enhanced data augmentation$^{[5]}$, and freeze-epoch tuning (optimal: 11 epochs). Best configurations were combined and retrained on an expanded 30-species, 150k-image dataset.}
     \end{minipage}%
     \hspace{0.02\linewidth}%
     \begin{minipage}[t]{0.44\linewidth}
@@ -381,21 +382,21 @@
       \centering
       \includegraphics[width=\linewidth]{images/observation_feed.png}
       \vspace{3pt}
-      {\small\color{subtext}\textbf{Fig.\ 5:} Filterable observation feed with Research Grade badges.\par}
+      {\small\color{subtext}\textbf{Fig.\ 5:} Filterable observation feed.\par}
     \end{minipage}%
     \hfill
     \begin{minipage}[t]{0.315\linewidth}
       \centering
       \includegraphics[width=\linewidth]{images/taxonomy_page.png}
       \vspace{3pt}
-      {\small\color{subtext}\textbf{Fig.\ 6:} Taxonomy browser — 14k taxa (IOC v15.1) with Wikipedia embed.\par}
+      {\small\color{subtext}\textbf{Fig.\ 6:} Taxonomy browser — 14k taxa (IOC v15.1$^{[6]}$) with Wikipedia embed.\par}
     \end{minipage}%
     \hfill
     \begin{minipage}[t]{0.315\linewidth}
       \centering
       \includegraphics[width=\linewidth]{images/ml_suggestions.png}
       \vspace{3pt}
-      {\small\color{subtext}\textbf{Fig.\ 7:} AI species suggestions with adaptive confidence display.\par}
+      {\small\color{subtext}\textbf{Fig.\ 7:} AI species suggestions with confidence display.\par}
     \end{minipage}
 
   \end{tcolorbox}
@@ -410,9 +411,9 @@
       \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=3pt,
                       label=\textcolor{brand}{\textbullet}]
         \item InceptionV3 best across all metrics
-        \item Augmentation biggest accuracy gain
         \item 95.98\% Top-3 suits suggestion UI
-        \item Research Grade enables quality data
+        \item Quality data collection through citizen science
+        \item Scalable, modular architecture for future growth
       \end{itemize}}
     \end{minipage}%
     \hfill
@@ -420,10 +421,9 @@
       {\small\textbf{Future Work}
       \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=3pt,
                       label=\textcolor{brand}{\textbullet}]
-        \item Expand species globally
-        \item Continuous model retraining
         \item Public cloud deployment
         \item Native mobile app
+        \item Continuous model retraining and data expansion
         \item Audio identification
       \end{itemize}}
     \end{minipage}
@@ -434,10 +434,13 @@
   % ── CARD: References ───────────────────────────────────
   \cardlabel{References}
   \begin{tcolorbox}[card]
-    {\small\color{subtext}
-    [1] Szegedy, C., et al. (2016). Rethinking the Inception Architecture for Computer Vision. \textit{CVPR}.\\[2pt]
-    [2] GBIF.org (2025). GBIF Occurrence Download.\\[2pt]
-    [3] iNaturalist (2025). Community-driven biodiversity observations.}
+    {\scriptsize\color{subtext}
+    [1] Global Biodiversity Information Facility, ``GBIF,'' 2025. [Online]. Available: \url{https://www.gbif.org}\\[2pt]
+    [2] C. Szegedy \textit{et al.}, ``Rethinking the Inception Architecture for Computer Vision,'' in \textit{Proc. CVPR}, 2016.\\[2pt]
+    [3] M. M. Bilgin, K. {\"O}zdem, and M. A. Akcayol, ``Bird Species Classification Using Deep Learning,'' \textit{J. Polytechnic}, vol. 25, no. 3, pp. 1251--1260, 2022.\\[2pt]
+    [4] A. Paszke \textit{et al.}, ``PyTorch: An Imperative Style, High-Performance Deep Learning Library,'' \textit{NeurIPS}, vol. 32, 2019.\\[2pt]
+    [5] C. Shorten and T. M. Khoshgoftaar, ``A Survey on Image Data Augmentation for Deep Learning,'' \textit{J. Big Data}, vol. 6, no. 1, p. 60, 2019.\\[2pt]
+    [6] IOC World Bird List, ``IOC World Bird List (v15.1),'' 2025. [Online]. Available: \url{https://www.worldbirdnames.org}}
   \end{tcolorbox}
 
 \end{minipage}
