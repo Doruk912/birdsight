@@ -136,15 +136,16 @@ augmentation techniques were applied \cite{shorten2019survey}.
 In image classification, augmentation generates additional training views by applying
 label-preserving geometric and photometric transforms to existing images.
 This expands the diversity of examples the optimizer sees without changing class labels or
-collecting new photographs, which helps reduce overfitting when the number of raw images per class is finite.
-The offline pipeline used in this project included random rotations, horizontal flipping, brightness
-adjustments, and other minor transformations so that models become less sensitive to lighting, viewpoint,
-and framing differences typical of amateur bird photographs.
+collecting new photographs, which helps reduce overfitting when the number of raw images per 
+class is finite. The offline pipeline used in this project included random rotations, 
+horizontal flipping, brightness adjustments, and other minor transformations so that models 
+become less sensitive to lighting, viewpoint, and framing differences typical of amateur bird 
+photographs.
 
 During training, additional stochastic augmentations (random resized crop to the 
-target size, flips, colour jitter, etc.) were applied on-line to further improve robustness to viewpoint and lighting.
-Validation and test splits used only the deterministic preprocessing described above so that metrics remain comparable 
-across models.
+target size, flips, colour jitter, etc.) were applied on-line to further improve robustness 
+to viewpoint and lighting. Validation and test splits used only the deterministic preprocessing 
+described above so that metrics remain comparable across models.
 
 After preprocessing was completed, the dataset was divided into training,
 validation, and testing subsets using a fixed splitting strategy. A total of
@@ -569,14 +570,17 @@ The enhanced augmentation pipeline additionally introduced:
     \item Random erasing for simulated occlusion
 \end{itemize}
 
-Applying more aggressive augmentation better simulated the amateur bird photographs that the model would encounter in real-world scenarios. 
-This experiment resulted in the largest performance gain among all experiments. 
-Test accuracy increased from 89.10\% to 89.64\%, while Top-5 accuracy improved from 97.82\% to 98.03\%.
+Applying more aggressive augmentation better simulated the amateur bird photographs that the model 
+would encounter in real-world scenarios. This experiment resulted in the largest performance gain 
+among all experiments. Test accuracy increased from 89.10\% to 89.64\%, while Top-5 accuracy improved 
+from 97.82\% to 98.03\%.
 
-Additionally, the training curves showed improved generalization performance. In the inital training curve,
-the training accuracy exceeded the validation accuracy. This indicates that the model was overfitting to the training data.
-With the enhanced augmentation, the validation and training curves were closer together and the training curve never exceeded the validation curve.
-This shows that the heavier augmentation helped reduce overfitting and improved the model's ability to generalize unseen data. 
+Additionally, the training curves showed improved generalization performance. In the initial training 
+curve, the training accuracy exceeded the validation accuracy. This indicates that the model was 
+overfitting to the training data. With the enhanced augmentation, the validation and training curves 
+were closer together and the training curve never exceeded the validation curve. This shows that the 
+heavier augmentation helped reduce overfitting and improved the model's ability to generalize unseen 
+data. 
 
 \begin{figure}[H]
     \centering
