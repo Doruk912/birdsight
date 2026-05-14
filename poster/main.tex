@@ -82,7 +82,7 @@
 
 % ── Section label above a card ───────────────────────────────
 \newcommand{\cardlabel}[1]{%
-  {\fontsize{16}{20}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
+  {\fontsize{20}{20}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
   \vspace{5pt}\par
 }
 
@@ -177,7 +177,8 @@
 
 % Push body below header
 \vspace{\hdrH}
-\vspace{0.55cm}
+\vspace{-1.0cm} % Pull up the top sections (Introduction and Platform)
+
 
 % ============================================================
 %  BODY — two minipages side by side
@@ -188,61 +189,102 @@
   % ── CARD: Introduction ─────────────────────────────────
   \cardlabel{Introduction}
   \begin{tcolorbox}[card]
-    Birds are critical \textbf{bioindicators} of ecosystem health.
-    Traditional monitoring is slow and expert-dependent.
-    \textbf{Citizen science + automated ML identification} bridges this gap.
+    \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=2pt,
+                    label=\textcolor{brand}{\textbullet}]
+      \item Birds are bioindicators of ecosystem health. Changes in their population may signal environmental issues.
+      \item Traditional population monitoring is slow and impossible to scale as it is expert-dependent.
+      \item Combining citizen science and automated AI-based identification solves this problem.
+      \item BirdSight: a web platform where enthusiasts submit sightings, get instant AI species suggestions, and contribute to biodiversity data collection.
+    \end{itemize}
   \end{tcolorbox}
 
   \vspace{\vgap}
 
-  % ── CARD: Dataset ──────────────────────────────────────
-  \cardlabel{Dataset}
-  \begin{tcolorbox}[card]
-    \begin{minipage}[t]{0.46\linewidth}
-      {\small
-      \textbf{Source:} GBIF via iNaturalist\\[4pt]
-      \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=0pt,
-                      label=\textcolor{brand}{\textbullet}]
-        \item 30 species — Turkey
-        \item 5,000 images / species
-        \item \textbf{150,000} images total
-        \item 80 / 10 / 10 split
-      \end{itemize}}
-    \end{minipage}%
-    \hfill
-    \begin{minipage}[t]{0.50\linewidth}
-      % INSERT: \includegraphics[width=\linewidth]{dataset_samples.png}
-      \pholder{\linewidth}{4.2cm}{Sample Images\\(Fig.\ 3.1)}
-    \end{minipage}
-  \end{tcolorbox}
+  % ── CARD: Dataset ──────────────────────────────────────────
+\cardlabel{Dataset}
+\begin{tcolorbox}[card]
+
+  % ── Top: full-width image ────────────────────────────────
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.85\linewidth]{images/bird_dataset_sample.png}}
+  \vspace{6pt}
+  {\small\color{subtext}\centering
+    \textbf{Fig.\ 1:} Sample images from the bird dataset with species labels.\par}
+
+  \vspace{-24pt}
+  \hrulecustom
+  \vspace{12pt}
+
+  % ── Bottom: Compact Summary ──────────────────────────────
+  {\small
+  \textbf{Dataset Scale:} 23 most common species in Turkey with 5000 images each, totaling 115,000 images. Sourced from GBIF [1]. Split 80/10/10 for training, validation, and testing.\par
+  \vspace{3pt}
+  \textbf{Pipeline \& Augmentation:} Images were cleaned, standardized, and augmented extensively during training (cropping, flipping, color jitter, occlusion) to enhance generalization.}
+
+\end{tcolorbox}
 
   \vspace{\vgap}
 
-  % ── CARD: Architecture Comparison ──────────────────────
-  \cardlabel{Architecture Comparison}
-  \begin{tcolorbox}[card]
-    % INSERT: \includegraphics[width=\linewidth]{arch_comparison.png}
-    \pholder{\linewidth}{7.5cm}{Metric Comparison Chart\\(Fig.\ 3.3)}
+  % ── CARD: Architecture Comparison ──────────────────────────
+\cardlabel{Architecture Comparison}
+\begin{tcolorbox}[card]
 
-    \vspace{8pt}
+  % ── Intro sentence ───────────────────────────────────────
+  {\small Five CNN architectures were trained under identical
+  conditions using ImageNet pre-trained weights and two-phase
+  transfer learning.}
 
-    {\small
-    \begin{tabular}{@{}lcccc@{}}
-      \toprule
-      \textbf{Model} & \textbf{Acc.} & \textbf{F1} & \textbf{Top-3} & \textbf{AUC}\\
-      \midrule
-      VGG16        & 73.3\% & 0.733 & 88.8\% & 0.980\\
-      MobileNetV2  & 81.7\% & 0.817 & 93.1\% & 0.991\\
-      ResNet50     & 87.8\% & 0.878 & 95.4\% & 0.994\\
-      DenseNet121  & 87.8\% & 0.879 & 95.6\% & 0.995\\
-      \rowcolor{brandlight}
-      \textbf{InceptionV3} & \textbf{89.1\%} & \textbf{0.891}
-                           & \textbf{96.1\%} & \textbf{0.995}\\
-      \bottomrule
-    \end{tabular}}
-  \end{tcolorbox}
+  \vspace{8pt}
 
-  \vspace{\vgap}
+  % ── Full-width bar chart ─────────────────────────────────
+  \includegraphics[width=\linewidth]{images/model_comparison_chart.png}
+  \vspace{6pt}
+  {\small\color{subtext}\centering
+    \textbf{Fig.\ 2:} Evaluation metrics across all five
+    architectures on the test set.\par}
+
+  \vspace{-24pt}
+  \hrulecustom
+  \vspace{12pt}
+
+  % ── Table below chart ────────────────────────────────────
+  {\small\centering
+  \begin{tabular}{@{}lcccccc@{}}
+    \toprule
+    \textbf{Model}
+      & \textbf{Acc.}
+      & \textbf{Prec.}
+      & \textbf{Recall}
+      & \textbf{F1}
+      & \textbf{Top-3}
+      & \textbf{AUC}\\
+    \midrule
+    VGG16        & 73.3\% & 74.2\% & 73.3\% & 0.733 & 88.8\% & 0.980\\
+    MobileNetV2  & 81.7\% & 81.8\% & 81.7\% & 0.817 & 93.1\% & 0.991\\
+    ResNet50     & 87.8\% & 87.8\% & 87.8\% & 0.878 & 95.4\% & 0.994\\
+    DenseNet121  & 87.8\% & 87.9\% & 87.8\% & 0.879 & 95.6\% & 0.995\\
+    \rowcolor{brandlight}
+    \textbf{InceptionV3}
+                 & \textbf{89.1\%}
+                 & \textbf{89.2\%}
+                 & \textbf{89.1\%}
+                 & \textbf{0.891}
+                 & \textbf{96.1\%}
+                 & \textbf{0.995}\\
+    \bottomrule
+  \end{tabular}\par}
+
+  \vspace{4pt}
+  {\small\color{subtext}\centering
+    \textbf{Table 1:} Detailed performance comparison of the five CNN architectures.}
+
+  \vspace{6pt}
+
+\end{tcolorbox}
+
+\end{minipage}%
+\hspace{\colGap}%
+\begin{minipage}[t]{\colW}
 
   % ── CARD: System Architecture ──────────────────────────
   \cardlabel{System Architecture}
@@ -275,9 +317,7 @@
     \end{minipage}
   \end{tcolorbox}
 
-\end{minipage}%
-\hspace{\colGap}%
-\begin{minipage}[t]{\colW}
+  \vspace{\vgap}
 
   % ── CARD: Platform Screenshots ─────────────────────────
   \cardlabel{Platform}
