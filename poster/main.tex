@@ -82,7 +82,7 @@
 
 % ── Section label above a card ───────────────────────────────
 \newcommand{\cardlabel}[1]{%
-  {\fontsize{28}{32}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
+  {\fontsize{24}{28}\selectfont\bfseries\color{brand}\MakeUppercase{#1}}%
   \vspace{5pt}\par
 }
 
@@ -283,6 +283,67 @@
 
 \end{tcolorbox}
 
+  \vspace{\vgap}
+
+  % ── CARD: Final Model Results ──────────────────────────────
+  \cardlabel{Final Model — 30 Species · 150k Images}
+  \begin{tcolorbox}[card]
+
+    % ── Top zone: intro + bullet list (left) | metrics table (right) ──
+    \begin{minipage}[t]{0.54\linewidth}
+      {\small To improve InceptionV3 further, three independent
+      experiments were run on the 23-class dataset:
+      \begin{itemize}[leftmargin=1.2em, itemsep=1pt, topsep=3pt,
+                      label=\textcolor{brand}{\textbullet}]
+        \item Label smoothing ($\varepsilon$\,=\,0.1)
+        \item Enhanced data augmentation
+        \item Freeze-epoch tuning (optimal: 11 epochs)
+      \end{itemize}
+      \vspace{3pt}
+      Best configs combined; retrained on expanded 30-species,
+      150\,k-image dataset:}
+    \end{minipage}%
+    \hspace{0.02\linewidth}%
+    \begin{minipage}[t]{0.44\linewidth}
+      \vspace{-5pt}
+      {\small\centering
+      \begin{tabular}{@{}lr@{}}
+        \toprule
+        \textbf{Metric} & \textbf{Score}\\
+        \midrule
+        Accuracy        & 89.35\%\\
+        Top-3 Accuracy  & 95.98\%\\
+        Top-5 Accuracy  & 97.80\%\\
+        Weighted F1     & 0.893\\
+        ROC-AUC         & 0.996\\
+        \bottomrule
+      \end{tabular}\par}
+      \vspace{3pt}
+      {\small\color{subtext}\centering\textbf{Table 2:} Final model on 30-class test set.\par}
+    \end{minipage}
+
+    \vspace{4pt}
+    \vspace{4pt}
+
+    % ── Bottom zone: training curves side by side ────────────
+    \begin{minipage}[t]{0.49\linewidth}
+      \centering
+      \includegraphics[width=0.75\linewidth]{images/inception_v3_training_history_initial.png}\\[3pt]
+      {\small\color{subtext}%
+        \textbf{Fig.\,3a:} Baseline — training accuracy\\
+        overshoots validation (overfitting).\par}
+    \end{minipage}%
+    \hspace{0.02\linewidth}%
+    \begin{minipage}[t]{0.49\linewidth}
+      \centering
+      \includegraphics[width=0.75\linewidth]{images/inception_v3_training_history_augmentation.png}\\[3pt]
+      {\small\color{subtext}%
+        \textbf{Fig.\,3b:} Enhanced augmentation —\\
+        curves converge, overfitting resolved.\par}
+    \end{minipage}
+
+  \end{tcolorbox}
+
 \end{minipage}%
 \hspace{\colGap}%
 \begin{minipage}[t]{\colW}
@@ -343,34 +404,6 @@
       \pholder{\linewidth}{5cm}{Taxonomy Browser\\(Fig.\ 3.15)}
       \vspace{2pt}
       {\normalsize\color{subtext}\centering 14k taxa + Wikipedia embed\par}
-    \end{minipage}
-  \end{tcolorbox}
-
-  \vspace{\vgap}
-
-  % ── CARD: Final Model Results ──────────────────────────
-  \cardlabel{Final Model — 30 Species · 150k Images}
-  \begin{tcolorbox}[card]
-    \begin{minipage}[t]{0.52\linewidth}
-      % INSERT: \includegraphics[width=\linewidth]{training_curves.png}
-      \pholder{\linewidth}{5cm}{Training Curves\\(Fig.\ 3.6 / 3.7)}
-    \end{minipage}%
-    \hfill
-    \begin{minipage}[t]{0.44\linewidth}
-      \vspace{0.3cm}
-      {\small
-      \begin{tabular}{@{}lc@{}}
-        \toprule
-        \textbf{Metric} & \textbf{Score}\\
-        \midrule
-        Accuracy        & 89.35\%\\
-        Top-3 Accuracy  & 95.98\%\\
-        Top-5 Accuracy  & 97.80\%\\
-        Weighted F1     & 0.893\\
-        ROC-AUC         & 0.996\\
-        mAP             & 0.952\\
-        \bottomrule
-      \end{tabular}}
     \end{minipage}
   \end{tcolorbox}
 
