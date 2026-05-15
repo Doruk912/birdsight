@@ -1,33 +1,25 @@
 \section{Methodology}
 
-This section describes the methodology of the project in detail. The stages of
-development from start to finish are explained, including strategies, design
-choices, development lifecycles, and technological specifics.
+Methodology of the project is described in detail in this section. It explains the development steps from start to finish.
+The strategies, the design choices, the development cycles and the technological aspects are explained.
 
-The main goal of this project was to promote citizen science by building a platform
-with an integrated machine learning model for birdwatchers and enthusiasts. The
-project was divided into two separate phases. These phases consisted of the machine
-learning phase of the project and the web platform development phase. The project
-followed a structured methodology that combined a comparative analysis of different
-machine learning models and applied software development.
+The main goal of this project was to promote citizen science by developing a platform with an integrated machine learning model for birdwatchers and enthusiasts.
+The project was broken down into two separate phases. The phases included the machine learning stage of the project and the web platform development stage. 
+The project was carried out based on a structured methodology that included comparative analysis of different machine learning models and applied software development.
 
-The machine learning phase included algorithm selection, data collection, model
-development, and evaluation. On the other hand, the web platform development phase
-included the design and development of the website, integration of the machine
-learning model, and testing.
+The machine learning phase included algorithm selection, data collection, model development and evaluation.
+On the other hand, the web platform development phase involved the design and development of the website, integrating the machine learning model, and testing.
 
 \subsection{Machine Learning Model Development and Comparative Analysis}
 
-The first main phase of the project was the development of machine learning models
-for bird species identification. This phase included data acquisition,
-preprocessing, model selection, training, and evaluation. The details of each step
-are explained in the following subsections.
+The first main phase was the development of machine learning models for bird species identification.
+This phase involved data acquisition, preprocessing, model selection, training and evaluation.
+The details of each step are explained in the following subsections.
 
 \subsubsection{Data Acquisition}
 
-When developing a machine learning model, one of the most important requirements is
-the availability of a large, high-quality dataset to train the models properly. In
-this project, multiple models were evaluated, and high performance was expected from
+One of the most important requirements for the development of a machine learning model is to have a lot of high quality data to train the models properly.
+In this project, multiple models were evaluated, and high performance was expected from
 them. To achieve accurate results, large numbers of bird images taken from different
 angles were required. Furthermore, the data had to be labeled with the correct bird
 species for the models to be trained effectively.
@@ -135,22 +127,18 @@ To increase dataset variability and improve model generalization, several data
 augmentation techniques were applied \cite{shorten2019survey}.
 In image classification, augmentation generates additional training views by applying
 label-preserving geometric and photometric transforms to existing images.
-This expands the diversity of examples the optimizer sees without changing class labels or
-collecting new photographs, which helps reduce overfitting when the number of raw images per 
-class is finite. The offline pipeline used in this project included random rotations, 
-horizontal flipping, brightness adjustments, and other minor transformations so that models 
-become less sensitive to lighting, viewpoint, and framing differences typical of amateur bird 
-photographs.
 
-During training, additional stochastic augmentations (random resized crop to the 
-target size, flips, colour jitter, etc.) were applied on-line to further improve robustness 
-to viewpoint and lighting. Validation and test splits used only the deterministic preprocessing 
-described above so that metrics remain comparable across models.
+This increases the diversity of examples the optimizer sees without changing class labels or collecting new data. 
+This process helps to reduce over-fitting when the number of raw images per class is finite.
+The pipeline used in this project involved random rotations, horizontal flipping, brightness adjustments and other minor transformations.
+These allow the models to become less sensitive to lighting, viewpoint and framing differences typical of amateur bird photographs.
 
-After preprocessing was completed, the dataset was divided into training,
-validation, and testing subsets using a fixed splitting strategy. A total of
-80\% of the dataset was reserved for training, while the remaining 20\% was
-equally divided between validation and testing subsets.
+The additional augmentations applied during training further improved robustness to viewpoint and lighting.
+The augmentations inlcuded random resized crop to target size, flips, colour jitter etc.
+Validation and test splits only used the deterministic preprocessing above so that metrics are comparable across models.
+
+After preprocessing, the dataset was divided into training, validation and testing subsets using a fixed splitting strategy.
+A total of 80\% of the dataset was reserved for training, while the remaining 20\% was equally divided between validation and testing subsets.
 
 \subsubsection{Model Selection}
 
@@ -184,44 +172,31 @@ allow deeper neural networks to be trained with improved gradient flow. In this
 project, \textbf{ResNet50} was used as the representative ResNet depth because it is
 widely reported in bird-species benchmarks \cite{bilgin2022bird,tang2025comparative}.
 
-\item \textbf{InceptionV3:} This architecture utilizes parallel convolutional
-filters of different sizes within the same layer, allowing it to capture
-multi-scale visual features. This design is effective for bird species
-classification because both overall shape and fine local patterns are important
-for distinguishing visually similar species \cite{tang2025comparative}.
+\item \textbf{InceptionV3:} This architecture uses parallel convolutional filters of different 
+sizes in the same layer, allowing it to detect multi-scale visual patterns. 
+This design turns out to be effective for bird species classification, 
+because the overall shape and the fine local patterns are important for visually distinguishing similar species \cite{tang2025comparative}.
 
-\item \textbf{MobileNetV2:} MobileNetV2 was designed for computational efficiency
-through the use of depthwise separable convolutions. Although lightweight, it
-has demonstrated competitive performance in similar image classification tasks
-\cite{lolge2025evolution,tang2025comparative}.
+\item \textbf{MobileNetV2:} MobileNetV2 is designed to be computationally efficient using depthwise separable convolutions. 
+It is lightweight and has shown competitive performance on similar image classification tasks \cite{lolge2025evolution,tang2025comparative}.
 
-\item \textbf{DenseNet121:} DenseNet121 connects each layer to every other layer in
-a feed-forward manner. This structure promotes feature reuse and improves
-gradient flow throughout the network. Comparative studies have shown that
-DenseNet architectures often outperform traditional CNN models
-\cite{bilgin2022bird}.
+\item \textbf{DenseNet121:} All layers are connected together in a feed-forward fashion in DenseNet121.
+This structure facilitates feature reuse and enhances gradient flow across the network.
+DenseNet architectures have been shown to perform better in comparison to the traditional CNN models \cite{bilgin2022bird}.
 
 \end{itemize}
 
-Each selected model was trained and evaluated using the same dataset and
-experimental conditions to ensure a fair comparison between architectures. The
-performance of each model was evaluated using multiple metrics, including
-accuracy, precision, recall, F1-score, and inference speed.
+In order to fairly compare the architectures, each selected model was trained and evaluated on the same dataset and experimental conditions.
+The performance of each model was evaluated using several metrics, including accuracy, precision, recall, F1-score, and inference speed.
 
 \subsubsection{Model Training}
 
-All models were trained using the Python programming language
-\cite{python2025}. Python was selected because of its large ecosystem and
-extensive support for machine learning and deep learning applications.
-Specifically, the PyTorch deep learning framework was used
-for model development and training \cite{paszke2019pytorch}.
-PyTorch was selected because it provides built-in support for
-transfer learning and implementations of widely used convolutional neural
-network architectures. The implementations of VGG16, ResNet50, InceptionV3,
-MobileNetV2, and DenseNet121 provided by Torchvision \cite{torchvision2025} were used to ensure
-consistency between experiments. The overall workflow used during model training and 
-evaluation is illustrated in
-Figure~\ref{fig:training_pipeline}.
+All models were trained using the Python programming language \cite{python2025}. 
+Python was chosen due to its large ecosystem and the wide support it provides for machine learning applications. 
+The model development and training was performed using the PyTorch deep learning framework \cite{paszke2019pytorch}. 
+PyTorch was selected as it has built-in support for transfer learning, in addition to implementations of common convolutional neural network architectures.
+For consistency across experiments, we used the implementations of VGG16, ResNet50, InceptionV3, MobileNetV2 and DenseNet121 provided by Torchvision \cite{torchvision2025}. 
+The overall workflow used during model training and evaluation is illustrated in Figure~\ref{fig:training_pipeline}.
 
 \begin{figure}[H]
     \centering
@@ -270,8 +245,8 @@ a cosine decay curve, and gradient norms were clipped at 1.0 for stability. Earl
 stopping applied only in Phase~2: if validation loss did not improve by at least 
 0.001 for 7 epochs in a row, training stopped even if 20 epochs had not been reached.
 
-After every epoch the script measured loss and accuracy on the validation split that 
-was not used for training. The training loss is the usual multi-class cross-entropy 
+The script measured loss and accuracy on the validation split that was not used for training after every epoch. 
+The training loss is the usual multi-class cross-entropy 
 between the model's softmax probabilities and the true species label; InceptionV3 
 experiments that add label smoothing are described later in this chapter. Validation 
 accuracy is simply the fraction of validation images whose predicted species matches 
@@ -347,20 +322,15 @@ Recall measures the proportion of correctly identified samples among all
 instances of a class. High recall indicates that the model is capable
 of identifying most true samples and minimizes false negatives.
 
-F1-score is the harmonic mean of precision and recall. It provides a balanced
-evaluation metric that considers both false positives and false negatives.
+F1-score is the harmonic mean of precision and recall. It gives an overall 
+measure of evaluation taking both false positives and false negatives into account.
 
-In addition to the standard classification metrics, Top-3 Accuracy and
-Top-5 Accuracy were also evaluated. These metrics measure whether the correct
-bird species appears within the top three or top five predictions generated
-by the model. 
+In addition to the usual classification metrics, Top-3 Accuracy and Top-5 Accuracy were also tested. 
+These metrics measure whether the correct bird species is present in the model’s top three or top five predictions.
 
-Receiver Operating Characteristic Area Under Curve (ROC-AUC) and mean Average
-Precision (mAP) scores were also computed to evaluate the discriminative
-capabilities of the models across all classes.
+Receiver Operating Characteristic Area Under Curve (ROC-AUC) and mean Average Precision (mAP) scores were also computed to evaluate the discriminative capabilities of the models across all classes.
 
-Inference speed was also considered during evaluation because practical
-deployment requires not only accurate but also efficient models.
+Inference speed was also considered in evaluation, as deployment requires not only accuracy, but also efficiency.
 
 \paragraph{Evaluation Process}
 
@@ -728,26 +698,21 @@ was selected for its widespread usage in the industry and its convention-over-co
 approach. Using Spring Boot simplified dependency management, service configuration, and 
 deployment \cite{springboot2025}.
 
-The backend exposes a RESTful API using Spring Web MVC \cite{walls2022spring}. This API serves as the only 
-communication between the frontend and all server-side functionality. The functions
-handled by backend include observation management, user authentication, taxonomy browsing, 
-and machine learning model requests. JSON was used as the data exchange format due to 
-its compatibility and lightweight nature \cite{bray2017json}.
+The backend exposes a RESTful API built with Spring Web MVC \cite{walls2022spring}. 
+This API is the only communication between the frontend and any server side functionality.
+The backend contains functions for observation management, user authentication, taxonomy browsing and machine learning model requests.
+The data exchange format was based on JSON due to its compatibility and light-weight nature \cite{bray2017json}.
 
-The application logic is organized into distinct packages. Separate packages handle 
-authentication, user management, observations, community identifications, comments, 
-taxonomy, machine learning, and object storage. This modular structure keeps 
-responsibilities separated and makes the codebase easier to maintain.
+The application logic is decoupled into packages. Authentication, user management, observations, community identifications, comments, taxonomy, machine learning and object storage are handled by separate packages. 
+This modular structure isolates responsibilities and makes the codebase easier to maintain.
 
-Authentication was implemented using a dual-token strategy \cite{rfc7519jwt}. When the user logs in, the backend 
-issues a short-lived JWT access token returned in the response body and a long-lived 
-refresh token stored in a cookie. The access token has a lifetime of only 15 minutes.
-The refresh token on the other hand remains valid for 7 days.
+Authentication was done using a two token approach \cite{rfc7519jwt}. When the user logs in, the backend issues a short-lived JWT access token returned in the response body and a long-lived refresh token stored in a cookie. 
+The access token is valid for only 15 minutes. The refresh token on the other hand is valid for 7 days.
 
-This design ensures that the access token is never persisted in the browser storage.
-This reduces the risk of cross-site scripting attacks. When an access token expires, 
-the frontend automatically uses the refresh token cookie to get a new access 
-token from the backend. This happens without requiring the user to log in again. 
+In this design the access token is never stored in the browser storage. 
+This reduces the risk of cross-site scripting attacks. 
+When an access token expires, the frontend will automatically use the refresh token cookie to request a new access token from the backend.
+This happens without requiring the user to log in again. 
 Spring Security was used to configure the security filter chain and enforce 
 authorization rules across all endpoints \cite{manne2023springsecurity}.
 
@@ -922,21 +887,25 @@ The settings page allows users to update their profile information and change th
 Visualizing the observation on a map is an important feature of the platform. It allows users to explore the distribution of sightings. The map was implemented using MapLibre GL 5 together with the react-map-gl library \cite{maplibre2025, reactmapgl2025}.
 For the visuals on the map, the platform uses Carto's Voyager tile style \cite{carto2025}. This relies on crowd-sourced geographical data from OpenStreetMap \cite{openstreetmap2025}.
 
-The map dynamically adjusts rendering based on the zoom level. When zoomed in, the map shows individual markers for observations however when zoomed out, the markers are clustered. This clustering is implemented to improve performance and user experience.
-Interacting with these markers triggers pop-ups displaying observation cards. These cards include details like the species name and a thumbnail image.
-There is also a sidebar that displays a filterable list of all observations. Additionally, the user can draw a bounding box on the map to filter observations within that area.
+The map dynamically adjusts rendering based on the zoom level. When zoomed in, the map shows individual markers for observations however when zoomed out, the markers are clustered.
+This clustering is done for better performance and better user experience.
+Clicking on these markers will bring up observation cards in pop-ups.
+These cards include information like the species name and a thumbnail image.
+There is also a sidebar, which displays a filterable list of all observations.
+The user can also draw a bounding box on the map to filter observations within the area.
 
-The backend provides a dedicated API endpoint that returns only the coordinates and basic information to improve performance.
+The backend has a dedicated API endpoint that returns just the coordinates and basic information to increase performance.
 
 \subsubsection{Machine Learning Model Integration}
 
-The trained InceptionV3 model was deployed as a separate microservice using Python \cite{python2025} and FastAPI \cite{fastapi2025}. This service exposes an API endpoint that expects an image and returns the predicted bird species along with confidence scores.
-Separating the machine learning model into its own service allows for better scalability and maintainability. The model can be updated or retrained independently without affecting the rest of the application.
-This is a recommended practice for integrating machine learning models into web applications \cite{karanam2026microservice}.
+The trained InceptionV3 model was deployed as a separate service using Python \cite{python2025} and FastAPI \cite{fastapi2025}.
+The service exposes an API endpoint that accepts an image and returnsthe predicted bird species and confidence scores. 
+Putting the machine learning model in its own service improves scalability and maintainability. 
+That means we can update or retrain the model in isolation without impacting the rest of the application.
+This is a best practices for any application using machine learning models \cite{karanam2026microservice}.
 
-The service exposes a single POST endpoint at /predict. This endpoint accepts an image file and then performs the same preprocessing steps as during training. 
-The image is resized to 299x299 pixels, normalized, and then passed through the InceptionV3 model to get predictions.
-The service returns a JSON response \cite{bray2017json} containing the top 5 predicted species along with their confidence scores.
+The service exposes a single POST endpoint at /predict. This endpoint is provided with an image file and then the same preprocessing steps are performed as when training.
+Image is resized to 299x299 pixels and normalized. Image is passed through InceptionV3 model to get predictions. The service provides a JSON response \cite{bray2017json} with the top 5 predicted species with confidence scores.
 
 Only the Spring Boot backend \cite{springboot2025} communicates with the machine learning service. The frontend never interacts with the machine learning service directly. 
 When a user uploads an observation or suggests an ID, the backend sends the image to the machine learning service and retrieves the predictions.
@@ -966,6 +935,6 @@ On top of these DataGrip was used for database management and query execution. T
 
 Version control was handled using Git with GitHub. Separate directories were used for the backend, frontend, machine learning service, and training utilities \cite{git2025, github2025}.
 
-Docker was used for containerization of services like PostgreSQL and MinIO. This ensured that the development environment was consistent across different machines and simplified the setup process \cite{docker2025}.
+Services such as PostgreSQL and MinIO were containerized with Docker. This ensured that the development environment was the same on different machines and made it easier to set up \cite{docker2025}
 
 \clearpage
