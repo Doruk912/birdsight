@@ -1,141 +1,136 @@
 \section{Results and Discussion}
 
-This chapter presents the outcomes of the machine learning experiments, the final model 
-performance on the expanded dataset, and evidence that the BirdSight web platform implements 
-the intended citizen-science workflow. It then interprets these outcomes in relation to the 
-research questions stated in the Introduction and discusses limitations and threats to validity.
+This section describes the outcomes of the machine learning experiments, 
+the final model performance on the dataset and proof that the BirdSight 
+web platform functions as expected in the citizen science workflow. The 
+results are then discussed in terms of the stated research questions.
 
 \subsection{Experiment and Validation}
 
-Before presenting the findings on the interface and numerical aspects, the chapter describes 
-what was validated and how it was implemented.The validation has two parts: (i) a controlled 
-machine-learning protocol with fixed data splits and shared evaluation code, and (ii) a 
-practical software check that the integrated services run together as a working system.
+Before presenting the results on the interface and numerical aspects, the chapter 
+describes what was validated and how it was implemented. Validation was twofold: 
+a controlled machine learning protocol with fixed data pods and shared evaluation 
+code; and a practical software check showing that the integrated services work 
+together as a system.
 
 \subsubsection{Machine learning protocol}
 
-The bird species classifier was developed and evaluated using a fixed experimental protocol 
-to keep comparisons fair. Images were sourced from GBIF-mediated observation records with 
-species-level labels, restricted to a Turkey-focused species list as described in the Methodology 
-\cite{gbif2025,ebird2025}. After preprocessing and cleaning, the dataset was split into training, 
-validation, and test partitions using a fixed ratio so that the test split was never used for 
-parameter updates or model selection decisions reported as final performance.
+The bird species classifier was developed and assessed over a standardised experimental 
+protocol to ensure fair comparisons. Images were extracted from GBIF-mediated observation 
+records with species-level tags, restricted to a species list focused on Turkey 
+\cite{gbif2025,ebird2025}. The dataset was split into training, validation and testing 
+sets using a fixed ratio after preprocessing and cleaning.
 
-Five convolutional architectures (VGG16, ResNet50, DenseNet121, MobileNetV2, InceptionV3) were
-trained with ImageNet initialisation and the same high-level training recipe (two-phase transfer 
-learning, shared optimiser family, and consistent evaluation code). This constitutes the primary 
-controlled experiment for architecture selection. InceptionV3 was then selected and improved through 
-three targeted ablation-style experiments on the original 23-class setup: label smoothing, stronger 
-augmentation, and tuning the number of frozen backbone epochs. Finally, the best combined configuration 
-was retrained on the expanded 30-class dataset.
+We trained five convolutional architectures (VGG16, ResNet50, DenseNet121, MobileNetV2, 
+InceptionV3) using the same top-level training method, with ImageNet initialisation method. 
+This is the first controlled experiment on the selection of architecture. The InceptionV3 
+was chosen and improved the original 23-class setup with three targeted erosion-style 
+experiments: label correction, stronger data enhancement and adjustment of the number of 
+frozen backbone periods. Subsequently, Finally, the best combined configuration was re-trained 
+on an extended 30-class dataset.
 
-Validation during training relied on held-out validation accuracy and loss, with early stopping in 
-the fine-tuning phase to reduce overfitting. Final reported metrics were computed on the untouched 
-test split using the same metric definitions throughout (top-1 accuracy, top-$k$ accuracy, precision
-/recall/F1 summaries, and additional ranking scores as listed in 
-Table~\ref{tab:model_evaluation_results} and Table~\ref{tab:final_optimized_results}).
+In order to reduce overfitting during the fine-tuning stage with early stop, validation 
+depended on conserved validation accuracy and loss throughout training. The same measure 
+definitions were used to produce the final reported metrics in the untouched testing part.
 
-\subsubsection{Software validation (functional checks)}
+\subsubsection{Software validation}
 
-Beyond offline metrics, the integrated system was validated as a runnable end-to-end application: users 
-can authenticate, submit observations with images and coordinates, request species suggestions, browse 
-observations and taxonomy pages, and contribute identifications that update observation quality 
-metadata. These checks confirm that the architectural split (Next.js client, Spring Boot API, FastAPI 
-inference, PostgreSQL/PostGIS, and MinIO object storage) works together in a local deployment 
-configuration. This validation is functional rather than a formal user study; no human-subjects 
-claims are made beyond standard software engineering acceptance testing.
+The integrated system was validated as a runnable end-to-end application, allowing users 
+to authenticate, submit observations with images and coordinates, request species 
+recommendations, browse observations and taxonomy pages, and contribute descriptions that update 
+observation quality metadata. These checks demonstrate that the architectural separation works 
+together in a local deployment configuration.
 
 \subsection{Results}
 
-This part summarises the measurable outcomes of the project. It first reports the comparative benchmark 
-among five CNN architectures, then the targeted improvements applied to InceptionV3, the final performance 
-after expanding to 30 species, and finally qualitative evidence from the implemented web interface.
+The project's quantifiable outcomes are summed up in this section. The comparative benchmark 
+results across five CNN architectures are shown first, followed by the specific enhancements 
+made to InceptionV3, the final performance following the extension to 30 species, and qualitative 
+data gathered from the implemented web interface.
 
 \subsubsection{Benchmark comparison (five architectures)}
 
-Table~\ref{tab:model_evaluation_results} summarises the benchmark performance on the held-out test 
-data. InceptionV3 achieved the strongest overall top-1 accuracy and the strongest top-3 and top-5 
-behaviour among the five candidates, which is important for an interactive workflow where users pick 
-among suggested species rather than only accepting the first label. DenseNet121 and ResNet50 performed 
-similarly to each other and slightly below InceptionV3, while MobileNetV2 remained competitive given 
-its lighter design. VGG16 lagged behind, which is consistent with the comparative literature on older 
-deep stacks versus residual and factorised architectures \cite{bilgin2022bird,tang2025comparative}.
+Out of the five contenders, InceptionV3 had the best overall top 1 accuracy as well as the 
+best top 3 and top 5 behavior, as shown in Table~\ref{tab:model_evaluation_results}, which highlights the benchmark performance 
+in the separated test data. This is crucial since it allows users to select from the recommended 
+species rather than simply accepting the first classification. Due to its lightweight architecture, 
+MobileNetV2 remained competitive, but DenseNet121 and ResNet50 fared similarly and marginally 
+worse than InceptionV3. VGG16 trailed behind. This aligns with the research that compares 
+residual and factored designs with legacy deep stacks \cite{bilgin2022bird,tang2025comparative}.
+A compressed visual comparison between the models is given in Figure~\ref{fig:model_comparison_chart}. 
+Figure~\ref{fig:inception_confusion_matrix} shows that most of the mass lies on the diagonal for 
+InceptionV3 and Figure~\ref{fig:top_confused_pairs} shows a small cluster of frequently confused 
+species pairs. Most of these pairs are visually qualitatively similar taxa as expected from 
+detailed classification \cite{chen2024fetfgvc}.
 
-Figure~\ref{fig:model_comparison_chart} provides a compact visual comparison across models. 
-Figure~\ref{fig:inception_confusion_matrix} shows that most mass lies on the diagonal for InceptionV3, 
-while Figure~\ref{fig:top_confused_pairs} highlights a small set of frequently confused species pairs. 
-Qualitatively, many of these pairs correspond to visually similar taxa, which matches expectations for 
-fine-grained classification \cite{chen2024fetfgvc}.
 
 \subsubsection{InceptionV3 improvement experiments}
 
-The ablation sequence confirmed that the strongest single gain came from enhanced augmentation, with 
-training and validation accuracy curves becoming more aligned compared with the baseline augmentation 
-setup (Figures~\ref{fig:baseline_training_history} and~\ref{fig:enhanced_aug_training_history}). 
-Freeze-epoch tuning showed a moderate effect, with 11 frozen epochs achieving the best observed 
-validation accuracy in the sweep (Table~\ref{tab:freeze_epoch_experiment} and 
-Figure~\ref{fig:freeze_epoch_comparison}). Label smoothing produced smaller movement in top-1 accuracy 
-but supports better-calibrated probabilities, which can matter when presenting ranked suggestions to 
-non-experts.
+The three follow-up experiments on InceptionV3 show that the largest improvement came from 
+stronger data augmentation.The training and validation accuracy curves became more consistent 
+compared to the baseline boosting setup (Figure~\ref{fig:baseline_training_history} 
+and~\ref{fig:enhanced_aug_training_history}). The effect of freeze-period adjustment was moderate.  
+Eleven frozen periods achieved the best validation accuracy of the scan 
+(Table~\ref{tab:freeze_epoch_experiment} and Figure~\ref{fig:freeze_epoch_comparison}). Label 
+smoothing supported a better calibrated probability but smaller movement, best at 1 accuracy. 
+This may be critical in providing successive advice to non-experts.
 
 \subsubsection{Final model on the 30-class dataset}
 
-After merging the best settings, the final InceptionV3 model was trained on 30 species and 150{,}000 
-images. Table~\ref{tab:final_optimized_results} reports the resulting test performance. Despite the 
-increased number of classes, the model retained strong top-1 accuracy and high top-3 accuracy, 
-indicating that the ranked suggestion interface remains useful when exact top-1 classification is 
-difficult.
+The final InceptionV3 model was trained on 30 types and 150,000 photos after the optimal settings 
+were combined. The test results are shown in Table~\ref{tab:final_optimized_results}. The model maintained a high first-3 
+accuracy rate and a solid first-1 accuracy despite the increase of classes. This demonstrates 
+that while full first-1 classification is challenging, the sequential suggestion interface is 
+still helpful.
 
 \subsubsection{Platform and user-interface outcomes}
 
-The implemented client covers the intended citizen-science journey. The landing experience introduces 
-the workflow and citizen-science context (Figures~\ref{fig:hero_section}--\ref{fig:citizen_science}), 
-while Figure~\ref{fig:user_workflow} summarises the end-to-end observation submission path.
+The proposed citizen science journey is included in the client's solution. The end-to-end 
+observation submission path is summarized in Figure~\ref{fig:user_workflow}, and the workflow and citizen 
+science framework are introduced in the introductory experience (Figures~\ref{fig:hero_section}--\ref{fig:citizen_science}).
 
-The observation feed supports browsing at scale with filtering and pagination 
-(Figure~\ref{fig:observation_feed}). The map view supports geographic exploration with clustering 
-behaviour at wider zoom levels (Figure~\ref{fig:map_page}). The taxonomy browser exposes hierarchical 
-navigation and taxon-scoped information (Figure~\ref{fig:taxonomy_page}).
+Scaled browsing with filtering and pagination is supported by the observation stream 
+(Figure~\ref{fig:observation_feed}). With clustering behavior at larger zoom levels, 
+the map display facilitates geographic investigation (Figure~\ref{fig:map_page}). 
+Taxon-wide data and hierarchical navigation are displayed by the taxonomy browser 
+(Figure~\ref{fig:taxonomy_page}).
 
-Observation detail pages combine media, metadata, community identifications, and discussion 
-(Figure~\ref{fig:observation_page}). The submission flow supports multiple images and shows model 
-suggestions through a dedicated pop-up (Figures~\ref{fig:observation_submission} 
-and~\ref{fig:ml_suggestions}). Together, these screenshots provide qualitative evidence that the 
-platform connects model assistance with community validation rather than replacing human judgement 
-entirely \cite{baker2021verification,fraisl2022citizen}.
+Media, information, community descriptions, and discussion are all integrated into observation 
+detail pages (Figure~\ref{fig:observation_page}). Multiple views are supported by the submission 
+stream, and model ideas are shown in a custom pop-up window (Figures~\ref{fig:observation_submission} and~\ref{fig:ml_suggestions}). 
+These screenshots offer qualitative proof that the platform incorporates community validation with model support.
+
 
 \subsection{Discussion}
 
-This subsection interprets BirdSight's results in project-specific terms: how the InceptionV3 metrics 
-and the implemented platform relate to the research questions, how key design choices connect to the 
-cited literature, and which limitations remain honest. The following subsubsections take these points 
-in order and end with a short takeaway.
+This section situates BirdSight's findings within the context of the specific project: how the 
+InceptionV3 metrics and the implemented platform relate to the research questions, how key design 
+choices relate to the cited literature, and which limitations remain honest.
 
 \subsubsection{Answering the research questions}
 
-\textbf{RQ1} asked how a learning-based classifier integrated into a citizen-science platform can 
-support large-scale monitoring. The results support a practical answer: automated top-$k$ suggestions 
-lower the friction for labelling noisy amateur images, while the observation feed, map, and 
-identification workflow collect structured, georeferenced records at scale \cite{fraisl2022citizen}. 
-The quality-grade mechanism further operationalises a lightweight community consensus layer on top 
-of model uncertainty, which aligns with discussions on data quality in volunteer-generated biodiversity 
-datasets \cite{johnston2022outstanding}.
+\textbf{RQ1} asked how adding a bird species classifier to a citizen-science platform can help large-scale 
+monitoring. The project results suggest three main points. First, the model gives ranked species suggestions, 
+which makes it easier for users to label difficult photos. Second, the observation list, map, and 
+identification pages turn uploads into records with location and date, so data can be collected at scale 
+\cite{fraisl2022citizen}. Third, the platform does not treat every model guess as final: observations stay 
+at \textit{Needs ID} until enough users agree on the same species-level identification. When that agreement 
+is reached, the record becomes \textit{Research Grade}. 
 
-\textbf{RQ2} asked whether publicly available bird imagery is suitable for training deep models 
-in this setting. The GBIF-mediated pipeline produced a large labelled corpus, and the final model 
-achieved strong held-out performance, supporting suitability after preprocessing, splitting, and 
-careful training \cite{gbif2025}. However, suitability is not ``noise-free labels'': citizen-science 
-imagery varies in pose, distance, blur, and background clutter, and some species pairs remain 
-partially confusable even when metrics are strong (Figure~\ref{fig:top_confused_pairs}). This is 
-consistent with fine-grained recognition challenges emphasised in the literature \cite{chen2024fetfgvc}.
+\textbf{RQ2} determining whether publicly available bird images are suitable for training deep 
+learning models, a large dataset was generated using the GBIF tool \cite{gbif2025}. The final model was then 
+pre-processed, split, and carefully trained. A strong performance was achieved after training, supporting 
+its suitability. Citizen science images vary in terms of exposure, distance, blur, and 
+background interference. Therefore, interference remains in some species even with strong metrics 
+(Figure~\ref{fig:top_confused_pairs}).
 
 \subsubsection{Relation to prior work and design choices}
 
-The benchmark ranking aligns with comparative CNN studies that frequently favour strong modern 
-architectures over VGG-style stacks for challenging visual classification \cite{bilgin2022bird,
-tang2025comparative,lolge2025evolution}. Separating inference into a dedicated FastAPI service matches 
-common deployment guidance for keeping model lifecycles independent from core application services 
-\cite{karanam2026microservice}.
+In comparison rankings, comparative CNN studies that select modern architectures for challenging visual 
+classification instead of VGG-style cluttered architecture are consistent.\cite{bilgin2022bird,
+tang2025comparative,lolge2025evolution}. Decoupling the inference to a separate FastAPI service complies 
+with deployment guidelines\cite{karanam2026microservice}.Model lifecycles are kept independent of 
+underlying application services.
 
 \subsubsection{Limitations and threats to validity}
 
