@@ -7,30 +7,28 @@ choice of architecture of machine learning algorithm, approaches for dataset cre
 and evaluation, and performance results.
 
 Traditional bird classification systems were typically based on classic machine learning
-techniques, such as SVM and Random Forest classifiers. These systems would often depend
-on manually designed features, such as color histograms, shape, and texture descriptors.
-However, these techniques would have limited success in dealing with practical
-image databases characterized by varying illumination, background, image quality,
+techniques, such as SVM and Random Forest classifiers. Systems like these would depend
+on manually designed features like color histograms, shape, and texture descriptors.
+However, these techniques would only achieve limited success when dealing with real-world
+image databases which have varying illumination, background, image quality,
 and bird poses \cite{kambali2024automated, lolge2025evolution}. Recent studies
-demonstrate that CNN architectures can significantly improve the results compared to
-traditional machine learning due to their ability to automatically extract hierarchical
-visual features from the image data \cite{kambali2024automated}.
+have shown that CNN architectures can significantly improve the results compared to
+traditional machine learning techniques. This is due to their ability to automatically extract hierarchical
+visual features from the image \cite{kambali2024automated}.
 
-Bird species classification is commonly considered a Fine-Grained Visual Classification
-(FGVC) problem because different bird species may share highly similar visual
-characteristics. In FGVC tasks, models must distinguish subtle local differences such as
+Bird species classification can be considered as a Fine-Grained Visual Classification
+(FGVC) problem because bird species can share very similar visual features.
+When working with FGVC tasks, models must distinguish subtle differences such as
 feather patterns, beak structure, wing shape, and color variations. Chen et al. emphasize
 that successful FGVC systems require models capable of learning discriminative local
-features and fine visual details \cite{chen2024fetfgvc}. Modern deep learning architectures,
-particularly CNN- and Transformer-based models, provide the performance necessary for
-handling these complex classification tasks.
+features and visual details \cite{chen2024fetfgvc}. Modern deep learning architectures,
+especially CNN- and Transformer-based models, can provide the performance necessary for
+handling classification tasks like this.
 
-There have been several studies regarding the comparative analysis of the performance of different
-CNN models in classifying birds species. For instance, the study by Bilgin et al. conducted a 
-comparative analysis of three different architectures such as VGG16, ResNet50, and DenseNet.
-It was noted that DenseNet and ResNet performed better compared to VGG16 because they had better
-feature propagation and gradient flow \cite{bilgin2022bird}. Another example is the study conducted
-by Tang, which compares VGG, ResNet, InceptionV3, and MobileNet and shows that ResNet and Inception 
+There are several studies conducted that analyze the performance of different CNN models for bird species classification.
+For example, the study by Bilgin et al. compared three different architectures such as VGG16, ResNet50, and DenseNet. 
+DenseNet and ResNet were observed to perform better than VGG16 due to better feature propagation and gradient flow \cite{bilgin2022bird}.
+Another example is the study conducted by Tang, which compares VGG, ResNet, InceptionV3, and MobileNet and shows that ResNet and Inception 
 achieve better F1 scores, and MobileNet gives better computational efficiency \cite{tang2025comparative}.
 
 Apart from the accuracy of classification, recent developments have also focused on
@@ -41,28 +39,18 @@ tend to perform more effectively but at the cost of increased memory and computa
 requirements \cite{bilgin2022bird}. In our case, we were constrained by this factor,
 since the model had to be deployed as part of a live website.
 
-The literature survey also included public datasets containing images of birds, as well as citizen
-science platforms. Biodiversity datasets available at a large-scale include the Global Biodiversity 
-Information Facility (GBIF) \cite{gbif2025}. The datasets made by these resources are freely 
-available and consist of records collected from all around the world.
+The literature survey also included public datasets with images of birds and citizen science platforms. 
+Large scale biodiversity datasets are available, for example the Global Biodiversity Information Facility (GBIF) \cite{gbif2025}. 
+These resources offer free datasets that contain records collected from all over the world.
 
-Citizen science has transformed biodiversity monitoring by enabling decentralized data
-collection from large communities of volunteers. Fraisl et al. discuss how citizen science
-has become an important component of environmental and ecological research due to its
-ability to collect large-scale observational data \cite{fraisl2022citizen}. Similarly,
-Bonney et al. explain that citizen science projects can improve public engagement and
-scientific awareness while contributing valuable environmental data
-\cite{bonney2015citizen}. However, citizen science data may also introduce challenges,
-including observer bias, class imbalance, inconsistent image quality, and incorrect
-species labels \cite{johnston2022outstanding}. Baker et al. mention that automated
-verification and validation techniques are increasingly being used to improve the quality
-and reliability of citizen science datasets \cite{baker2021verification}.
+Citizen science has transformed biodiversity monitoring through decentralized data collection from large communities of volunteers.
+The authors Fraisl et al. argue that the ability of citizen science to gather data on a large scale makes it an important part of ecological research \cite{fraisl2022citizen}.
+Bonney et al. argue similarly that citizen science projects can increase public engagement and awareness while collecting valuable environmental data \cite{bonney2015citizen}. 
+However, citizen science data can pose challenges such as observer bias, class imbalance, inconsistent image quality, and incorrect labels \cite{johnston2022outstanding}.
+Automated verification and validation techniques are increasingly being used to enhance the quality and reliability of citizen science data \cite{baker2021verification}.
 
-The results obtained from the literature review influenced many design choices made in the 
-project. These results helped determine which architectures were suitable for selection, which 
-criteria should be used for performance evaluation, and which data preprocessing steps should 
-be taken. Particular attention was paid to issues such as class imbalance, fine-grained species 
-similarity, and varying image quality.
-
+The results from the literature review shaped many of the design choices made in the project.
+The results were used in the selection of architectures, the criteria for the performance assessment, and the data pre-processing steps.
+Special attention was paid to issues such as class imbalance, specie similarity, and varying image quality
 
 \clearpage
