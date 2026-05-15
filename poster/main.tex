@@ -1,5 +1,5 @@
 % ============================================================
-%  BirdSight – Graduation Project Poster  (v3)
+%  BirdSight – Graduation Project Poster
 %  B2 size: 500 mm × 707 mm  portrait
 %
 %  KEY DESIGN DECISIONS:
@@ -12,8 +12,6 @@
 %   - Colours: white background, #00BC7D green accents, dark text.
 %
 %  COMPILE:  pdflatex birdsight_poster_v3.tex   (run twice)
-%
-%  SEARCH "INSERT" FOR EVERY PLACEHOLDER.
 % ============================================================
 
 \documentclass[final]{beamer}
@@ -190,7 +188,6 @@
   % ── CARD: Introduction ─────────────────────────────────
   \cardlabel{Introduction}
   \begin{tcolorbox}[card]
-    \typeout{INTRO_FONT: \the\font}
     \begin{itemize}[leftmargin=1em, itemsep=2pt, topsep=2pt,
                     label=\textcolor{brand}{\textbullet}]
       \item Birds are bioindicators of ecosystem health. Changes in their population may signal environmental issues.
@@ -313,8 +310,7 @@
       {\footnotesize\color{subtext}\centering\textbf{Table 2:} Final model, 30-class test set.\par}
     \end{minipage}
 
-    \vspace{4pt}
-    \vspace{4pt}
+    \vspace{8pt}
 
     % ── Bottom zone: training curves side by side ────────────
     \begin{minipage}[t]{0.49\linewidth}
@@ -344,7 +340,7 @@
       \includegraphics[width=0.85\linewidth]{images/architecture_diagram.png}}
     \vspace{6pt}
     {\small\color{subtext}\centering
-      \textbf{Fig.\ 3:} High-level system architecture diagram.\par}
+      \textbf{Fig.\ 4:} High-level system architecture diagram.\par}
 
     \vspace{-20pt}
     \hrulecustom
@@ -373,7 +369,7 @@
       \includegraphics[width=\linewidth]{images/map_page.png}}
     \vspace{3pt}
     {\small\color{subtext}\centering
-      \textbf{Fig.\ 4:} Interactive map with clustered markers and filterable observation sidebar.\par}
+      \textbf{Fig.\ 5:} Interactive map with clustered markers and filterable observation sidebar.\par}
 
     \vspace{6pt}
 
@@ -382,21 +378,21 @@
       \centering
       \includegraphics[width=\linewidth]{images/observation_feed.png}
       \vspace{3pt}
-      {\small\color{subtext}\textbf{Fig.\ 5:} Filterable observation feed.\par}
+      {\small\color{subtext}\textbf{Fig.\ 6:} Filterable observation feed.\par}
     \end{minipage}%
     \hfill
     \begin{minipage}[t]{0.315\linewidth}
       \centering
       \includegraphics[width=\linewidth]{images/taxonomy_page.png}
       \vspace{3pt}
-      {\small\color{subtext}\textbf{Fig.\ 6:} Taxonomy browser — 14k taxa (IOC v15.1$^{[6]}$) with Wikipedia embed.\par}
+      {\small\color{subtext}\textbf{Fig.\ 7:} Taxonomy browser — 14k taxa (IOC v15.1$^{[6]}$) with Wikipedia embed.\par}
     \end{minipage}%
     \hfill
     \begin{minipage}[t]{0.315\linewidth}
       \centering
       \includegraphics[width=\linewidth]{images/ml_suggestions.png}
       \vspace{3pt}
-      {\small\color{subtext}\textbf{Fig.\ 7:} AI species suggestions with confidence display.\par}
+      {\small\color{subtext}\textbf{Fig.\ 8:} AI species suggestions with confidence display.\par}
     \end{minipage}
 
   \end{tcolorbox}
