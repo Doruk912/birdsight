@@ -134,7 +134,7 @@ The pipeline used in this project involved random rotations, horizontal flipping
 These allow the models to become less sensitive to lighting, viewpoint and framing differences typical of amateur bird photographs.
 
 The additional augmentations applied during training further improved robustness to viewpoint and lighting.
-The augmentations inlcuded random resized crop to target size, flips, colour jitter etc.
+The augmentations included random resized crop to target size, flips, colour jitter etc.
 Validation and test splits only used the deterministic preprocessing above so that metrics are comparable across models.
 
 After preprocessing, the dataset was divided into training, validation and testing subsets using a fixed splitting strategy.
@@ -218,7 +218,7 @@ layers were frozen and only the newly added classification layers were trained.
 In the second phase, all layers were unfrozen and the entire network was fine-tuned 
 using differential learning rates. Phase~1, which is the frozen backbone, optimised only 
 the new classification head with a learning rate of $10^{-3}$ and weight reduction of
-$10^{-4}$, except for VGG16, where weight reduction of $5\times 10^{-4}$ in code 
+$10^{-4}$, except for VGG16, where weight reduction of $5\times 10^{-4}$ was used
 to stabilise the larger fully-connected stack. Phase~2, which is the unfrozen backbone, used two 
 sets of parameters: $10^{-5}$ for convolutional backbone layers and $10^{-4}$ for 
 the classifier header. The backbone should move slower than the randomly initialized 
@@ -243,7 +243,7 @@ the backbone was unfrozen. In Phase~2, all weights were updated, with at most 20
 fine-tuning epochs as a hard upper limit. Inside each phase the learning rate followed 
 a cosine decay curve, and gradient norms were clipped at 1.0 for stability. Early 
 stopping applied only in Phase~2: if validation loss did not improve by at least 
-0.001 for 7 epochs in a row, training stopped even if 20 epochs had not been reached.
+0.001 for 7 consecutive epochs, training stopped even if 20 epochs had not been reached.
 
 The script measured loss and accuracy on the validation split that was not used for training after every epoch. 
 The training loss is the usual multi-class cross-entropy 
@@ -787,7 +787,7 @@ All API calls pass through a shared apiClient wrapper that automatically injects
 All API calls are routed through a Next.js rewrite proxy, so the frontend never exposes the backend host or port directly to the browser.
 
 The application uses Next.js App Router for routing. The main pages include the home page, observations page, map page, taxonomy browser, user profile page etc.
-The hero section on the main page is shown in Figure~\ref{fig:hero_section}. The design of the frontend was developed to besimple and user-friendly.
+The hero section on the main page is shown in Figure~\ref{fig:hero_section}. The design of the frontend was developed to be simple and user-friendly.
 
 \begin{figure}[H]
     \centering
@@ -869,7 +869,7 @@ In this page users can add identification or comments. People can discuss about 
 Additionally, the machine learning suggestions pop-up appear in this page when users suggests on ID. The same pop up also appears on the observation submission page.
 
 The observation submission page allows users to submit their bird sightings. Users can upload up to 5 images, enter the location and date of the sighting, and optionally suggest an ID for their observation. 
-After uploading the observation, users can see the suggestions from the machine learning model. If user uploads multiple images for the same observation, they can cycle thorugh the predictions for each image.
+After uploading the observation, users can see the suggestions from the machine learning model. If a user uploads multiple images for the same observation, they can cycle through the predictions for each image.
 The figure below shows the observation submission page. The machine learning suggestions pop up is shown in Figure~\ref{fig:observation_submission}.
 
 \begin{figure}[H]
@@ -899,7 +899,7 @@ The backend has a dedicated API endpoint that returns just the coordinates and b
 \subsubsection{Machine Learning Model Integration}
 
 The trained InceptionV3 model was deployed as a separate service using Python \cite{python2025} and FastAPI \cite{fastapi2025}.
-The service exposes an API endpoint that accepts an image and returnsthe predicted bird species and confidence scores. 
+The service exposes an API endpoint that accepts an image and returns the predicted bird species and confidence scores. 
 Putting the machine learning model in its own service improves scalability and maintainability. 
 That means we can update or retrain the model in isolation without impacting the rest of the application.
 This is a best practices for any application using machine learning models \cite{karanam2026microservice}.
